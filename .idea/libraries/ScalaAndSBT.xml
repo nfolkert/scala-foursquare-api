@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="ScalaAndSBT">
+    <CLASSES>
+      <root url="file:///fs/scala/scala-2.9.0.1/lib" />
+      <root url="jar:///fs/scala/sbt-launch.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar:///fs/scala/scala-2.9.0.1/src/scala-dbc-src.jar!/" />
+      <root url="jar:///fs/scala/scala-2.9.0.1/src/scala-library-src.jar!/" />
+      <root url="jar:///fs/scala/scala-2.9.0.1/src/sbaz-src.jar!/" />
+      <root url="jar:///fs/scala/scala-2.9.0.1/src/scala-compiler-src.jar!/" />
+      <root url="jar:///fs/scala/scala-2.9.0.1/src/scala-swing-src.jar!/" />
+    </SOURCES>
+    <jarDirectory url="file:///fs/scala/scala-2.9.0.1/lib" recursive="false" />
+  </library>
+</component>

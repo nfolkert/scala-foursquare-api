@@ -3,3 +3,4 @@ project/boot
 lib_managed
 .idea
 scala_fs.iml
+src/main/resources/props/*.props

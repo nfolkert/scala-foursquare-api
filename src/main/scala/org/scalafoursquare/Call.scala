@@ -5,16 +5,19 @@ import scalaj.http.{HttpOptions, Http}
 
 //
 
-case class Call (token: String, version: String = "20110823", url: String = "https://api.foursquare.com/v2/") {
-
+case class App(client_id: String, client_secret: String, version: String = "20110823", url: String = "https://api.foursquare.com/v2/") {
+  def call(token: String) = Call(token, this)
 }
 
-case class VenueCategories(call: Call) {
+case class Call (token: String, app: App) {
+  def venueCategories = VenueCategoriesCall(this)
+}
 
-  def makeCall() = {
-    val http = Http.get(call.url + "venues/categories").options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000))
+case class VenueCategoriesCall(call: Call) {
+  def get() = {
+    val http = Http.get(call.app.url + "venues/categories").options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000))
+      .param("version", call.app.version)
       .param("oauth_token", call.token)
-    println(http.getUrl.toString)
     http.asString
   }
 }
@@ -27,3 +30,5 @@ case class VenueCategories(call: Call) {
                          call: Call) {
   
 }*/
+
+case class VenueCategories()

@@ -1,0 +1,6 @@
+consumer.key=CONSUMER_ID_HERE
+consumer.secret=CONSUMER_SECRET_HERE
+access.token.userless=USERLESS_ACCESS_TOKEN_HERE
+access.token.user=USER_ACCESS_TOKEN_HERE
+foursquare.test.url=https://api.foursquare.com/v2/
+api.version=20110823

@@ -12,11 +12,15 @@
     <output url="file://$MODULE_DIR$/target/scala_2.8.0 2.7.7/classes" />
     <output-test url="file://$MODULE_DIR$/target/scala_2.8.0 2.7.7/test-classes" />
     <exclude-output />
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/project/target" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="" level="application" />
     <orderEntry type="library" name="ScalaAndSBT" level="project" />
+    <orderEntry type="library" name="Managed" level="project" />
   </component>
 </module>
 

@@ -2,3 +2,4 @@ target
 project/boot
 lib_managed
 .idea
+scala_fs.iml

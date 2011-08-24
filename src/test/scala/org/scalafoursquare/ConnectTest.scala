@@ -3,8 +3,18 @@ package org.scalafoursquare
 import org.junit.Test
 import net.liftweb.common.Empty
 import net.liftweb.util.Props
+import org.specs.SpecsMatchers
 
-class ConnectTest {
+object TestCaller extends FSCaller {
+  def makeCall(req: FSRequest): String = req.endpoint match {
+    case "venues/categories" => {
+      """{"meta":{"code":200},"response":{"categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","icon":"noIcon","categories":[]}]}}"""
+
+    }
+  }
+}
+
+class ConnectTest extends SpecsMatchers {
 
   val USER_TOKEN = Props.get("access.token.user").open_!
   val CONSUMER_KEY = Props.get("consumer.key").open_!
@@ -14,10 +24,27 @@ class ConnectTest {
 
 
   @Test
-  def simpleTest() {
+  def venueCategories() {
+    val mockCaller = TestCaller
+    val mockApp = FSApp(mockCaller)
 
-    val json = App(CONSUMER_KEY, CONSUMER_SECRET, API_VERSION, TEST_URL).call(USER_TOKEN).venueCategories.get
-    println(json)
+    val mockVenueCategories = mockApp.venueCategories.get
+    mockVenueCategories.meta must_== Meta(200, None, None)
+    mockVenueCategories.notifications must_== None
+    mockVenueCategories.response.categories.length must_== 1
+    mockVenueCategories.response.categories(0).name must_== "Fake Category"
+    mockVenueCategories.response.categories(0).pluralName must_== "Fake Categories"
+    mockVenueCategories.response.categories(0).id must_== "fakeId"
+    mockVenueCategories.response.categories(0).icon must_== "noIcon"
+    mockVenueCategories.response.categories(0).categories.length must_== 0
+
+    // This one actually makes a web call!
+    
+    val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val app = FSApp(caller)
+
+    val venueCategories = app.venueCategories.get
+
+    println(venueCategories.toString)
   }
-
 }

@@ -3,29 +3,45 @@ package org.scalafoursquare
 import net.liftweb.json.{DefaultFormats, JsonParser}
 import net.liftweb.json.JsonAST.{JObject, JValue}
 import net.liftweb.common.{Loggable, Full, Empty, Box}
+import net.liftweb.util.Helpers._
 import scalaj.http.{HttpException, HttpOptions, Http}
 
 case class FSRequest(endpoint: String, token: Box[String] = Empty, params:List[(String, String)] = Nil) {
-
   def this(endpoint: String, params:(String, String)*) = this(endpoint, Empty, params.toList)
   def this(endpoint: String, token: String, params: (String, String)*) = this(endpoint, Full(token), params.toList)
-
 }
 
 abstract class FSCaller {
   def makeCall(req: FSRequest): String
+  def multiCall(token: String, reqs: List[FSRequest]): String
 }
 
 case class HttpFSCaller(clientId: String, clientSecret: String,
                    urlRoot: String = "https://api.foursquare.com/v2/",
                    version: String = "20110823") extends FSCaller {
   def makeCall(req: FSRequest): String = {
-
     val fullParams: List[(String, String)] = ("v", version) ::
       (req.token.map(token => List(("oauth_token", token))).openOr(List(("client_id", clientId), ("client_secret", clientSecret)))) ++
       req.params.toList
 
     val http = Http.get(urlRoot + req.endpoint).options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000))
+      .params(fullParams)
+
+    println(http.getUrl.toString)
+
+    try {
+      http.asString
+    } catch {
+      case e: HttpException => {e.body}
+    }
+  }
+
+  def multiCall(token: String, reqs: List[FSRequest]): String = {
+    val param = reqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
+
+    val fullParams: List[(String, String)] = ("v", version) :: ("oauth_token", token) :: ("requests", param) :: Nil
+
+    val http = Http.get(urlRoot + "multi").options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000))
       .params(fullParams)
 
     println(http.getUrl.toString)
@@ -43,18 +59,43 @@ case class FSApp(caller: FSCaller) {
   object Formats extends DefaultFormats
   implicit val formats = Formats
 
+  // ==================
   // Userless Endpoints
+  // ==================
   def venueCategories = getConvert[VenueCategoriesResponse](FSRequest("venues/categories"))
   def venueDetail(id: String) = getConvert[VenueDetailResponse](FSRequest("venues/" + id))
 
-  // Authenticated Endpoints
+  def tipDetail(id: String) = getConvert[TipDetailResponse](FSRequest("tips/" + id))
+
+  def specialDetail(id: String, venue: String) = getConvert[SpecialDetailResponse](FSRequest("specials/" + id, Empty, ("venueId", venue) :: Nil))
+  // ==================
+
   val app = this
   def user(token: String) = FSUserApp(token)
   case class FSUserApp(token: String) {
+
+    // =======================
+    // Authenticated Endpoints
+    // =======================
+
     def self = userDetail("self")
     def userDetail(id: String) = app.getConvert[UserDetailResponse](FSRequest("users/" + id, Full(token)))
+
+    def updateDetail(id: String) = app.getConvert[UpdateDetailResponse](FSRequest("updates/" + id, Full(token)))
+
+    def photoDetail(id: String) = app.getConvert[PhotoDetailResponse](FSRequest("photos/" + id, Full(token)))
+
+    def settingsDetail(id: String) = app.getConvert[SettingsDetailResponse](FSRequest("settings/" + id, Full(token)))
+
+    def checkinDetail(id: String, signature: Option[String] = None) =
+      app.getConvert[CheckinDetailResponse](FSRequest("checkins/" + id, Full(token), signature.map(s=>("signature", s)).toList))
+
+    // =======================
+
     def getRaw(req: FSRequest): String = app.getRaw(req.copy(token=Full(token)))
     def getConvert[T](req: FSRequest)(implicit mf: Manifest[T]) = app.getConvert[T](req.copy(token=Full(token)))
+
+    def getMultiRaw(token: String, reqs: List[FSRequest]): String = caller.multiCall(token, reqs)
   }
 
   def getRaw(req: FSRequest): String = caller.makeCall(req)
@@ -169,7 +210,6 @@ trait UserKernel {
   def `type`: String
 }
 
-
 // Venue Categories
 
 trait VenueCategoryKernel {
@@ -188,3 +228,11 @@ case class Meta(code: Int, errorType: Option[String], errorDetail: Option[String
 case class Notification(unreadCount: Int)
 case class Notifications(`type`: String, item: Notification)
 case class Response[T](meta: Meta, notifications: Option[Notifications], response: Option[T])
+
+// TODO:
+case class UpdateDetailResponse()
+case class CheckinDetailResponse()
+case class TipDetailResponse()
+case class PhotoDetailResponse()
+case class SpecialDetailResponse()
+case class SettingsDetailResponse()

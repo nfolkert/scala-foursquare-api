@@ -71,4 +71,6 @@ object TestCaller extends FSCaller {
       case _ => """{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}"""
     }
   }
+
+  def multiCall(token: String, reqs: List[FSRequest]): String = "TODO"
 }

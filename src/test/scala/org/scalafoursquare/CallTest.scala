@@ -7,7 +7,7 @@ import org.specs.SpecsMatchers
 import net.liftweb.common.Empty
 import net.liftweb.util.Props
 
-class ConnectTest extends SpecsMatchers {
+class CallTest extends SpecsMatchers {
 
   val USER_TOKEN = Props.get("access.token.user").open_!
   val CONSUMER_KEY = Props.get("consumer.key").open_!

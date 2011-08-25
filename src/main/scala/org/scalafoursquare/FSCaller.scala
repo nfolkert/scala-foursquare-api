@@ -59,6 +59,10 @@ case class FSApp(caller: FSCaller) {
   object Formats extends DefaultFormats
   implicit val formats = Formats
 
+  case class Request(endpoint: String, params: List[(String, String)]) {
+
+  }
+
   // ==================
   // Userless Endpoints
   // ==================

@@ -18,11 +18,14 @@ class ConnectTest extends SpecsMatchers {
     val mockCaller = TestCaller
     val mockApp = FSApp(mockCaller)
 
-    val failVenue = mockApp.venueDetail("missingId").get
+    val failVenue = mockApp.venueDetail("missingId")
 
     failVenue.meta.code must_== 400
     failVenue.meta.errorType must_== Some("param_error")
     failVenue.response.isDefined must_== false
+
+    val failEndpoint = mockApp.caller.makeCall(FSRequest("bad/endpoint/blargh"))
+    failEndpoint must_== """{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}"""
   }
 
   @Test
@@ -30,7 +33,7 @@ class ConnectTest extends SpecsMatchers {
     val mockCaller = TestCaller
     val mockApp = FSApp(mockCaller)
 
-    val mockVenue = mockApp.venueDetail("someVenueId").get
+    val mockVenue = mockApp.venueDetail("someVenueId")
 
     mockVenue.meta must_== Meta(200, None, None)
     mockVenue.notifications must_== None
@@ -44,7 +47,7 @@ class ConnectTest extends SpecsMatchers {
     val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
     val app = FSApp(caller)
 
-    val venue = app.venueDetail("1234").get
+    val venue = app.venueDetail("1234")
     println(venue.toString)
   }
 
@@ -54,8 +57,8 @@ class ConnectTest extends SpecsMatchers {
     val mockApp = FSApp(mockCaller)
     val mockUserApp = mockApp.user("Just Testing!")
 
-    val mockSelf = mockUserApp.self.get
-    val mockById = mockUserApp.userDetail("someUserId").get
+    val mockSelf = mockUserApp.self
+    val mockById = mockUserApp.userDetail("someUserId")
 
     println(mockSelf.toString)
     println(mockById.toString)
@@ -64,9 +67,9 @@ class ConnectTest extends SpecsMatchers {
     mockSelf.notifications must_== None
     mockSelf.response.get.user.firstName must_== "Fake"
     mockSelf.response.get.user.mayorships.count must_== 20
-    mockSelf.response.get.user.checkins.items(0).venue.name must_== "Fake Venue"
-    mockSelf.response.get.user.checkins.items(0).venue.location.lat must_== 40.0
-    mockSelf.response.get.user.checkins.items(0).venue.location.lng must_== -73.5
+    mockSelf.response.get.user.checkins.items(0).venue.get.name must_== "Fake Venue"
+    mockSelf.response.get.user.checkins.items(0).venue.get.location.lat must_== Some(40.0)
+    mockSelf.response.get.user.checkins.items(0).venue.get.location.lng must_== Some(-73.5)
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30
@@ -76,10 +79,10 @@ class ConnectTest extends SpecsMatchers {
     val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
     val userApp = FSApp(caller).user(USER_TOKEN)
 
-    val self = userApp.self.get
+    val self = userApp.self
     println(self.toString)
 
-    val mtv = userApp.userDetail(660771.toString).get
+    val mtv = userApp.userDetail(660771.toString)
     println(mtv.toString)
   }
 
@@ -88,7 +91,7 @@ class ConnectTest extends SpecsMatchers {
     val mockCaller = TestCaller
     val mockApp = FSApp(mockCaller)
 
-    val mockVenueCategories = mockApp.venueCategories.get
+    val mockVenueCategories = mockApp.venueCategories
     mockVenueCategories.meta must_== Meta(200, None, None)
     mockVenueCategories.notifications must_== None
     mockVenueCategories.response.get.categories.length must_== 1
@@ -103,7 +106,7 @@ class ConnectTest extends SpecsMatchers {
     val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
     val app = FSApp(caller)
 
-    val venueCategories = app.venueCategories.get
+    val venueCategories = app.venueCategories
 
     println(venueCategories.toString)
   }

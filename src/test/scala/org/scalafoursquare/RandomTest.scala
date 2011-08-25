@@ -16,26 +16,36 @@ class RandomTest extends SpecsMatchers {
 
   @Ignore
   def randomVenues() {
-    val r = new Random(1977)
+    val seed = {
+      val time = System.currentTimeMillis
+      println("RANDOM SEED: " + time)
+      time
+    }
+    val r = new Random(seed)
 
     val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
     val app = FSApp(caller)
     for (i <- 1 to 10) {
-      val venueId = r.nextInt(10000000)
-      val venue = app.venueDetail(venueId.toString).get
+      val venueId = r.nextInt(100000)
+      val venue = app.venueDetail(venueId.toString)
       println(venue.toString)
     }
   }
 
   @Ignore
   def randomUsers() {
-    val r = new Random(1977)
+    val seed = {
+      val time = System.currentTimeMillis
+      println("RANDOM SEED: " + time)
+      time
+    }
+    val r = new Random(seed)
 
     val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
     val userApp = FSApp(caller).user(USER_TOKEN)
     for (i <- 1 to 10) {
-      val userId = r.nextInt(10000000)
-      val user = userApp.userDetail(userId.toString).get
+      val userId = r.nextInt(100000)
+      val user = userApp.userDetail(userId.toString)
       println(user.toString)
     }
   }

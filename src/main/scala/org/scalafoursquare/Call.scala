@@ -44,62 +44,42 @@ case class FSApp(caller: FSCaller) {
   implicit val formats = Formats
 
   // Userless Endpoints
-  def venueCategories = VenueCategoryFSCall(caller)
-  def venueDetail(id: String) = VenueDetailFSCall(caller, id)
+  def venueCategories = getInternal[VenueCategoriesResponse](FSRequest("venues/categories"))
+  def venueDetail(id: String) = getInternal[VenueDetailResponse](FSRequest("venues/" + id))
 
   // Authenticated Endpoints
   def user(token: String) = FSUserApp(token)
   case class FSUserApp(token: String) {
-    def self = UserDetailFSCall(caller, "self", token)
-    def userDetail(id: String) = UserDetailFSCall(caller, id, token)
+    def self = userDetail("self")
+    def userDetail(id: String) = getInternal[UserDetailResponse](FSRequest("users/" + id, Full(token)))
   }
 
-  abstract class FSCall[T](caller: FSCaller) {
-    protected def getInternal(req: FSRequest)(implicit mf : scala.reflect.Manifest[T]): Response[T] = {
-      val jsonStr = caller.makeCall(req)
+  protected def getInternal[T](req: FSRequest)(implicit mf : scala.reflect.Manifest[T]): Response[T] = {
+    val jsonStr = caller.makeCall(req)
 
-      println(jsonStr)
+    println(jsonStr)
 
-      val json = JsonParser.parse(jsonStr)
+    val json = JsonParser.parse(jsonStr)
 
-      val fields = json.asInstanceOf[JObject].obj
-      val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-      val notifications = fields.find(_.name == "notifications").map(_.extract[Notifications])
-      val response = {
-        if (meta.code != 200)
-          None
-        else
-          Some(fields.find(_.name == "response").get.value.extract[T])
-      }
-      Response[T](meta, notifications, response)
+    val fields = json.asInstanceOf[JObject].obj
+    val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
+    val notifications = fields.find(_.name == "notifications").map(_.extract[Notifications])
+    val response = {
+      if (meta.code != 200)
+        None
+      else
+        Some(fields.find(_.name == "response").get.value.extract[T])
     }
-
-    def get: Response[T]
-  }
-
-  case class VenueCategoryFSCall(caller: FSCaller) extends FSCall[VenueCategoriesResponse](caller) {
-    def get: Response[VenueCategoriesResponse] = {
-      getInternal(FSRequest("venues/categories"))
-    }
-  }
-
-  case class VenueDetailFSCall(caller: FSCaller, id: String) extends FSCall[VenueDetailResponse](caller) {
-    def get: Response[VenueDetailResponse] = {
-      getInternal(FSRequest("venues/" + id))
-    }
-  }
-
-  case class UserDetailFSCall(caller: FSCaller, id: String, token: String) extends FSCall[UserDetailResponse](caller) {
-    def get: Response[UserDetailResponse] = {
-      getInternal(FSRequest("users/" + id, Full(token)))
-    }
+    Response[T](meta, notifications, response)
   }
 }
 
 // Venue Details
 
 case class VenueContact(phone: Option[String], formattedPhone: Option[String], twitter: Option[String])
-case class VenueLocation(address: String, crossStreet: Option[String], city: String, state: String, postalCode: String, lat: Double, lng: Double)
+case class VenueLocation(address: Option[String], crossStreet: Option[String],  city: Option[String],
+                         state: Option[String], postalCode: Option[String], country: Option[String],
+                         lat: Option[Double], lng: Option[Double], distance: Option[Int])
 case class VenueStats(checkinsCount: Int, usersCount: Int, tipCount: Int)
 
 case class VenueHereNowGroup(`type`: String, name: String, count: Int /*, items: List[String]*/)
@@ -151,7 +131,7 @@ case class UserContact(phone: Option[String], email: Option[String], twitter: Op
 case class UserBadges(count: Int)
 case class UserMayorships(count: Int /*, items: List[String]*/)
 
-case class UserCheckin(id: String, createdAt: Long, `type`: String, timeZone: String, venue: VenueCompact)
+case class UserCheckin(id: String, createdAt: Long, `type`: String, timeZone: String, venue: Option[VenueCompact])
 case class UserCheckins(count: Int, items: List[UserCheckin])
 case class UserFriendGroup(`type`: String, name: String, count: Int /*, items: List[String] */)
 case class UserFriends(count: Int, groups: List[UserFriendGroup])

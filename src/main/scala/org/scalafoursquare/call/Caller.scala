@@ -332,5 +332,66 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("limit", limit)
     )
 
+  def selfBadges = userBadges("self")
+  def userBadges(id: String) = new Request[UserBadgesResponse](this, "/users/" + id + "/badges")
 
+  def selfCheckins(limit: Option[Int]=None, offset: Option[Int]=None, afterTimestamp: Option[Long]=None,
+                   beforeTimestamp: Option[Long]=None) = {
+    val id = "self" // Only self is supported
+    new Request[UserCheckinsResponse](this, "/users/" + id + "/checkins",
+      op("limit", limit) ++
+      op("offset", offset) ++
+      op("afterTimestamp", afterTimestamp) ++
+      op("beforeTimestamp", beforeTimestamp)
+    )
+  }
+  // TODO: userCheckins, if supported
+
+  def selfFriends(limit: Option[Int]=None, offset: Option[Int]=None) = userFriends("self", limit, offset)
+  def userFriends(id: String, limit: Option[Int]=None, offset: Option[Int]=None) =
+    new Request[UserFriendsResponse](this, "/users/" + id + "/friends",
+      op("limit", limit) ++
+      op("offset", offset)
+    )
+
+  def selfMayorships = userMayorships("self")
+  def userMayorships(id: String) = new Request[UserMayorshipsResponse](this, "/users/" + id + "/mayorships")
+
+  def selfTips(sort: Option[String]=None, ll: Option[(Double, Double)]=None, limit: Option[Int]=None, offset: Option[Int]=None) =
+    userTips("self", sort, ll, limit, offset)
+  def userTips(id: String, sort: Option[String]=None, ll: Option[(Double, Double)]=None, limit: Option[Int]=None,
+               offset: Option[Int]=None) =
+    new Request[UserTipsResponse](this, "/users/" + id + "/tips",
+      op("sort", sort) ++
+      op("ll", ll.map(p=>p._1 + "," + p._2)) ++
+      op("limit", limit) ++
+      op("offset", offset)
+    )
+
+  def selfTodos(sort: Option[String]=None, ll: Option[(Double, Double)]=None) =
+    userTodos("self", sort, ll)
+  def userTodos(id: String, sort: Option[String]=None, ll: Option[(Double, Double)]=None) =
+    new Request[UserTodosResponse](this, "/users/" + id + "/todos",
+      op("sort", sort) ++
+      op("ll", ll.map(p=>p._1 + "," + p._2))
+    )
+
+  def selfVenueHistory(beforeTimestamp: Option[Long]=None, afterTimestamp: Option[Long]=None, categoryId: Option[String]=None) = {
+    val id = "self" // Only self is supported
+    new Request[UserVenueHistoryResponse](this, "/users/" + id + "/venuehistory",
+      op("beforeTimestamp", beforeTimestamp) ++
+      op("afterTimestamp", afterTimestamp) ++
+      op("categoryId", categoryId)
+    )
+  }
+  // TODO: userVenueHistory, should it be supported
+
+
+  case class UserBadgesResponse()
+  case class UserCheckinsResponse()
+  case class UserFriendsResponse()
+  case class UserMayorshipsResponse()
+  case class UserTipsResponse()
+  case class UserTodosResponse()
+  case class UserVenueHistoryResponse()
 }

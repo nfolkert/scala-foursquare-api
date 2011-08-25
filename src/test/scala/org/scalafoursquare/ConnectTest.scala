@@ -24,8 +24,9 @@ class ConnectTest extends SpecsMatchers {
     failVenue.meta.errorType must_== Some("param_error")
     failVenue.response.isDefined must_== false
 
-    val failEndpoint = mockApp.caller.makeCall(FSRequest("bad/endpoint/blargh"))
-    failEndpoint must_== """{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}"""
+    case class ErrorTest()
+    val failEndpoint = mockApp.getConvert[ErrorTest](FSRequest("bad/endpoint/blargh"))
+    failEndpoint.meta must_== Meta(404, Some("other"), Some("Endpoint not found"))
   }
 
   @Test

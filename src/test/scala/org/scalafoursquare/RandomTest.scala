@@ -5,8 +5,11 @@ import net.liftweb.util.Props
 import org.specs.SpecsMatchers
 import util.Random
 import org.junit.{Ignore, Test}
+import net.liftweb.json.{JsonAST, Printer, DefaultFormats, Extraction, JsonParser}
 
 class RandomTest extends SpecsMatchers {
+  object Formats extends DefaultFormats
+  implicit val formats = Formats
 
   val USER_TOKEN = Props.get("access.token.user").open_!
   val CONSUMER_KEY = Props.get("consumer.key").open_!
@@ -20,6 +23,7 @@ class RandomTest extends SpecsMatchers {
       val time = System.currentTimeMillis
       println("RANDOM SEED: " + time)
       time
+      // 1314248366804L
     }
     val r = new Random(seed)
 
@@ -29,6 +33,19 @@ class RandomTest extends SpecsMatchers {
       val venueId = r.nextInt(100000)
       val venue = app.venueDetail(venueId.toString)
       println(venue.toString)
+
+      if (venue.meta.code == 200) {
+        val rawVenue = app.getRaw(FSRequest("venues/" + venueId))
+        val parsedRaw = JsonParser.parse(rawVenue)
+        val unparsedRes = Extraction.decompose(venue)
+
+        val parsed = Printer.compact(JsonAST.render(parsedRaw))
+        val unparsed = Printer.compact(JsonAST.render(unparsedRes))
+        println(parsed)
+        println(unparsed)
+
+        parsed must_== unparsed
+      }
     }
   }
 
@@ -47,6 +64,19 @@ class RandomTest extends SpecsMatchers {
       val userId = r.nextInt(100000)
       val user = userApp.userDetail(userId.toString)
       println(user.toString)
+
+      if (user.meta.code == 200) {
+        val rawUser = userApp.getRaw(FSRequest("users/" + userId))
+        val parsedRaw = JsonParser.parse(rawUser)
+        val unparsedRes = Extraction.decompose(user)
+
+        val parsed = Printer.compact(JsonAST.render(parsedRaw))
+        val unparsed = Printer.compact(JsonAST.render(unparsedRes))
+        println(parsed)
+        println(unparsed)
+
+        parsed must_== unparsed
+      }
     }
   }
 }

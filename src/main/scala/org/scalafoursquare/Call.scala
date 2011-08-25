@@ -44,18 +44,22 @@ case class FSApp(caller: FSCaller) {
   implicit val formats = Formats
 
   // Userless Endpoints
-  def venueCategories = getInternal[VenueCategoriesResponse](FSRequest("venues/categories"))
-  def venueDetail(id: String) = getInternal[VenueDetailResponse](FSRequest("venues/" + id))
+  def venueCategories = getConvert[VenueCategoriesResponse](FSRequest("venues/categories"))
+  def venueDetail(id: String) = getConvert[VenueDetailResponse](FSRequest("venues/" + id))
 
   // Authenticated Endpoints
+  val app = this
   def user(token: String) = FSUserApp(token)
   case class FSUserApp(token: String) {
     def self = userDetail("self")
-    def userDetail(id: String) = getInternal[UserDetailResponse](FSRequest("users/" + id, Full(token)))
+    def userDetail(id: String) = app.getConvert[UserDetailResponse](FSRequest("users/" + id, Full(token)))
+    def getRaw(req: FSRequest): String = app.getRaw(req.copy(token=Full(token)))
+    def getConvert[T](req: FSRequest)(implicit mf: Manifest[T]) = app.getConvert[T](req.copy(token=Full(token)))
   }
 
-  protected def getInternal[T](req: FSRequest)(implicit mf : scala.reflect.Manifest[T]): Response[T] = {
-    val jsonStr = caller.makeCall(req)
+  def getRaw(req: FSRequest): String = caller.makeCall(req)
+  def getConvert[T](req: FSRequest)(implicit mf: Manifest[T]): Response[T] = {
+    val jsonStr = getRaw(req)
 
     println(jsonStr)
 

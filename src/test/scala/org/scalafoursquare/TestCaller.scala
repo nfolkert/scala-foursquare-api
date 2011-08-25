@@ -1,10 +1,10 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{Caller, RawRequest}
+import org.scalafoursquare.call.{Caller, RawRequest, PostData}
 import net.liftweb.util.Helpers._
 
 object TestCaller extends Caller {
-  def makeCall(req: RawRequest, token: Option[String]): String = {
+  def makeCall(req: RawRequest, token: Option[String], method: String="GET", postData: Option[PostData]=None): String = {
     def m(jsonObj: String) = """{"meta":{"code":200},"response":""" + jsonObj + "}"
     def unparse(reqStr: String): RawRequest = {
       new RawRequest(req.app, reqStr) // TODO: unparse parameters from endpoint

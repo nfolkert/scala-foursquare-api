@@ -56,6 +56,33 @@ class CallTest extends SpecsMatchers {
   }
 
   @Test
+  def changeSettings() {
+    // This one actually makes a web call, and modifies the database!
+
+    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val app = new AuthApp(caller, USER_TOKEN)
+
+    val original = app.settingsDetail("sendMayorshipsToFacebook").get
+    val restoreOn = original.response.exists(_.value)
+
+    if (restoreOn)
+      app.changeSetting("sendMayorshipsToFacebook", false).get
+
+    val turnOn = app.changeSetting("sendMayorshipsToFacebook", true).get
+    // println(turnOn.response.map(_.message).getOrElse(turnOn.meta.toString))
+
+    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== true
+
+    val turnOff = app.changeSetting("sendMayorshipsToFacebook", false).get
+    // println(turnOff.response.map(_.message).getOrElse(turnOff.meta.toString))
+
+    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== false
+
+    if (restoreOn)
+      app.changeSetting("sendMayorshipsToFacebook", true).get
+  }
+
+  @Test
   def userDetail() {
     val mockCaller = TestCaller
     val mockUserApp = new AuthApp(mockCaller, "Just Testing!")

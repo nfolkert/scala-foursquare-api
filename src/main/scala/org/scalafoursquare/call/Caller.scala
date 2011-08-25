@@ -4,22 +4,34 @@ import net.liftweb.json.{DefaultFormats, JsonParser}
 import net.liftweb.json.JsonAST.{JArray, JObject}
 import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
-import scalaj.http.{HttpException, HttpOptions, Http}
+import scalaj.http.{HttpException, HttpOptions, Http, MultiPart}
 
-class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil) {
-  def getRaw: String = app.caller.makeCall(this, app.token)
+abstract class PostData {
+  def asMultipart: List[MultiPart]
 }
 
-class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params) {
+class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil, val method: String = "GET", val postData: Option[PostData]=None) {
+  def getRaw: String = app.caller.makeCall(this, app.token, method, postData)
+}
+
+class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "GET", None) {
+  def get: Response[T] = app.convertSingle[T](getRaw)
+}
+
+class PostRequest[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", None) {
+  def get: Response[T] = app.convertSingle[T](getRaw)
+}
+
+class PostDataRequest[T](app: App, endpoint: String, params: List[(String, String)]=Nil, postData: PostData)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", Some(postData)) {
   def get: Response[T] = app.convertSingle[T](getRaw)
 }
 
 class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawRequest], reqC: Option[RawRequest],
-                      reqD: Option[RawRequest], reqE: Option[RawRequest]) {
+                      reqD: Option[RawRequest], reqE: Option[RawRequest], val method: String="GET") {
   def getRaw: String = {
     val subreqs = List(reqA, reqB, reqC, reqD, reqE).flatten
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
-    new RawRequest(app, "/multi", List(("requests", param))).getRaw
+    new RawRequest(app, "/multi", List(("requests", param)), method, None).getRaw
   }
 }
 
@@ -29,10 +41,10 @@ class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[R
   def get: MultiResponse[A,B,C,D,E] = app.convertMulti[A,B,C,D,E](getRaw)
 }
 
-class RawMultiRequestList(val app: App, val subreqs: List[RawRequest]) {
+class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val method: String="GET") {
   def getRaw: String = {
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
-    new RawRequest(app, "/multi", List(("requests", param))).getRaw
+    new RawRequest(app, "/multi", List(("requests", param)), method, None).getRaw
   }
 }
 
@@ -41,27 +53,36 @@ class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Mani
 }
 
 abstract class Caller {
-  def makeCall(req: RawRequest, token: Option[String]): String
+  def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): String
 }
 
 case class HttpCaller(clientId: String, clientSecret: String,
                       urlRoot: String = "https://api.foursquare.com/v2",
                       version: String = "20110823") extends Caller {
-  def makeCall(req: RawRequest, token: Option[String]): String = {
+  def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): String = {
     val fullParams: List[(String, String)] = ("v", version) ::
       (token.map(t => List(("oauth_token", t))).getOrElse(List(("client_id", clientId), ("client_secret", clientSecret)))) ++
       req.params.toList
 
-    val http = Http.get(urlRoot + req.endpoint).options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000))
-      .params(fullParams)
+    val url = urlRoot + req.endpoint
+    val http = (method match {
+      case "GET" => Http.get(url)
+      case "POST" if postData.isEmpty => Http.post(url)
+      case "POST" => Http.multipart(url, postData.get.asMultipart:_*)
+      case _ => throw new Exception("Don't understand " + method)
+    }).options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000)).params(fullParams)
 
-    // println(http.getUrl.toString)
+    println(http.getUrl.toString)
 
-    try {
+    val result = try {
       http.asString
     } catch {
       case e: HttpException => {e.body}
     }
+
+    println(result)
+
+    result
   }
 }
 
@@ -71,7 +92,7 @@ abstract class App(val caller: Caller) {
 
   def token: Option[String]
 
-  def p(key: String, value: String) = List((key, value))
+  def p[T](key: String, value: T) = List((key, value.toString))
   def op[T](key: String, value: Option[T]) = value.map(v=>(key, v.toString)).toList
 
   def convertSingle[T](raw: String)(implicit mf: Manifest[T]): Response[T] = {
@@ -161,6 +182,29 @@ class UserlessApp(caller: Caller) extends App(caller) {
   def venueDetail(id: String) = new Request[VenueDetailResponse](this, "/venues/" + id)
   def tipDetail(id: String) = new Request[TipDetailResponse](this, "/tips/" + id)
   def specialDetail(id: String, venue: String) = new Request[SpecialDetailResponse](this, "/specials/" + id, p("venueId", venue))
+
+  def venueHereNow(id: String, limit: Option[Int]=None, offset: Option[Int]=None, afterTimestamp: Option[Long]=None) =
+    new Request[VenueHereNowResponse](this, "/venues/" + id + "/herenow",
+      op("limit", limit) ++
+      op("offset", offset) ++
+      op("afterTimestamp", afterTimestamp)
+    )
+
+  def venueTips(id: String, sort: Option[String]=None, limit: Option[Int]=None, offset: Option[Int]=None) =
+    new Request[VenueTipsResponse](this, "/venues/" + id + "/tips",
+      op("sort", sort) ++
+      op("limit", limit) ++
+      op("offset", offset)
+    )
+
+  def venuePhotos(id: String, group: String, limit: Option[Int]=None, offset: Option[Int]=None) =
+    new Request[VenuePhotosResponse](this, "/venues/" + id + "/photos",
+      p("group", group) ++
+      op("limit", limit) ++
+      op("offset", offset)
+    )
+
+  def venueLinks(id: String) = new Request[VenueLinksResponse](this, "/venues/" + id  + "/links")
 
   // Not sure if these can be userless; will move to AuthApp if not
 
@@ -386,12 +430,20 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   }
   // TODO: userVenueHistory, should it be supported
 
+  def friendRequest(id: String) = new PostRequest[UserFriendRequestResponse](this, "/users/" + id + "/request")
+  def unfriend(id: String) = new PostRequest[UserUnfriendResponse](this, "/users/" + id + "/unfriend")
+  def approveFriendship(id: String) = new PostRequest[UserApproveFriendResponse](this, "/users/" + id + "/approve")
+  def denyFriendship(id: String) = new PostRequest[UserDenyFriendshipResponse](this, "/users/" + id + "/deny")
 
-  case class UserBadgesResponse()
-  case class UserCheckinsResponse()
-  case class UserFriendsResponse()
-  case class UserMayorshipsResponse()
-  case class UserTipsResponse()
-  case class UserTodosResponse()
-  case class UserVenueHistoryResponse()
+  def setPings(id: String, value: Boolean) =
+    new PostRequest[UserSetPingsResponse](this, "/users/" + id + "/setpings", p("value", value))
+
+  // Settings options:
+  // sendToTwitter, sendMayorshipsToTwitter, sendBadgesToTwitter, sendToFacebook, sendMayorshipsToFacebook, sendBadgesToFacebook, receivePings, receiveCommentPings
+  def changeSetting(id: String, value: Boolean) = new PostRequest[ChangeSettingsResponse](this, "/settings/" + id + "/set",
+    p("value", (if (value) 1 else 0)))
+
+  // TODO: post photo in multipart MIME encoding (image/jpeg, image/gif, or image/png)
+  def updatePhoto() = new Request[UserPhotoUpdateResponse](this, "/users/self/update")
+
 }

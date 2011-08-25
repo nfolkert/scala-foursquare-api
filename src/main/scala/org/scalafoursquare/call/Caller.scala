@@ -252,11 +252,85 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       // No radius?
     )
 
-  def venueTrending(lat: Double, long: Double, limit: Option[Int], radius: Option[Int]) =
+  def venueTrending(lat: Double, long: Double, limit: Option[Int]=None, radius: Option[Int]=None) =
     new Request[VenueTrendingResponse](this, "/venues/trending",
       p("ll", lat + "," + long) ++
       op("limit", limit) ++
       op("radius", radius)
     )
+
+  def addCheckin(venueId: Option[String]=None, venue: Option[String]=None, shout: Option[String]=None,
+                 broadcast: Option[List[String]]=None, ll: Option[(Double, Double)]=None, llAcc: Option[Double]=None,
+                 alt: Option[Double]=None, altAcc: Option[Double]=None) =
+    new Request[AddCheckinResponse](this, "/checkins/add",
+      op("venueId", venueId) ++
+      op("venue", venue) ++
+      op("shout", shout) ++
+      op("broadcast", broadcast.map(_.join(","))) ++
+      op("ll", ll.map(p=>p._1 + "," + p._2)) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc)
+    )
+
+  def recentCheckins(ll: Option[(Double, Double)]=None, limit: Option[Int]=None, afterTimestamp: Option[Long]=None) =
+    new Request[RecentCheckinsResponse](this, "/checkins/recent",
+      op("ll", ll.map(p=>p._1 + "," + p._2)) ++
+      op("limit", limit) ++
+      op("afterTimestamp", afterTimestamp)
+    )
+
+  def addTip(venueId: String, text: String, url: Option[String]=None, broadcast: Option[List[String]]=None) =
+    new Request[AddTipResponse](this, "/tips/add",
+      p("venueId", venueId) ++
+      p("text", text) ++
+      op("url", url) ++
+      op("broadcast", broadcast.map(_.join(",")))
+    )
+
+  def tipsSearch(lat: Double, long: Double, limit: Option[Int]=None, offset: Option[Int]=None, filter: Option[String]=None,
+                 query: Option[String]=None) =
+    new Request[TipSearchResponse](this, "/tips/search",
+      p("ll", lat + "," + long) ++
+      op("limit", limit) ++
+      op("offset", offset) ++
+      op("filter", filter) ++
+      op("query", query)
+    )
+
+  def notifications(limit: Option[Int]=None, offset: Option[Int]=None) =
+    new Request[NotificationsResponse](this, "/updates/notifications",
+      op("limit", limit) ++
+      op("offset", offset)
+    )
+
+  // TODO: pass in file handle, post on crequest
+  def addPhoto(checkinId: Option[String]=None, tipId: Option[String]=None, venueId: Option[String]=None,
+               broadcast: Option[List[String]]=None, `public`: Option[Boolean]=None, ll: Option[(Double, Double)]=None,
+               llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None) =
+    new Request[AddPhotoResponse](this, "/photos/add",
+      op("checkinId", checkinId) ++
+      op("tipId", tipId) ++
+      op("venueId", venueId) ++
+      op("broadcast", broadcast.map(_.join(","))) ++
+      op("public", `public`.map(b=> if (b) 1 else 0)) ++
+      op("ll", ll.map(p=>p._1 + "," + p._2)) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc)
+    )
+
+  def allSettings = new Request[AllSettingsResponse](this, "/settings/all")
+
+  def specialsSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
+                     altAcc: Option[Double]=None, limit: Option[Int]=None) =
+    new Request[SpecialsSearchResponse](this, "/specials/search",
+      p("ll", lat + "," + long) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc) ++
+      op("limit", limit)
+    )
+
 
 }

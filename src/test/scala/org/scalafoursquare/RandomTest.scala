@@ -1,5 +1,6 @@
 package org.scalafoursquare
 
+import org.scalafoursquare.call.{HttpCaller, UserlessApp, AuthApp, Request, RawRequest}
 import net.liftweb.common.Empty
 import net.liftweb.util.Props
 import org.specs.SpecsMatchers
@@ -23,19 +24,19 @@ class RandomTest extends SpecsMatchers {
       val time = System.currentTimeMillis
       println("RANDOM SEED: " + time)
       time
-      // 1314248366804L
+      // 1314248366804L 1314290178357L 1314290196887L 1314290227343L
     }
     val r = new Random(seed)
 
-    val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val app = FSApp(caller)
+    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val app = new UserlessApp(caller)
     for (i <- 1 to 10) {
       val venueId = r.nextInt(100000)
-      val venue = app.venueDetail(venueId.toString)
+      val venue = app.venueDetail(venueId.toString).get
       println(venue.toString)
 
       if (venue.meta.code == 200) {
-        val rawVenue = app.getRaw(FSRequest("venues/" + venueId))
+        val rawVenue = new RawRequest(app, "venues/" + venueId).getRaw
         val parsedRaw = JsonParser.parse(rawVenue)
         val unparsedRes = Extraction.decompose(venue)
 
@@ -58,15 +59,15 @@ class RandomTest extends SpecsMatchers {
     }
     val r = new Random(seed)
 
-    val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val userApp = FSApp(caller).user(USER_TOKEN)
+    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val userApp = new AuthApp(caller, USER_TOKEN)
     for (i <- 1 to 10) {
       val userId = r.nextInt(100000)
-      val user = userApp.userDetail(userId.toString)
+      val user = userApp.userDetail(userId.toString).get
       println(user.toString)
 
       if (user.meta.code == 200) {
-        val rawUser = userApp.getRaw(FSRequest("users/" + userId))
+        val rawUser = new RawRequest(userApp, "users/" + userId).getRaw
         val parsedRaw = JsonParser.parse(rawUser)
         val unparsedRes = Extraction.decompose(user)
 

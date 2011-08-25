@@ -6,12 +6,12 @@ import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
 import scalaj.http.{HttpException, HttpOptions, Http}
 
-class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)]) {
+class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil) {
   def getRaw: String = app.caller.makeCall(this, app.token)
 }
 
 class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params) {
-  def get = app.convertSingle(getRaw)
+  def get: Response[T] = app.convertSingle[T](getRaw)
 }
 
 class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawRequest], reqC: Option[RawRequest],
@@ -26,7 +26,7 @@ class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawReques
 class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[Request[B]], reqC: Option[Request[C]],
                                    reqD: Option[Request[D]], reqE: Option[Request[E]])(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E])
   extends RawMultiRequest(app, reqA, reqB, reqC, reqD, reqE) {
-  def get = app.convertMulti(getRaw)
+  def get: MultiResponse[A,B,C,D,E] = app.convertMulti[A,B,C,D,E](getRaw)
 }
 
 class RawMultiRequestList(val app: App, val subreqs: List[RawRequest]) {
@@ -37,7 +37,7 @@ class RawMultiRequestList(val app: App, val subreqs: List[RawRequest]) {
 }
 
 class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Manifest[A]) extends RawMultiRequestList(app, subreqs) {
-  def get = app.convertMultiList(getRaw)
+  def get: MultiResponseList[A] = app.convertMultiList[A](getRaw)
 }
 
 abstract class Caller {

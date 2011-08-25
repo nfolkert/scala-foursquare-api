@@ -1,9 +1,18 @@
 package org.scalafoursquare
 
-object TestCaller extends FSCaller {
-  def makeCall(req: FSRequest): String = {
+import org.scalafoursquare.call.{Caller, RawRequest}
+import net.liftweb.util.Helpers._
+
+object TestCaller extends Caller {
+  def makeCall(req: RawRequest, token: Option[String]): String = {
     def m(jsonObj: String) = """{"meta":{"code":200},"response":""" + jsonObj + "}"
     req.endpoint match {
+      case "multi" => {
+        req.params.find(_._1 == "requests").map(reqs => {
+          val reqList = reqs._2.split(",").toList
+          ""
+        }).getOrElse("")
+      }
       case "venues/categories" => {
         m("""{"categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","icon":"noIcon","categories":[]}]}""")
       }
@@ -71,6 +80,4 @@ object TestCaller extends FSCaller {
       case _ => """{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}"""
     }
   }
-
-  def multiCall(token: String, reqs: List[FSRequest]): String = "TODO"
 }

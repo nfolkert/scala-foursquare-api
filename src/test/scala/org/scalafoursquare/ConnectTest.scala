@@ -1,9 +1,11 @@
 package org.scalafoursquare
 
+import org.scalafoursquare.call.{AuthApp, UserlessApp, HttpCaller, Request}
+import org.scalafoursquare.response.{Meta}
 import org.junit.Test
+import org.specs.SpecsMatchers
 import net.liftweb.common.Empty
 import net.liftweb.util.Props
-import org.specs.SpecsMatchers
 
 class ConnectTest extends SpecsMatchers {
 
@@ -16,25 +18,26 @@ class ConnectTest extends SpecsMatchers {
   @Test
   def errorHandling() {
     val mockCaller = TestCaller
-    val mockApp = FSApp(mockCaller)
+    val mockApp = new UserlessApp(mockCaller)
 
-    val failVenue = mockApp.venueDetail("missingId")
+    val failVenue = mockApp.venueDetail("missingId").get
 
     failVenue.meta.code must_== 400
     failVenue.meta.errorType must_== Some("param_error")
     failVenue.response.isDefined must_== false
 
     case class ErrorTest()
-    val failEndpoint = mockApp.getConvert[ErrorTest](FSRequest("bad/endpoint/blargh"))
+
+    val failEndpoint = new Request[ErrorTest](mockApp, "bad/endpoint/blargh").get
     failEndpoint.meta must_== Meta(404, Some("other"), Some("Endpoint not found"))
   }
 
   @Test
   def venueDetail() {
     val mockCaller = TestCaller
-    val mockApp = FSApp(mockCaller)
+    val mockApp = new UserlessApp(mockCaller)
 
-    val mockVenue = mockApp.venueDetail("someVenueId")
+    val mockVenue = mockApp.venueDetail("someVenueId").get
 
     mockVenue.meta must_== Meta(200, None, None)
     mockVenue.notifications must_== None
@@ -45,21 +48,21 @@ class ConnectTest extends SpecsMatchers {
 
     // This one actually makes a web call!
 
-    val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val app = FSApp(caller)
+    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val app = new UserlessApp(caller)
 
-    val venue = app.venueDetail("1234")
+    val venue = app.venueDetail("1234").get
     println(venue.toString)
   }
 
   @Test
   def userDetail() {
     val mockCaller = TestCaller
-    val mockApp = FSApp(mockCaller)
-    val mockUserApp = mockApp.user("Just Testing!")
+    val mockApp = new UserlessApp(mockCaller)
+    val mockUserApp = new AuthApp(mockCaller, "Just Testing!")
 
-    val mockSelf = mockUserApp.self
-    val mockById = mockUserApp.userDetail("someUserId")
+    val mockSelf = mockUserApp.self.get
+    val mockById = mockUserApp.userDetail("someUserId").get
 
     println(mockSelf.toString)
     println(mockById.toString)
@@ -77,22 +80,22 @@ class ConnectTest extends SpecsMatchers {
 
     // These actually make a web call!
 
-    val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val userApp = FSApp(caller).user(USER_TOKEN)
+    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val userApp = new AuthApp(caller, USER_TOKEN)
 
     val self = userApp.self
     println(self.toString)
 
-    val mtv = userApp.userDetail(660771.toString)
+    val mtv = userApp.userDetail(660771.toString).get
     println(mtv.toString)
   }
 
   @Test
   def venueCategories() {
     val mockCaller = TestCaller
-    val mockApp = FSApp(mockCaller)
+    val mockApp = new UserlessApp(mockCaller)
 
-    val mockVenueCategories = mockApp.venueCategories
+    val mockVenueCategories = mockApp.venueCategories.get
     mockVenueCategories.meta must_== Meta(200, None, None)
     mockVenueCategories.notifications must_== None
     mockVenueCategories.response.get.categories.length must_== 1
@@ -104,10 +107,10 @@ class ConnectTest extends SpecsMatchers {
 
     // This one actually makes a web call!
     
-    val caller = HttpFSCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val app = FSApp(caller)
+    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val app = new UserlessApp(caller)
 
-    val venueCategories = app.venueCategories
+    val venueCategories = app.venueCategories.get
 
     println(venueCategories.toString)
   }

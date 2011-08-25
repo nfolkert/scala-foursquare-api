@@ -6,17 +6,22 @@ import net.liftweb.util.Helpers._
 object TestCaller extends Caller {
   def makeCall(req: RawRequest, token: Option[String]): String = {
     def m(jsonObj: String) = """{"meta":{"code":200},"response":""" + jsonObj + "}"
+    def unparse(reqStr: String): RawRequest = {
+      new RawRequest(req.app, reqStr) // TODO: unparse parameters from endpoint
+    }
+
     req.endpoint match {
-      case "multi" => {
-        req.params.find(_._1 == "requests").map(reqs => {
-          val reqList = reqs._2.split(",").toList
-          ""
-        }).getOrElse("")
+      case "/multi" => {
+        req.params.find(_._1 == "requests").map(reqEntry => {
+          val reqs = reqEntry._2
+          val reqList = reqs.split(",").toList
+          m("{\"responses\":[" + reqList.map(r => makeCall(unparse(r), req.app.token)).join(",") + "]}")
+        }).getOrElse("""{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}""")
       }
-      case "venues/categories" => {
+      case "/venues/categories" => {
         m("""{"categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","icon":"noIcon","categories":[]}]}""")
       }
-      case "users/self" | "users/someUserId" => m("""
+      case "/users/self" | "/users/someUserId" => m("""
       {"user":{
         "id":"fakeId", "firstName":"Fake", "lastName":"User", "photo":"noPhoto", "gender":"male",
         "homeCity":"New York, NY", "relationship":"self", "type":"user", "pings":false,
@@ -36,7 +41,7 @@ object TestCaller extends Caller {
          "todos":{"count":100},
          "scores":{"recent":110,"max":120,"checkinsCount":30}}}
       """)
-      case "venues/someVenueId" => m("""
+      case "/venues/someVenueId" => m("""
       {"venue":{
         "id":"fakeId","name":"Fake Venue","itemId":"fakeId",
         "contact":{"phone":"8675309","formattedPhone":"(701) 867-5309"},
@@ -76,7 +81,7 @@ object TestCaller extends Caller {
           {"type":"venue","name":"venue photos","count":0,"items":[]}]},
         "todos":{"count":0,"items":[]}}}
       """)
-      case "venues/missingId" => """{"meta":{"code":400,"errorType":"param_error","errorDetail":"Value missingId is invalid for venue id"},"response":{}}"""
+      case "/venues/missingId" => """{"meta":{"code":400,"errorType":"param_error","errorDetail":"Value missingId is invalid for venue id"},"response":{}}"""
       case _ => """{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}"""
     }
   }

@@ -19,7 +19,7 @@ class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawReques
   def getRaw: String = {
     val subreqs = List(reqA, reqB, reqC, reqD, reqE).flatten
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
-    new RawRequest(app, "multi", List(("requests", param))).getRaw
+    new RawRequest(app, "/multi", List(("requests", param))).getRaw
   }
 }
 
@@ -32,7 +32,7 @@ class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[R
 class RawMultiRequestList(val app: App, val subreqs: List[RawRequest]) {
   def getRaw: String = {
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
-    new RawRequest(app, "multi", List(("requests", param))).getRaw
+    new RawRequest(app, "/multi", List(("requests", param))).getRaw
   }
 }
 
@@ -45,7 +45,7 @@ abstract class Caller {
 }
 
 case class HttpCaller(clientId: String, clientSecret: String,
-                      urlRoot: String = "https://api.foursquare.com/v2/",
+                      urlRoot: String = "https://api.foursquare.com/v2",
                       version: String = "20110823") extends Caller {
   def makeCall(req: RawRequest, token: Option[String]): String = {
     val fullParams: List[(String, String)] = ("v", version) ::
@@ -55,7 +55,7 @@ case class HttpCaller(clientId: String, clientSecret: String,
     val http = Http.get(urlRoot + req.endpoint).options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000))
       .params(fullParams)
 
-    println(http.getUrl.toString)
+    // println(http.getUrl.toString)
 
     try {
       http.asString
@@ -96,11 +96,25 @@ abstract class App(val caller: Caller) {
       if (meta.code != 200)
         (None, None, None, None, None)
       else {
-        val responses = fields.find(_.name == "response").get.value.asInstanceOf[JObject].obj.find(_.name == "responses").asInstanceOf[JArray]
+        val responses = fields.find(_.name == "response").get.value.asInstanceOf[JObject].obj.find(_.name == "responses").get.value.asInstanceOf[JArray]
         def response(idx: Int) = if (idx >= responses.arr.length) None else Some(responses.arr(idx))
 
-        (response(0).map(_.extract[A]), response(1).map(_.extract[B]), response(2).map(_.extract[C]),
-         response(3).map(_.extract[D]), response(4).map(_.extract[E]))
+        def convert[T](idx: Int)(implicit mf: Manifest[T]): Option[Response[T]] = {
+          response(idx).map(res=>{
+            val sfields = res.asInstanceOf[JObject].obj
+            val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
+            val snotifications = sfields.find(_.name == "notifications").map(_.extract[Notifications])
+            val sresponse = {
+              if (smeta.code != 200)
+                None
+              else
+                Some(sfields.find(_.name == "response").get.value.extract[T])
+            }
+            Response[T](smeta, snotifications, sresponse)
+          })
+        }
+
+        (convert[A](0), convert[B](1), convert[C](2), convert[D](3), convert[E](4))
       }
     }
     MultiResponse[A,B,C,D,E](meta, notifications, responses)
@@ -117,7 +131,18 @@ abstract class App(val caller: Caller) {
         None
       else {
         val responses = fields.find(_.name == "response").get.value.asInstanceOf[JObject].obj.find(_.name == "responses").asInstanceOf[JArray]
-        val resolved: List[A] = responses.arr.map(_.extract[A])
+        val resolved: List[Response[A]] = responses.arr.map(res => {
+          val sfields = res.asInstanceOf[JObject].obj
+          val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
+          val snotifications = sfields.find(_.name == "notifications").map(_.extract[Notifications])
+          val sresponse = {
+            if (smeta.code != 200)
+              None
+            else
+              Some(sfields.find(_.name == "response").get.value.extract[A])
+          }
+          Response[A](smeta, snotifications, sresponse)
+        })
         Some(resolved)
       }
     }
@@ -129,10 +154,10 @@ class UserlessApp(caller: Caller) extends App(caller) {
   def token: Option[String] = None
 
   // Userless Endpoints
-  def venueCategories = new Request[VenueCategoriesResponse](this, "venues/categories")
-  def venueDetail(id: String) = new Request[VenueDetailResponse](this, "venues/" + id)
-  def tipDetail(id: String) = new Request[TipDetailResponse](this, "tips/" + id)
-  def specialDetail(id: String, venue: String) = new Request[SpecialDetailResponse](this, "specials/" + id, ("venueId", venue) :: Nil)
+  def venueCategories = new Request[VenueCategoriesResponse](this, "/venues/categories")
+  def venueDetail(id: String) = new Request[VenueDetailResponse](this, "/venues/" + id)
+  def tipDetail(id: String) = new Request[TipDetailResponse](this, "/tips/" + id)
+  def specialDetail(id: String, venue: String) = new Request[SpecialDetailResponse](this, "/specials/" + id, ("venueId", venue) :: Nil)
 
   // Not sure if these can be userless; will move to AuthApp if not
 
@@ -153,10 +178,10 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
 
   // Authenticated Endpoints
   def self = userDetail("self")
-  def userDetail(id: String) = new Request[UserDetailResponse](this, "users/" + id)
-  def updateDetail(id: String) = new Request[UserDetailResponse](this, "updates/" + id)
-  def photoDetail(id: String) = new Request[PhotoDetailResponse](this, "photos/" + id)
-  def settingsDetail(id: String) = new Request[SettingsDetailResponse](this, "settings/" + id)
+  def userDetail(id: String) = new Request[UserDetailResponse](this, "/users/" + id)
+  def updateDetail(id: String) = new Request[UserDetailResponse](this, "/updates/" + id)
+  def photoDetail(id: String) = new Request[PhotoDetailResponse](this, "/photos/" + id)
+  def settingsDetail(id: String) = new Request[SettingsDetailResponse](this, "/settings/" + id)
   def checkinDetail(id: String, signature: Option[String] = None) =
-    new Request[CheckinDetailResponse](this, "checkins/" + id, signature.map(s=>("signature", s)).toList)
+    new Request[CheckinDetailResponse](this, "/checkins/" + id, signature.map(s=>("signature", s)).toList)
 }

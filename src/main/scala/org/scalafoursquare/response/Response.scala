@@ -110,8 +110,8 @@ case class Notification(unreadCount: Int)
 case class Notifications(`type`: String, item: Notification)
 case class Response[T](meta: Meta, notifications: Option[Notifications], response: Option[T])
 
-case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[Notifications], responses: (Option[A], Option[B], Option[C], Option[D], Option[E]))
-case class MultiResponseList[A](meta: Meta, notifications: Option[Notifications], responses: Option[List[A]])
+case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[Notifications], responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]))
+case class MultiResponseList[A](meta: Meta, notifications: Option[Notifications], responses: Option[List[Response[A]]])
 
 // TODO:
 case class UpdateDetailResponse()

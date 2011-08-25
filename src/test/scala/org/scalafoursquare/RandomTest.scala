@@ -32,11 +32,12 @@ class RandomTest extends SpecsMatchers {
     val app = new UserlessApp(caller)
     for (i <- 1 to 10) {
       val venueId = r.nextInt(100000)
-      val venue = app.venueDetail(venueId.toString).get
+      val venueReq = app.venueDetail(venueId.toString)
+      val venue = venueReq.get
       println(venue.toString)
 
       if (venue.meta.code == 200) {
-        val rawVenue = new RawRequest(app, "venues/" + venueId).getRaw
+        val rawVenue = venueReq.getRaw
         val parsedRaw = JsonParser.parse(rawVenue)
         val unparsedRes = Extraction.decompose(venue)
 
@@ -63,11 +64,12 @@ class RandomTest extends SpecsMatchers {
     val userApp = new AuthApp(caller, USER_TOKEN)
     for (i <- 1 to 10) {
       val userId = r.nextInt(100000)
-      val user = userApp.userDetail(userId.toString).get
+      val userReq = userApp.userDetail(userId.toString)
+      val user = userReq.get
       println(user.toString)
 
       if (user.meta.code == 200) {
-        val rawUser = new RawRequest(userApp, "users/" + userId).getRaw
+        val rawUser = userReq.getRaw
         val parsedRaw = JsonParser.parse(rawUser)
         val unparsedRes = Extraction.decompose(user)
 

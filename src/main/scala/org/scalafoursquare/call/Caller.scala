@@ -71,6 +71,9 @@ abstract class App(val caller: Caller) {
 
   def token: Option[String]
 
+  def p(key: String, value: String) = List((key, value))
+  def op[T](key: String, value: Option[T]) = value.map(v=>(key, v.toString)).toList
+
   def convertSingle[T](raw: String)(implicit mf: Manifest[T]): Response[T] = {
     val json = JsonParser.parse(raw)
 
@@ -157,7 +160,7 @@ class UserlessApp(caller: Caller) extends App(caller) {
   def venueCategories = new Request[VenueCategoriesResponse](this, "/venues/categories")
   def venueDetail(id: String) = new Request[VenueDetailResponse](this, "/venues/" + id)
   def tipDetail(id: String) = new Request[TipDetailResponse](this, "/tips/" + id)
-  def specialDetail(id: String, venue: String) = new Request[SpecialDetailResponse](this, "/specials/" + id, ("venueId", venue) :: Nil)
+  def specialDetail(id: String, venue: String) = new Request[SpecialDetailResponse](this, "/specials/" + id, p("venueId", venue))
 
   // Not sure if these can be userless; will move to AuthApp if not
 
@@ -183,5 +186,77 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def photoDetail(id: String) = new Request[PhotoDetailResponse](this, "/photos/" + id)
   def settingsDetail(id: String) = new Request[SettingsDetailResponse](this, "/settings/" + id)
   def checkinDetail(id: String, signature: Option[String] = None) =
-    new Request[CheckinDetailResponse](this, "/checkins/" + id, signature.map(s=>("signature", s)).toList)
+    new Request[CheckinDetailResponse](this, "/checkins/" + id, op("signature", signature))
+
+  def leaderboard(neighbors: Option[Int] = None) = new Request[LeaderboardResponse](this, "/users/leaderboard", op("neighbors", neighbors))
+
+  def userSearch(phone: Option[List[String]]=None, email: Option[List[String]]=None, twitter: Option[List[String]]=None,
+                 twitterSource: Option[String]=None, fbid: Option[List[String]]=None, name: Option[String]=None) =
+    new Request[UserSearchResponse](this, "/users/search",
+      op("phone", phone.map(_.join(","))) ++
+      op("email", email.map(_.join(","))) ++
+      op("twitter", twitter.map(_.join(","))) ++
+      op("twitterSource", twitterSource) ++
+      op("fbid", fbid.map(_.join(","))) ++
+      op("name", name)
+    )
+
+  def userRequests = new Request[UserRequestResponse](this, "/users/requests")
+
+  def addVenue(name: String, lat: Double, long: Double, address: Option[String]=None, crossStreet: Option[String]=None,
+               city: Option[String]=None, state: Option[String]=None, zip: Option[String]=None,
+               phone: Option[String]=None, twitter: Option[String]=None, primaryCategoryId: Option[String]=None) =
+    new Request[VenueAddResponse](this, "/venues/add",
+      p("name", name) ++
+      op("address", address) ++
+      op("crossStreet", crossStreet) ++
+      op("state", state) ++
+      op("zip", zip) ++
+      op("phone", phone) ++
+      op("twitter", twitter) ++
+      p("ll", lat + "," + long) ++
+      op("primaryCategoryId", primaryCategoryId)
+    )
+
+  def exploreVenues(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
+                    altAcc: Option[Double]=None, radius: Option[Int]=None, section: Option[String]=None,
+                    query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None) =
+    new Request[VenueExploreResponse](this, "/venues/explore",
+      p("ll", lat + "," + long) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc) ++
+      op("radius", radius) ++
+      op("section", section) ++
+      op("query", query) ++
+      op("limit", limit) ++
+      op("intent", intent)
+    )
+
+  def venueSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None,
+                  query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None,
+                  categoryId: Option[String]=None, url: Option[String]=None, providerId: Option[String]=None,
+                  linkedId: Option[String]) =
+    new Request[VenueSearchResponse](this, "/venues/search",
+      p("ll", lat + "," + long) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc) ++
+      op("query", query) ++
+      op("limit", limit) ++
+      op("intent", intent) ++
+      op("categoryId", categoryId) ++
+      op("url", url) ++
+      op("providerId", providerId) ++
+      op("linkedId", linkedId)
+      // No radius?
+    )
+
+  def venueTrending(lat: Double, long: Double, limit: Option[Int], radius: Option[Int]) =
+    new Request[VenueTrendingResponse](this, "/venues/trending",
+      p("ll", lat + "," + long) ++
+      op("limit", limit) ++
+      op("radius", radius)
+    )
+
 }

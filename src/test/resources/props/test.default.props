@@ -5,3 +5,5 @@ access.token.user=USER_ACCESS_TOKEN_HERE
 foursquare.url=https://foursquare.com
 foursquare.api.url=https://api.foursquare.com/v2
 api.version=20110823
+connect.timeout=1000
+read.timeout=2000

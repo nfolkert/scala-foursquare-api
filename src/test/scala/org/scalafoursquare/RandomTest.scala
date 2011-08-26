@@ -24,7 +24,7 @@ class RandomTest extends SpecsMatchers {
     }
     val r = new Random(seed)
 
-    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new UserlessApp(caller)
     for (i <- 1 to 10) {
       val venueId = r.nextInt(100000)
@@ -56,7 +56,7 @@ class RandomTest extends SpecsMatchers {
     }
     val r = new Random(seed)
 
-    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val userApp = new AuthApp(caller, P.USER_TOKEN)
     for (i <- 1 to 10) {
       val userId = r.nextInt(100000)

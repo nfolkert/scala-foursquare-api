@@ -13,7 +13,7 @@ class Example extends SpecsMatchers {
 
   @Test
   def example() {
-    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new AuthApp(caller, P.USER_TOKEN)
 
     val meAndCategories = app.multi(app.self, app.venueCategories).get

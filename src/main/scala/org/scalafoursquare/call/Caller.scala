@@ -72,7 +72,9 @@ abstract class Caller {
 
 case class HttpCaller(clientId: String, clientSecret: String,
                       urlRoot: String = "https://api.foursquare.com/v2",
-                      version: String = "20110823") extends Caller {
+                      version: String = "20110823",
+                      connectTimeout: Int=1000, readTimeout: Int=2000
+                     ) extends Caller {
   def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): String = {
     val fullParams: List[(String, String)] = ("v", version) ::
       (token.map(t => List(("oauth_token", t))).getOrElse(List(("client_id", clientId), ("client_secret", clientSecret)))) ++
@@ -84,7 +86,7 @@ case class HttpCaller(clientId: String, clientSecret: String,
       case "POST" if postData.isEmpty => Http.post(url)
       case "POST" => Http.multipart(url, postData.get.asMultipart:_*)
       case _ => throw new Exception("Don't understand " + method)
-    }).options(HttpOptions.connTimeout(1000), HttpOptions.readTimeout(1000)).params(fullParams)
+    }).options(HttpOptions.connTimeout(connectTimeout), HttpOptions.readTimeout(readTimeout)).params(fullParams)
 
     println(http.getUrl.toString)
 

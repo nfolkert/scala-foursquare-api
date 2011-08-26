@@ -51,7 +51,7 @@ class CallTest extends SpecsMatchers {
 
     // This one actually makes a web call!
 
-    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new UserlessApp(caller)
 
     val venue = app.venueDetail("1234").get
@@ -62,7 +62,7 @@ class CallTest extends SpecsMatchers {
   def changeSettings() {
     // This one actually makes a web call, and modifies the database!
 
-    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new AuthApp(caller, P.USER_TOKEN)
 
     val original = app.settingsDetail("sendMayorshipsToFacebook").get
@@ -89,7 +89,7 @@ class CallTest extends SpecsMatchers {
   def uploadPhoto() {
     // This one actually makes a web call, and modifies the database!
 
-    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new AuthApp(caller, P.USER_TOKEN)
 
     val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
@@ -104,7 +104,7 @@ class CallTest extends SpecsMatchers {
   def checkinAndAddPhoto() {
     // This one actually makes a web call, and modifies the database!
 
-    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new AuthApp(caller, P.USER_TOKEN)
 
     val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
@@ -146,7 +146,7 @@ class CallTest extends SpecsMatchers {
 
     // These actually make a web call!
 
-    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val userApp = new AuthApp(caller, P.USER_TOKEN)
 
     val self = userApp.self.get
@@ -173,7 +173,7 @@ class CallTest extends SpecsMatchers {
 
     // This one actually makes a web call!
     
-    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new UserlessApp(caller)
 
     val venueCategories = app.venueCategories.get
@@ -214,7 +214,7 @@ class CallTest extends SpecsMatchers {
 
     // This one actually makes a web call!
 
-    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val app = new UserlessApp(caller)
 
     val venue = app.venueDetail("1234")
@@ -259,7 +259,7 @@ class CallTest extends SpecsMatchers {
 
     // These actually make a web call!
 
-    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val caller = TestUtil.httpCaller
     val userApp = new AuthApp(caller, P.USER_TOKEN)
 
     val self = userApp.self

@@ -155,4 +155,5 @@ case class UserUnfriendResponse()
 case class UserApproveFriendResponse()
 case class UserDenyFriendshipResponse()
 case class UserSetPingsResponse()
-case class UserPhotoUpdateResponse()
+
+case class UserPhotoUpdateResponse(user: UserDetail)

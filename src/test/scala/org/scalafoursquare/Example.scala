@@ -24,10 +24,12 @@ class Example extends SpecsMatchers {
     println("Hi, I'm " + me.user.firstName)
     println("My favorite category is " + cats.categories(5).name)
 
-    val venueId = me.user.checkins.items(0).venue.get.id
-
-    val venue = app.venueDetail(venueId).get.response.get
-
-    println("I'm at " + venue.venue.name)
+    if (me.user.checkins.items.isEmpty)
+      println("I've never been anywhere")
+    else {
+      val venueId = me.user.checkins.items(0).venue.get.id
+      val venue = app.venueDetail(venueId).get.response.get
+      println("I'm at " + venue.venue.name)
+    }
   }
 }

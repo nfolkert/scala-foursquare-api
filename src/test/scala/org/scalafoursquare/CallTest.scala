@@ -1,6 +1,6 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{AuthApp, UserlessApp, HttpCaller, Request}
+import org.scalafoursquare.call.{AuthApp, UserlessApp, HttpCaller, Request, PhotoData}
 import org.scalafoursquare.response.{Meta}
 import org.junit.Test
 import org.specs.SpecsMatchers
@@ -83,6 +83,21 @@ class CallTest extends SpecsMatchers {
 
     if (restoreOn)
       app.changeSetting("sendMayorshipsToFacebook", true).get
+  }
+
+  @Test
+  def uploadPhoto() {
+    // This one actually makes a web call, and modifies the database!
+
+    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val app = new AuthApp(caller, P.USER_TOKEN)
+
+    val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
+    val data = PhotoData.fromUrl(photoUrl)
+
+    app.updatePhoto(data).get
+
+    // Verified that this works.  API page on this is fail: no params listed, plus says returns photo object when really it returns user detail
   }
 
   @Test

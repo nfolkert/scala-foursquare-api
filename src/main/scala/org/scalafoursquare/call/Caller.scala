@@ -5,9 +5,23 @@ import net.liftweb.json.JsonAST.{JArray, JObject}
 import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
 import scalaj.http.{HttpException, HttpOptions, Http, MultiPart}
+import io.Source
+import java.io.File
 
 abstract class PostData {
   def asMultipart: List[MultiPart]
+}
+
+class PhotoData(fileName: String, data: Array[Byte]) extends PostData {
+  def asMultipart: List[MultiPart] = {
+    MultiPart("photo", fileName, "image/jpeg", data) :: Nil
+  }
+}
+object PhotoData {
+  def fromUrl(url: String) = {
+    val bytes = Http(url).options(HttpOptions.connTimeout(500), HttpOptions.readTimeout(5000)).asBytes
+    new PhotoData(url.substring(url.lastIndexOf("/")), bytes)
+  }
 }
 
 class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil, val method: String = "GET", val postData: Option[PostData]=None) {
@@ -349,10 +363,10 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     )
 
   // TODO: pass in file handle, post on crequest
-  def addPhoto(checkinId: Option[String]=None, tipId: Option[String]=None, venueId: Option[String]=None,
+  def addPhoto(data: PhotoData, checkinId: Option[String]=None, tipId: Option[String]=None, venueId: Option[String]=None,
                broadcast: Option[List[String]]=None, `public`: Option[Boolean]=None, ll: Option[(Double, Double)]=None,
                llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None) =
-    new Request[AddPhotoResponse](this, "/photos/add",
+    new PostDataRequest[AddPhotoResponse](this, "/photos/add",
       op("checkinId", checkinId) ++
       op("tipId", tipId) ++
       op("venueId", venueId) ++
@@ -361,7 +375,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("ll", ll.map(p=>p._1 + "," + p._2)) ++
       op("llAcc", llAcc) ++
       op("alt", alt) ++
-      op("altAcc", altAcc)
+      op("altAcc", altAcc), data
     )
 
   def allSettings = new Request[AllSettingsResponse](this, "/settings/all")
@@ -444,6 +458,5 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     p("value", (if (value) 1 else 0)))
 
   // TODO: post photo in multipart MIME encoding (image/jpeg, image/gif, or image/png)
-  def updatePhoto() = new Request[UserPhotoUpdateResponse](this, "/users/self/update")
-
+  def updatePhoto(data: PhotoData) = new PostDataRequest[UserPhotoUpdateResponse](this, "/users/self/update", postData=data)
 }

@@ -104,6 +104,24 @@ case class VenueCategoryWithChildren(id: String, name: String, pluralName: Strin
 
 case class VenueCategoriesResponse(categories: List[VenueCategoryWithChildren])
 
+case class UserPhotoUpdateResponse(user: UserDetail)
+
+case class CheckinLocation(name: String, lat: Double, lng: Double)
+case class CheckinForFriend(id: String,
+                            createdAt: Long,
+                            `type`: String,
+                            `private`: Option[Boolean],
+                            shout: Option[String],
+                            isMayor: Option[Boolean],
+                            timeZone: String,
+                            venue: Option[VenueCompact],
+                            location: Option[CheckinLocation],
+                            event: Option[CompactEvent])
+
+case class CompactEvent(id: String, name: Option[String])
+
+case class AddCheckinResponse(checkin: CheckinForFriend)
+
 // Settings
 case class SettingsDetailResponse(value: Boolean) // TODO: Are these always boolean?  If not, how to convert?
 case class ChangeSettingsResponse() // (message: String)
@@ -154,21 +172,15 @@ case class UserUnfriendResponse()
 case class UserApproveFriendResponse()
 case class UserDenyFriendshipResponse()
 case class UserSetPingsResponse()
+case class FlagSpecialResponse()
+case class MarkNotificationsReadResponse()
+case class TipUnmarkResponse()
+case class TipMarkDoneResponse()
+case class TipMarkTodoResponse()
+case class CheckinDeleteCommentResponse()
+case class CheckinAddCommentResponse()
+case class VenueProposeEditResponse()
+case class VenueEditResponse()
+case class VenueMarkTodoResponse()
+case class VenueFlagResponse()
 
-case class UserPhotoUpdateResponse(user: UserDetail)
-
-case class CheckinLocation(name: String, lat: Double, lng: Double)
-case class CheckinForFriend(id: String,
-                            createdAt: Long,
-                            `type`: String,
-                            `private`: Option[Boolean],
-                            shout: Option[String],
-                            isMayor: Option[Boolean],
-                            timeZone: String,
-                            venue: Option[VenueCompact],
-                            location: Option[CheckinLocation],
-                            event: Option[CompactEvent])
-
-case class CompactEvent(id: String, name: Option[String])
-
-case class AddCheckinResponse(checkin: CheckinForFriend)

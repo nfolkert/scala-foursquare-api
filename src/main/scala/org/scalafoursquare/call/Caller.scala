@@ -362,7 +362,6 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("offset", offset)
     )
 
-  // TODO: pass in file handle, post on crequest
   def addPhoto(data: PhotoData, checkinId: Option[String]=None, tipId: Option[String]=None, venueId: Option[String]=None,
                broadcast: Option[List[String]]=None, `public`: Option[Boolean]=None, ll: Option[(Double, Double)]=None,
                llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None) =
@@ -457,6 +456,62 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def changeSetting(id: String, value: Boolean) = new PostRequest[ChangeSettingsResponse](this, "/settings/" + id + "/set",
     p("value", (if (value) 1 else 0)))
 
-  // TODO: post photo in multipart MIME encoding (image/jpeg, image/gif, or image/png)
+  // TODO: add other update parameters?
   def updatePhoto(data: PhotoData) = new PostDataRequest[UserPhotoUpdateResponse](this, "/users/self/update", postData=data)
+
+  def markVenueTodo(id: String, text: Option[String]=None) = new PostRequest[VenueMarkTodoResponse](this, "/venues/" + id + "/marktodo", op("text", text))
+
+  // mislocated, closed, duplicate
+  def flagVenue(id: String, problem: String, venueId: Option[String]=None) =
+    new PostRequest[VenueFlagResponse](this, "/venues/" + id + "/flag", p("problem", problem) ++ op("venueId", venueId))
+
+  def editVenue(id: String, name: Option[String]=None, address: Option[String]=None, crossStreet: Option[String]=None,
+                city: Option[String]=None, state: Option[String]=None, zip: Option[String]=None,
+                phone: Option[String]=None, ll: Option[(Double, Double)]=None, categoryId: Option[List[String]]=None) =
+    new PostRequest[VenueEditResponse](this, "/venues/" + id + "/edit",
+      op("name", name) ++
+      op("address", address) ++
+      op("crossStreet", crossStreet) ++
+      op("city", city) ++
+      op("state", state) ++
+      op("zip", zip) ++
+      op("phone", phone) ++
+      op("ll", ll.map(p=>p._1 + "," + p._2)) ++
+      op("categoryId", categoryId.map(_.join(",")))
+    )
+
+  def proposeEditVenue(id: String, name: Option[String]=None, address: Option[String]=None, crossStreet: Option[String]=None,
+                city: Option[String]=None, state: Option[String]=None, zip: Option[String]=None,
+                phone: Option[String]=None, ll: Option[(Double, Double)]=None, primaryCategoryId: Option[String]=None) =
+    new PostRequest[VenueProposeEditResponse](this, "/venues/" + id + "/proposeedit",
+      op("name", name) ++
+      op("address", address) ++
+      op("crossStreet", crossStreet) ++
+      op("city", city) ++
+      op("state", state) ++
+      op("zip", zip) ++
+      op("phone", phone) ++
+      op("ll", ll.map(p=>p._1 + "," + p._2)) ++
+      op("primaryCategoryId", primaryCategoryId)
+    )
+
+  def addCheckinComment(id: String, text: String) = new PostRequest[CheckinAddCommentResponse](this, "/checkins/" + id + "/addcomment", p("text", text))
+
+  def deleteCheckinComment(id: String, commentId: String) =
+    new PostRequest[CheckinDeleteCommentResponse](this, "/checkins/" + id + "/deletecomment", p("commentId", commentId))
+
+  def markTipTodo(id: String) = new PostRequest[TipMarkTodoResponse](this, "/tips/" + id + "/marktodo")
+  def markTipDone(id: String) = new PostRequest[TipMarkDoneResponse](this, "/tips/" + id + "/markdone")
+  def unmarkTip(id: String) = new PostRequest[TipUnmarkResponse](this, "/tips/" + id + "/unmark")
+
+  def markNotificationsRead(highWatermark: Long) =
+    new PostRequest[MarkNotificationsReadResponse](this, "/updates/marknotificationsread", p("highWatermark", highWatermark))
+
+  // not_redeemable, not_valuable, other
+  def flagSpecial(id: String, venueId: String, problem: String, text: Option[String]) =
+    new PostRequest[FlagSpecialResponse](this, "/specials/" + id + "/flag",
+      p("venueId", venueId) ++
+      p("problem", problem) ++
+      op("text", text)
+    )
 }

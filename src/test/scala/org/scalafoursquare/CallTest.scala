@@ -9,11 +9,14 @@ import net.liftweb.util.Props
 
 class CallTest extends SpecsMatchers {
 
-  val USER_TOKEN = Props.get("access.token.user").open_!
-  val CONSUMER_KEY = Props.get("consumer.key").open_!
-  val CONSUMER_SECRET = Props.get("consumer.secret").open_!
-  val TEST_URL = Props.get("foursquare.test.url").open_!
-  val API_VERSION = Props.get("api.version").open_!
+  val P = TestUtil.propParams
+
+  @Test
+  def oauthUrl() {
+
+    println(P.FS_URL + "/oauth2/authenticate?client_id=" + P.CONSUMER_KEY +
+      "&response_type=token&redirect_uri=" + P.CALLBACK_URL)
+  }
 
   @Test
   def errorHandling() {
@@ -48,7 +51,7 @@ class CallTest extends SpecsMatchers {
 
     // This one actually makes a web call!
 
-    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
     val app = new UserlessApp(caller)
 
     val venue = app.venueDetail("1234").get
@@ -59,8 +62,8 @@ class CallTest extends SpecsMatchers {
   def changeSettings() {
     // This one actually makes a web call, and modifies the database!
 
-    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val app = new AuthApp(caller, USER_TOKEN)
+    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val app = new AuthApp(caller, P.USER_TOKEN)
 
     val original = app.settingsDetail("sendMayorshipsToFacebook").get
     val restoreOn = original.response.exists(_.value)
@@ -106,8 +109,8 @@ class CallTest extends SpecsMatchers {
 
     // These actually make a web call!
 
-    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val userApp = new AuthApp(caller, USER_TOKEN)
+    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val userApp = new AuthApp(caller, P.USER_TOKEN)
 
     val self = userApp.self.get
     println(self.toString)
@@ -133,7 +136,7 @@ class CallTest extends SpecsMatchers {
 
     // This one actually makes a web call!
     
-    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
     val app = new UserlessApp(caller)
 
     val venueCategories = app.venueCategories.get
@@ -174,7 +177,7 @@ class CallTest extends SpecsMatchers {
 
     // This one actually makes a web call!
 
-    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
     val app = new UserlessApp(caller)
 
     val venue = app.venueDetail("1234")
@@ -219,8 +222,8 @@ class CallTest extends SpecsMatchers {
 
     // These actually make a web call!
 
-    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val userApp = new AuthApp(caller, USER_TOKEN)
+    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val userApp = new AuthApp(caller, P.USER_TOKEN)
 
     val self = userApp.self
     val mtv = userApp.userDetail(660771.toString)

@@ -1,6 +1,6 @@
 import sbt._
 
-class ScalaJSProject(info: ProjectInfo) extends DefaultProject(info) {
+class ScalaFoursquareProject(info: ProjectInfo) extends DefaultProject(info) {
   override def managedStyle = ManagedStyle.Maven
 
   val liftCommon = "net.liftweb" %% "lift-common" % "2.4-M1" % "compile" withSources()

@@ -12,11 +12,7 @@ class RandomTest extends SpecsMatchers {
   object Formats extends DefaultFormats
   implicit val formats = Formats
 
-  val USER_TOKEN = Props.get("access.token.user").open_!
-  val CONSUMER_KEY = Props.get("consumer.key").open_!
-  val CONSUMER_SECRET = Props.get("consumer.secret").open_!
-  val TEST_URL = Props.get("foursquare.test.url").open_!
-  val API_VERSION = Props.get("api.version").open_!
+  val P = TestUtil.propParams
 
   @Ignore
   def randomVenues() {
@@ -28,7 +24,7 @@ class RandomTest extends SpecsMatchers {
     }
     val r = new Random(seed)
 
-    val caller = HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
+    val caller = HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
     val app = new UserlessApp(caller)
     for (i <- 1 to 10) {
       val venueId = r.nextInt(100000)
@@ -60,8 +56,8 @@ class RandomTest extends SpecsMatchers {
     }
     val r = new Random(seed)
 
-    val caller = new HttpCaller(CONSUMER_KEY, CONSUMER_SECRET, TEST_URL, API_VERSION)
-    val userApp = new AuthApp(caller, USER_TOKEN)
+    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val userApp = new AuthApp(caller, P.USER_TOKEN)
     for (i <- 1 to 10) {
       val userId = r.nextInt(100000)
       val userReq = userApp.userDetail(userId.toString)

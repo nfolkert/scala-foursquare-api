@@ -1,0 +1,30 @@
+This is a Scala implementation of a caller for the foursquare API.
+
+To use, you need to create an HttpCaller object and supply it with your client information (you can get
+client credentials at foursquare.com/oauth).  This caller object gets passed into either a 
+UserlessApp (which makes all requests using only your client secret rather than an access token, so 
+only a limited set of endpoints are available) or an AuthApp (which requires a user's access token, thus
+binding any requests made to that user).  To get a user's access token, you need to go through one of the 
+oauth flows described at https://developer.foursquare.com/docs/oauth.html.
+
+These apps support multiple request types to interact with the foursquare server.  All requests may be
+made either raw (returning the json formatted string result of the call) or extracted into Scala case
+classes.  For the latter, most of the case classes are not yet implemented, so these calls will end 
+up returning empty objects (any json it doesn't understand will get thrown away).  Need to look at 
+custom deserialization for some of these nodes.  Not all the calls are tested yet, though, and I'm sure 
+there are a few that are using GET requests when they should be using POST requests.  There is a way to 
+hand-roll a request, though most of them are constructed using typed parameters.  Almost all endpoints at
+least have a function signature already.  Photo endpoints support uploading a photo file via POST.  See 
+CallTest for examples on how to make these various calls.  Multi endpoint is also supported.
+
+To run the tests, you will need to fill out the information missing in test.default.props file (you 
+should make a test.<username>.props file that will get ignored by git.  Please do not submit any
+credentials in the persisted test.default.props file).
+
+There is an sbt 0.7 project as well as the beginning of an IntelliJ project.  For IntelliJ users, this 
+should have the beginnings of the project, though you may need to construct some of the libraries and 
+the like.
+
+Please note that this is an unofficial library.  As of now I'm still playing around with it to see if it's useful.
+
+Feel free to contact me if you have any questions.  I am nfolkert at foursquare.

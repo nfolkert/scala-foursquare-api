@@ -7,6 +7,7 @@ import org.junit.Test
 class RequestTest extends SpecsMatchers {
   @Test
   def testRequests() {
+
     val app = new AuthApp(TestCaller, "A Fake Token")
 
     // USERLESS

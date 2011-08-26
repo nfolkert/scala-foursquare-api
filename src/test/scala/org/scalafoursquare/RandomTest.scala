@@ -1,16 +1,14 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{HttpCaller, UserlessApp, AuthApp, Request, RawRequest}
-import net.liftweb.common.Empty
-import net.liftweb.util.Props
+import net.liftweb.json.{JsonAST, Printer, Extraction, JsonParser}
+import org.junit.{Ignore}
+import org.scalafoursquare.call.{UserlessApp, AuthApp}
+import org.scalafoursquare.response.{APICustomSerializers}
 import org.specs.SpecsMatchers
 import util.Random
-import org.junit.{Ignore, Test}
-import net.liftweb.json.{JsonAST, Printer, DefaultFormats, Extraction, JsonParser}
 
 class RandomTest extends SpecsMatchers {
-  object Formats extends DefaultFormats
-  implicit val formats = Formats
+  implicit val formats = APICustomSerializers.formats
 
   val P = TestUtil.propParams
 

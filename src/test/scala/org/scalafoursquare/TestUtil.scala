@@ -1,6 +1,6 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{Caller, HttpCaller}
+import org.scalafoursquare.call.{HttpCaller}
 import net.liftweb.util.Props
 
 object TestUtil {

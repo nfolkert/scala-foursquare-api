@@ -1,11 +1,8 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{AuthApp, UserlessApp, HttpCaller, Request}
-import org.scalafoursquare.response.{Meta}
+import org.scalafoursquare.call.{AuthApp}
 import org.junit.Test
 import org.specs.SpecsMatchers
-import net.liftweb.common.Empty
-import net.liftweb.util.Props
 
 class Example extends SpecsMatchers {
 

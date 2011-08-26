@@ -5,8 +5,6 @@ import net.liftweb.json.JsonAST.{JArray, JObject}
 import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
 import scalaj.http.{HttpException, HttpOptions, Http, MultiPart}
-import io.Source
-import java.io.File
 
 abstract class PostData {
   def asMultipart: List[MultiPart]
@@ -88,7 +86,7 @@ case class HttpCaller(clientId: String, clientSecret: String,
       case _ => throw new Exception("Don't understand " + method)
     }).options(HttpOptions.connTimeout(connectTimeout), HttpOptions.readTimeout(readTimeout)).params(fullParams)
 
-    println(http.getUrl.toString)
+    // println(http.getUrl.toString)
 
     val result = try {
       http.asString
@@ -96,15 +94,14 @@ case class HttpCaller(clientId: String, clientSecret: String,
       case e: HttpException => {e.body}
     }
 
-    println(result)
+    // println(result)
 
     result
   }
 }
 
 abstract class App(val caller: Caller) {
-  object Formats extends DefaultFormats
-  implicit val formats = Formats
+  implicit val formats = APICustomSerializers.formats
 
   def token: Option[String]
 

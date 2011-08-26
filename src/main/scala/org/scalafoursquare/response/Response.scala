@@ -57,8 +57,7 @@ case class UserContact(phone: Option[String], email: Option[String], twitter: Op
 case class UserBadges(count: Int)
 case class UserMayorships(count: Int /*, items: List[String]*/)
 
-case class UserCheckin(id: String, createdAt: Long, `type`: String, timeZone: String, venue: Option[VenueCompact])
-case class UserCheckins(count: Int, items: List[UserCheckin])
+case class UserCheckins(count: Int, items: List[CheckinForFriend])
 case class UserFriendGroup(`type`: String, name: String, count: Int /*, items: List[String] */)
 case class UserFriends(count: Int, groups: List[UserFriendGroup])
 case class UserFollowers(count: Int)
@@ -111,12 +110,13 @@ case class ChangeSettingsResponse() // (message: String)
 // {"meta":{"code":200},"notifications":[{"type":"notificationTray","item":{"unreadCount":0}}],"response":{"settings":{"receivePings":true,"receiveCommentPings":true,"twitter":"nfolkert","sendToTwitter":true,"sendMayorshipsToTwitter":true,"sendBadgesToTwitter":true,"facebook":203195,"sendToFacebook":true,"sendMayorshipsToFacebook":false,"sendBadgesToFacebook":true,"enableDebug":true,"foreignConsent":"undetermined"}}}
 
 case class Meta(code: Int, errorType: Option[String], errorDetail: Option[String])
-case class Notification(unreadCount: Int)
-case class Notifications(`type`: String, item: Notification)
-case class Response[T](meta: Meta, notifications: Option[Notifications], response: Option[T])
 
-case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[Notifications], responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]))
-case class MultiResponseList[A](meta: Meta, notifications: Option[Notifications], responses: Option[List[Response[A]]])
+case class Notification(`type`: String /*, item: DIFFERENT TYPES */)
+
+case class Response[T](meta: Meta, notifications: Option[List[Notification]], response: Option[T])
+
+case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[List[Notification]], responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]))
+case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notification]], responses: Option[List[Response[A]]])
 
 // TODO:
 case class UpdateDetailResponse()
@@ -131,7 +131,6 @@ case class VenueAddResponse()
 case class VenueExploreResponse()
 case class VenueSearchResponse()
 case class VenueTrendingResponse()
-case class AddCheckinResponse()
 case class RecentCheckinsResponse()
 case class AddTipResponse()
 case class TipSearchResponse()
@@ -157,3 +156,19 @@ case class UserDenyFriendshipResponse()
 case class UserSetPingsResponse()
 
 case class UserPhotoUpdateResponse(user: UserDetail)
+
+case class CheckinLocation(name: String, lat: Double, lng: Double)
+case class CheckinForFriend(id: String,
+                            createdAt: Long,
+                            `type`: String,
+                            `private`: Option[Boolean],
+                            shout: Option[String],
+                            isMayor: Option[Boolean],
+                            timeZone: String,
+                            venue: Option[VenueCompact],
+                            location: Option[CheckinLocation],
+                            event: Option[CompactEvent])
+
+case class CompactEvent(id: String, name: Option[String])
+
+case class AddCheckinResponse(checkin: CheckinForFriend)

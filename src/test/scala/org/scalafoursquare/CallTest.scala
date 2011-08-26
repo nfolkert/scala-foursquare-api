@@ -101,6 +101,28 @@ class CallTest extends SpecsMatchers {
   }
 
   @Test
+  def checkinAndAddPhoto() {
+    // This one actually makes a web call, and modifies the database!
+
+    val caller = new HttpCaller(P.CONSUMER_KEY, P.CONSUMER_SECRET, P.TEST_URL, P.API_VERSION)
+    val app = new AuthApp(caller, P.USER_TOKEN)
+
+    val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
+    val data = PhotoData.fromUrl(photoUrl)
+
+    val checkinResponse = app.addCheckin(venueId=Some("30558"), shout=Some("Woot")).get
+
+    val checkinId = checkinResponse.response.get.checkin.id
+
+    val photoReq = app.addPhoto(data, checkinId=Some(checkinId))
+
+    println(photoReq.getRaw)
+
+    // Verified that this works.  API page on this is fail: no params listed, plus says returns photo object when really it returns user detail
+
+  }
+
+  @Test
   def userDetail() {
     val mockCaller = TestCaller
     val mockUserApp = new AuthApp(mockCaller, "Just Testing!")

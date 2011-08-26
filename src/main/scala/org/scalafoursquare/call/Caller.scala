@@ -114,7 +114,7 @@ abstract class App(val caller: Caller) {
 
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.extract[Notifications])
+    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
     val response = {
       if (meta.code != 200)
         None
@@ -129,7 +129,7 @@ abstract class App(val caller: Caller) {
 
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.extract[Notifications])
+    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
     val responses = {
       if (meta.code != 200)
         (None, None, None, None, None)
@@ -141,7 +141,7 @@ abstract class App(val caller: Caller) {
           response(idx).map(res=>{
             val sfields = res.asInstanceOf[JObject].obj
             val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
-            val snotifications = sfields.find(_.name == "notifications").map(_.extract[Notifications])
+            val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
             val sresponse = {
               if (smeta.code != 200)
                 None
@@ -163,7 +163,7 @@ abstract class App(val caller: Caller) {
 
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.extract[Notifications])
+    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
     val responses = {
       if (meta.code != 200)
         None
@@ -172,7 +172,7 @@ abstract class App(val caller: Caller) {
         val resolved: List[Response[A]] = responses.arr.map(res => {
           val sfields = res.asInstanceOf[JObject].obj
           val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
-          val snotifications = sfields.find(_.name == "notifications").map(_.extract[Notifications])
+          val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
           val sresponse = {
             if (smeta.code != 200)
               None
@@ -320,7 +320,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def addCheckin(venueId: Option[String]=None, venue: Option[String]=None, shout: Option[String]=None,
                  broadcast: Option[List[String]]=None, ll: Option[(Double, Double)]=None, llAcc: Option[Double]=None,
                  alt: Option[Double]=None, altAcc: Option[Double]=None) =
-    new Request[AddCheckinResponse](this, "/checkins/add",
+    new PostRequest[AddCheckinResponse](this, "/checkins/add",
       op("venueId", venueId) ++
       op("venue", venue) ++
       op("shout", shout) ++

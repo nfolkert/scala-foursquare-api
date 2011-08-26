@@ -1,6 +1,6 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{Caller, RawRequest, PostData}
+import org.scalafoursquare.call.{Caller, RawRequest, PostData, PhotoData}
 import net.liftweb.util.Helpers._
 
 object TestCaller extends Caller {
@@ -86,3 +86,5 @@ object TestCaller extends Caller {
     }
   }
 }
+
+object TestPhotoData extends PhotoData("aFile.jpg", Array[Byte](0xFF.toByte, 0x00.toByte, 0xAB.toByte, 0xED.toByte).toArray)

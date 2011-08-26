@@ -204,6 +204,7 @@ class UserlessApp(caller: Caller) extends App(caller) {
       op("afterTimestamp", afterTimestamp)
     )
 
+  // sort =  recent, popular
   def venueTips(id: String, sort: Option[String]=None, limit: Option[Int]=None, offset: Option[Int]=None) =
     new Request[VenueTipsResponse](this, "/venues/" + id + "/tips",
       op("sort", sort) ++
@@ -211,6 +212,7 @@ class UserlessApp(caller: Caller) extends App(caller) {
       op("offset", offset)
     )
 
+  // group: checkin, venue, multi
   def venuePhotos(id: String, group: String, limit: Option[Int]=None, offset: Option[Int]=None) =
     new Request[VenuePhotosResponse](this, "/venues/" + id + "/photos",
       p("group", group) ++
@@ -219,6 +221,71 @@ class UserlessApp(caller: Caller) extends App(caller) {
     )
 
   def venueLinks(id: String) = new Request[VenueLinksResponse](this, "/venues/" + id  + "/links")
+
+  // section = food, drinks, coffee, shops, arts, outdoors
+  // intent = specials, ?
+  def exploreVenues(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
+                    altAcc: Option[Double]=None, radius: Option[Int]=None, section: Option[String]=None,
+                    query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None) =
+    new Request[VenueExploreResponse](this, "/venues/explore",
+      p("ll", lat + "," + long) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc) ++
+      op("radius", radius) ++
+      op("section", section) ++
+      op("query", query) ++
+      op("limit", limit) ++
+      op("intent", intent)
+    )
+
+  // intent = checkin, match, specials
+  def venueSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None,
+                  query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None,
+                  categoryId: Option[String]=None, url: Option[String]=None, providerId: Option[String]=None,
+                  linkedId: Option[String]) =
+    new Request[VenueSearchResponse](this, "/venues/search",
+      p("ll", lat + "," + long) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc) ++
+      op("query", query) ++
+      op("limit", limit) ++
+      op("intent", intent) ++
+      op("categoryId", categoryId) ++
+      op("url", url) ++
+      op("providerId", providerId) ++
+      op("linkedId", linkedId)
+      // No radius?
+    )
+
+  def venueTrending(lat: Double, long: Double, limit: Option[Int]=None, radius: Option[Int]=None) =
+    new Request[VenueTrendingResponse](this, "/venues/trending",
+      p("ll", lat + "," + long) ++
+      op("limit", limit) ++
+      op("radius", radius)
+    )
+
+  // filter = friends, ?
+  def tipsSearch(lat: Double, long: Double, limit: Option[Int]=None, offset: Option[Int]=None, filter: Option[String]=None,
+                 query: Option[String]=None) =
+    new Request[TipSearchResponse](this, "/tips/search",
+      p("ll", lat + "," + long) ++
+      op("limit", limit) ++
+      op("offset", offset) ++
+      op("filter", filter) ++
+      op("query", query)
+    )
+
+  def specialsSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
+                     altAcc: Option[Double]=None, limit: Option[Int]=None) =
+    new Request[SpecialsSearchResponse](this, "/specials/search",
+      p("ll", lat + "," + long) ++
+      op("llAcc", llAcc) ++
+      op("alt", alt) ++
+      op("altAcc", altAcc) ++
+      op("limit", limit)
+    )
 
   // Not sure if these can be userless; will move to AuthApp if not
 
@@ -264,7 +331,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def addVenue(name: String, lat: Double, long: Double, address: Option[String]=None, crossStreet: Option[String]=None,
                city: Option[String]=None, state: Option[String]=None, zip: Option[String]=None,
                phone: Option[String]=None, twitter: Option[String]=None, primaryCategoryId: Option[String]=None) =
-    new Request[VenueAddResponse](this, "/venues/add",
+    new PostRequest[VenueAddResponse](this, "/venues/add",
       p("name", name) ++
       op("address", address) ++
       op("crossStreet", crossStreet) ++
@@ -276,47 +343,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("primaryCategoryId", primaryCategoryId)
     )
 
-  def exploreVenues(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
-                    altAcc: Option[Double]=None, radius: Option[Int]=None, section: Option[String]=None,
-                    query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None) =
-    new Request[VenueExploreResponse](this, "/venues/explore",
-      p("ll", lat + "," + long) ++
-      op("llAcc", llAcc) ++
-      op("alt", alt) ++
-      op("altAcc", altAcc) ++
-      op("radius", radius) ++
-      op("section", section) ++
-      op("query", query) ++
-      op("limit", limit) ++
-      op("intent", intent)
-    )
-
-  def venueSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None,
-                  query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None,
-                  categoryId: Option[String]=None, url: Option[String]=None, providerId: Option[String]=None,
-                  linkedId: Option[String]) =
-    new Request[VenueSearchResponse](this, "/venues/search",
-      p("ll", lat + "," + long) ++
-      op("llAcc", llAcc) ++
-      op("alt", alt) ++
-      op("altAcc", altAcc) ++
-      op("query", query) ++
-      op("limit", limit) ++
-      op("intent", intent) ++
-      op("categoryId", categoryId) ++
-      op("url", url) ++
-      op("providerId", providerId) ++
-      op("linkedId", linkedId)
-      // No radius?
-    )
-
-  def venueTrending(lat: Double, long: Double, limit: Option[Int]=None, radius: Option[Int]=None) =
-    new Request[VenueTrendingResponse](this, "/venues/trending",
-      p("ll", lat + "," + long) ++
-      op("limit", limit) ++
-      op("radius", radius)
-    )
-
+  // broaddcast = private, public, facebook, twitter, followers
   def addCheckin(venueId: Option[String]=None, venue: Option[String]=None, shout: Option[String]=None,
                  broadcast: Option[List[String]]=None, ll: Option[(Double, Double)]=None, llAcc: Option[Double]=None,
                  alt: Option[Double]=None, altAcc: Option[Double]=None) =
@@ -338,6 +365,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("afterTimestamp", afterTimestamp)
     )
 
+  // broadcast = twitter, facebook
   def addTip(venueId: String, text: String, url: Option[String]=None, broadcast: Option[List[String]]=None) =
     new Request[AddTipResponse](this, "/tips/add",
       p("venueId", venueId) ++
@@ -346,22 +374,13 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("broadcast", broadcast.map(_.join(",")))
     )
 
-  def tipsSearch(lat: Double, long: Double, limit: Option[Int]=None, offset: Option[Int]=None, filter: Option[String]=None,
-                 query: Option[String]=None) =
-    new Request[TipSearchResponse](this, "/tips/search",
-      p("ll", lat + "," + long) ++
-      op("limit", limit) ++
-      op("offset", offset) ++
-      op("filter", filter) ++
-      op("query", query)
-    )
-
   def notifications(limit: Option[Int]=None, offset: Option[Int]=None) =
     new Request[NotificationsResponse](this, "/updates/notifications",
       op("limit", limit) ++
       op("offset", offset)
     )
 
+  // broadcast: twitter, facebook (todo: convenience method for addCheckinPhoto vs. addTipPhoto, etc.)
   def addPhoto(data: PhotoData, checkinId: Option[String]=None, tipId: Option[String]=None, venueId: Option[String]=None,
                broadcast: Option[List[String]]=None, `public`: Option[Boolean]=None, ll: Option[(Double, Double)]=None,
                llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None) =
@@ -378,16 +397,6 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     )
 
   def allSettings = new Request[AllSettingsResponse](this, "/settings/all")
-
-  def specialsSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
-                     altAcc: Option[Double]=None, limit: Option[Int]=None) =
-    new Request[SpecialsSearchResponse](this, "/specials/search",
-      p("ll", lat + "," + long) ++
-      op("llAcc", llAcc) ++
-      op("alt", alt) ++
-      op("altAcc", altAcc) ++
-      op("limit", limit)
-    )
 
   def selfBadges = userBadges("self")
   def userBadges(id: String) = new Request[UserBadgesResponse](this, "/users/" + id + "/badges")
@@ -414,6 +423,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def selfMayorships = userMayorships("self")
   def userMayorships(id: String) = new Request[UserMayorshipsResponse](this, "/users/" + id + "/mayorships")
 
+  // sort = recent, nearby, popular
   def selfTips(sort: Option[String]=None, ll: Option[(Double, Double)]=None, limit: Option[Int]=None, offset: Option[Int]=None) =
     userTips("self", sort, ll, limit, offset)
   def userTips(id: String, sort: Option[String]=None, ll: Option[(Double, Double)]=None, limit: Option[Int]=None,
@@ -425,6 +435,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("offset", offset)
     )
 
+  // sort = nearby, recent
   def selfTodos(sort: Option[String]=None, ll: Option[(Double, Double)]=None) =
     userTodos("self", sort, ll)
   def userTodos(id: String, sort: Option[String]=None, ll: Option[(Double, Double)]=None) =
@@ -433,11 +444,11 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("ll", ll.map(p=>p._1 + "," + p._2))
     )
 
-  def selfVenueHistory(beforeTimestamp: Option[Long]=None, afterTimestamp: Option[Long]=None, categoryId: Option[String]=None) = {
+  def selfVenueHistory(afterTimestamp: Option[Long]=None, beforeTimestamp: Option[Long]=None, categoryId: Option[String]=None) = {
     val id = "self" // Only self is supported
     new Request[UserVenueHistoryResponse](this, "/users/" + id + "/venuehistory",
-      op("beforeTimestamp", beforeTimestamp) ++
       op("afterTimestamp", afterTimestamp) ++
+      op("beforeTimestamp", beforeTimestamp) ++
       op("categoryId", categoryId)
     )
   }
@@ -461,7 +472,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
 
   def markVenueTodo(id: String, text: Option[String]=None) = new PostRequest[VenueMarkTodoResponse](this, "/venues/" + id + "/marktodo", op("text", text))
 
-  // mislocated, closed, duplicate
+  // problem = mislocated, closed, duplicate
   def flagVenue(id: String, problem: String, venueId: Option[String]=None) =
     new PostRequest[VenueFlagResponse](this, "/venues/" + id + "/flag", p("problem", problem) ++ op("venueId", venueId))
 
@@ -507,7 +518,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def markNotificationsRead(highWatermark: Long) =
     new PostRequest[MarkNotificationsReadResponse](this, "/updates/marknotificationsread", p("highWatermark", highWatermark))
 
-  // not_redeemable, not_valuable, other
+  // problem = not_redeemable, not_valuable, other
   def flagSpecial(id: String, venueId: String, problem: String, text: Option[String]) =
     new PostRequest[FlagSpecialResponse](this, "/specials/" + id + "/flag",
       p("venueId", venueId) ++

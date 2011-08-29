@@ -144,6 +144,10 @@ case class UserTipsResponse(tips: UserTipsList)
 case class UserCheckins(count: Int, items: List[CheckinForFriend])
 case class UserCheckinsResponse(checkins: UserCheckins)
 
+case class UserVenueHistoryElement(beenHere: Int, venue: VenueCompact)
+case class UserVenueHistoryList(count: Int, items: List[UserVenueHistoryElement])
+case class UserVenueHistoryResponse(venues: UserVenueHistoryList)
+
 case class MentionEntity(indices: List[Int], `type`: String, user: Option[List[UserCompact]])
 
 case class CheckinLocation(name: String, lat: Double, lng: Double)
@@ -318,7 +322,7 @@ case class VenueTipsResponse()
 case class VenuePhotosResponse()
 case class VenueLinksResponse()
 
-case class UserVenueHistoryResponse()
+
 case class FlagSpecialResponse()
 case class MarkNotificationsReadResponse()
 case class TipUnmarkResponse()

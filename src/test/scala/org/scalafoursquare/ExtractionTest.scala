@@ -182,6 +182,9 @@ class ExtractionTest extends SpecsMatchers {
     def todoForList1 = todoCore1 ~ ("list" -> ("name" -> "listName")) ~ ("tip" -> tipForList1)
     def todoForList2 = todoCore2 ~ ("list" -> ("name" -> "listName"))
 
+    def venueHistory1 = ("beenHere" -> 10) ~ ("venue" -> compactVenue1)
+    def venueHistory2 = ("beenHere" -> 10) ~ ("venue" -> compactVenue2)
+
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
     def json(v:JValue) = {
@@ -267,51 +270,45 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def userVenueHistory() {
-    val jsonStr = """
-    """
-    testExtraction[UserVenueHistoryResponse](jsonStr)
+    testExtraction[UserVenueHistoryResponse](C.json(("venues" -> C.countList(2, List(C.venueHistory1, C.venueHistory2)))))
+    testExtraction[UserVenueHistoryResponse](C.json(("venues" -> C.countList(0, List[JValue]()))))
   }
 
-  /*
-  TODO: build extraction patterns for the user action endpoints
-request
-unfriend
-approve
-deny
-setpings
-update
-   */
+  @Test
   def userFriendRequest() {
-    val jsonStr = """
-    """
-    testExtraction[UserFriendRequestResponse](jsonStr)
-  }
-  def userUnfriend() {
-    val jsonStr = """
-    """
-    testExtraction[UserUnfriendResponse](jsonStr)
-  }
-  def userApproveRequest() {
-    val jsonStr = """
-    """
-    testExtraction[UserApproveFriendResponse](jsonStr)
-  }
-  def userDenyRequest() {
-    val jsonStr = """
-    """
-    testExtraction[UserDenyFriendshipResponse](jsonStr)
-  }
-  def userSetPings() {
-    val jsonStr = """
-    """
-    testExtraction[UserSetPingsResponse](jsonStr)
-  }
-  def userUpdate() {
-    val jsonStr = """
-    """
-    testExtraction[UserPhotoUpdateResponse](jsonStr)
+    testExtraction[UserFriendRequestResponse](C.json(("user" -> C.userDetail1)))
+    testExtraction[UserFriendRequestResponse](C.json(("user" -> C.userDetail2)))
   }
 
+  @Test
+  def userUnfriend() {
+    testExtraction[UserUnfriendResponse](C.json(("user" -> C.userDetail1)))
+    testExtraction[UserUnfriendResponse](C.json(("user" -> C.userDetail2)))
+  }
+
+  @Test
+  def userApproveRequest() {
+    testExtraction[UserApproveFriendResponse](C.json(("user" -> C.userDetail1)))
+    testExtraction[UserApproveFriendResponse](C.json(("user" -> C.userDetail2)))
+  }
+
+  @Test
+  def userDenyRequest() {
+    testExtraction[UserDenyFriendshipResponse](C.json(("user" -> C.userDetail1)))
+    testExtraction[UserDenyFriendshipResponse](C.json(("user" -> C.userDetail2)))
+  }
+
+  @Test
+  def userSetPings() {
+    testExtraction[UserSetPingsResponse](C.json(("user" -> C.userDetail1)))
+    testExtraction[UserSetPingsResponse](C.json(("user" -> C.userDetail2)))
+  }
+
+  @Test
+  def userUpdate() {
+    testExtraction[UserPhotoUpdateResponse](C.json(("user" -> C.userDetail1)))
+    testExtraction[UserPhotoUpdateResponse](C.json(("user" -> C.userDetail2)))
+  }
 
   @Test
   def venueDetail() {

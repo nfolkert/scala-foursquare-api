@@ -22,8 +22,13 @@ object PhotoData {
   }
 }
 
+class ExtractionFailed(msg: String, cause: Throwable, raw: String) extends Throwable {
+  def getJson: JObject = JsonParser.parse(raw).asInstanceOf[JObject]
+}
+
 class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil, val method: String = "GET", val postData: Option[PostData]=None) {
   def getRaw: String = app.caller.makeCall(this, app.token, method, postData)
+  def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
 
 class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "GET", None) {
@@ -45,6 +50,7 @@ class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawReques
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
     new RawRequest(app, "/multi", List(("requests", param)), method, None).getRaw
   }
+  def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
 
 class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[Request[B]], reqC: Option[Request[C]],
@@ -58,6 +64,7 @@ class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val metho
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
     new RawRequest(app, "/multi", List(("requests", param)), method, None).getRaw
   }
+  def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
 
 class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Manifest[A]) extends RawMultiRequestList(app, subreqs) {

@@ -14,7 +14,7 @@ class ExtractionTest extends SpecsMatchers {
     println()
     println(mf.erasure.getName)
 
-    // println(jsonStr)
+    println(jsonStr)
     val json = JsonParser.parse(jsonStr)
     // println(Printer.pretty(JsonAST.render(json)))
     val extracted = json.extract[T]
@@ -207,23 +207,20 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def userCheckins() {
-    val jsonStr = """
-    """
-    testExtraction[UserCheckinsResponse](jsonStr)
+    testExtraction[UserCheckinsResponse](C.json(("checkins" -> C.countList(2, List(C.checkinForFriend1, C.checkinForFriend2)))))
+    testExtraction[UserCheckinsResponse](C.json(("checkins" -> C.countList(0, List[JValue]()))))
   }
 
   @Test
   def userFriends() {
-    val jsonStr= """
-    """
-    testExtraction[UserFriendsResponse](jsonStr)
+    testExtraction[UserFriendsResponse](C.json(("friends" -> C.countList(2, List(C.compactUser1, C.compactUser2)))))
+    testExtraction[UserFriendsResponse](C.json(("friends" -> C.countList(0, List[JValue]()))))
   }
 
   @Test
   def userMayorships() {
-    val jsonStr = """
-    """
-    testExtraction[UserMayorshipsResponse](jsonStr)
+    testExtraction[UserMayorshipsResponse](C.json(("mayorships" -> C.countList(2, List(C.compactVenue1, C.compactVenue2)))))
+    testExtraction[UserMayorshipsResponse](C.json(("mayorships" -> C.countList(0, List[JValue]()))))
   }
 
   @Test

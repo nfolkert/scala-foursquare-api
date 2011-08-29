@@ -135,6 +135,9 @@ case class VenueCategoriesResponse(categories: List[VenueCategoryWithChildren])
 
 case class UserPhotoUpdateResponse(user: UserDetail)
 
+case class UserMayorshipsList(count: Int, items: List[VenueCompact])
+case class UserMayorshipsResponse(mayorships: UserMayorshipsList)
+
 case class UserCheckins(count: Int, items: List[CheckinForFriend])
 case class UserCheckinsResponse(checkins: UserCheckins)
 
@@ -304,9 +307,6 @@ case class VenueTipsResponse()
 case class VenuePhotosResponse()
 case class VenueLinksResponse()
 
-
-
-case class UserMayorshipsResponse()
 case class UserTipsResponse()
 case class UserTodosResponse()
 case class UserVenueHistoryResponse()

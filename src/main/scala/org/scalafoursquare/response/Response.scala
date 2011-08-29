@@ -138,6 +138,9 @@ case class UserPhotoUpdateResponse(user: UserDetail)
 case class UserMayorshipsList(count: Int, items: List[VenueCompact])
 case class UserMayorshipsResponse(mayorships: UserMayorshipsList)
 
+case class UserTipsList(count: Int, items: List[TipForList])
+case class UserTipsResponse(tips: UserTipsList)
+
 case class UserCheckins(count: Int, items: List[CheckinForFriend])
 case class UserCheckinsResponse(checkins: UserCheckins)
 
@@ -213,7 +216,7 @@ trait TipKernel {
   def text: String
   def url: Option[String]
   def status: Option[String]
-  def photo: Option[String]
+  def photo: Option[PhotoCore]
   def photourl: Option[String]
 }
 
@@ -223,16 +226,23 @@ trait TipStats {
 }
 
 case class TipCore(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
-               photo: Option[String], photourl: Option[String]) extends TipKernel
+               photo: Option[PhotoCore], photourl: Option[String]) extends TipKernel
 case class TipForList(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
-               photo: Option[String], photourl: Option[String], todo: TodoStat, done: DoneStat,
+               photo: Option[PhotoCore], photourl: Option[String], todo: TodoStat, done: DoneStat,
                venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
 case class TipSearchResponse(tips: List[TipForList])
 
 case class TipDetail(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
-               photo: Option[String], photourl: Option[String], todo: TodoStat, done: DoneStat,
+               photo: Option[PhotoCore], photourl: Option[String], todo: TodoStat, done: DoneStat,
                venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
 case class TipDetailResponse(tip: TipDetail)
+
+
+case class TodoListName(name: String)
+case class TodoForList(id: String, createdAt: Long, list: Option[TodoListName], tip: Option[TipForList])
+
+case class UserTodosList(count: Int, items: List[TodoForList])
+case class UserTodosResponse(todos: UserTodosList)
 
 // Photos
 
@@ -247,6 +257,7 @@ trait PhotoKernel {
   def sizes: PhotoDimensionList
   def source: Option[OAuthSource]
 }
+case class PhotoCore(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource])
 case class PhotoForList(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource],
                         user: Option[UserCompact], visibility: String) extends PhotoKernel
 
@@ -307,8 +318,6 @@ case class VenueTipsResponse()
 case class VenuePhotosResponse()
 case class VenueLinksResponse()
 
-case class UserTipsResponse()
-case class UserTodosResponse()
 case class UserVenueHistoryResponse()
 case class FlagSpecialResponse()
 case class MarkNotificationsReadResponse()

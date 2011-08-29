@@ -152,6 +152,36 @@ class ExtractionTest extends SpecsMatchers {
     def badges1 = ("bh1id" -> badge1) ~ ("bh2id" -> badge2)
     def badges2 = JObject(Nil)
 
+    def oauthSrc1 = ("name" -> "oauthName") ~ ("url" -> "oauthUrl")
+    def oauthSrc2 = ("name" -> "oauthName") ~ ("url" -> "oauthUrl")
+
+    def photoDims1 = ("url" -> "dimUrl") ~ ("width" -> 100) ~ ("height" -> 100)
+    def photoDims2 = ("url" -> "dimUrl") ~ ("width" -> 200) ~ ("height" -> 200)
+
+    def photoCore1 = ("id" -> "phid") ~ ("createdAt" -> 2000) ~ ("url" -> "photoUrl") ~
+      ("sizes" -> countList(2, List(photoDims1, photoDims2))) ~ ("source" -> oauthSrc1)
+    def photoCore2 = ("id" -> "phid") ~ ("createdAt" -> 2000) ~ ("url" -> "photoUrl") ~
+      ("sizes" -> countList(0, List[JValue]()))
+
+    def tipCore1 = ("id" -> "tid") ~ ("createdAt" -> 1000) ~ ("itemId" -> "eid") ~ ("text" -> "tipText") ~
+      ("url" -> "tipUrl") ~ ("status" -> "tipBindStatus") ~ ("photo" -> photoCore1) ~ ("photourl" -> "tipPhotoUrl")
+    def tipCore2 = ("id" -> "tid") ~ ("createdAt" -> 1000) ~ ("itemId" -> "eid") ~ ("text" -> "tipText")
+
+    def tipStats1 = ("todo" -> ("count" -> 5)) ~ ("done" -> ("count" -> 5))
+    def tipStats2 = ("todo" -> ("count" -> 0)) ~ ("done" -> ("count" -> 0))
+
+    def tipForUser1 = tipCore1 ~ tipStats1 ~ ("venue" -> compactVenue1)
+    def tipForUser2 = tipCore2 ~ tipStats2
+
+    def tipForList1 = tipCore1 ~ tipStats1 ~ ("venue" -> compactVenue1) ~ ("user" -> compactUser1)
+    def tipForList2 = tipCore2 ~ tipStats2
+
+    def todoCore1 = ("id" -> "todoId") ~ ("createdAt" -> 1000)
+    def todoCore2 = ("id" -> "todoId") ~ ("createdAt" -> 1000)
+
+    def todoForList1 = todoCore1 ~ ("list" -> ("name" -> "listName")) ~ ("tip" -> tipForList1)
+    def todoForList2 = todoCore2 ~ ("list" -> ("name" -> "listName"))
+
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
     def json(v:JValue) = {
@@ -225,16 +255,14 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def userTips() {
-    val jsonStr = """
-    """
-    testExtraction[UserTipsResponse](jsonStr)
+    testExtraction[UserTipsResponse](C.json(("tips" -> C.countList(2, List(C.tipForUser1, C.tipForUser2)))))
+    testExtraction[UserTipsResponse](C.json(("tips" -> C.countList(0, List[JValue]()))))
   }
 
   @Test
   def userTodos() {
-    val jsonStr = """
-    """
-    testExtraction[UserTodosResponse](jsonStr)
+    testExtraction[UserTodosResponse](C.json(("todos" -> C.countList(2, List(C.todoForList1, C.todoForList2)))))
+    testExtraction[UserTodosResponse](C.json(("todos" -> C.countList(0, List[JValue]()))))
   }
 
   @Test

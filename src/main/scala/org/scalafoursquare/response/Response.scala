@@ -34,19 +34,30 @@ trait VenueKernel {
 }
 
 case class VenueCore(id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
-                     categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String]) extends VenueKernel
+                     categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String])
 
 case class VenueCompact(id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
                         categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String],
-                        specials: Option[List[String]], hereNow: Option[VenueHereNowCompact], events: Option[List[String]]) extends VenueKernel
+                        specials: Option[List[Special]], hereNow: Option[VenueHereNowCompact],
+                        events: Option[List[CompactEvent]]) extends VenueKernel
 
-case class VenueDetail(id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
-                       categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String],
-                       createdAt: Long, hereNow: VenueHereNow, mayor: VenueMayor, tips: VenueTips,
-                       tags: List[String], /*specials: List[String],*/ /*specialsNearby: List[String], */
-                       shortUrl: String, timeZone: String, beenHere: Option[VenueBeenHere],
-                       photos: VenuePhotos, description: Option[String], /*events: List[String],*/
-                       todos: Option[VenueTodos]) extends VenueKernel
+case class VenueDetail(
+  id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
+  categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String],
+  createAt: Long,
+  hereNow: VenueHereNow,
+  mayor: VenueMayor,
+  tips: VenueTips,
+  tags: List[String],
+  specials: List[Special],
+  // specialsNearby: List[Special], // TODO: need to decompose this and do custom serde since case classes only support 22 fields
+  shortUrl: String,
+  timeZone: String,
+  beenHere: Option[VenueBeenHere],
+  photos: VenuePhotos,
+  description: Option[String],
+  events: List[CompactEvent],
+  todos: Option[VenueTodos]) extends VenueKernel
 
 case class VenueDetailResponse(venue: VenueDetail)
 
@@ -54,25 +65,28 @@ case class VenueDetailResponse(venue: VenueDetail)
 // User Details
 // TODO: find which of these can be merged; which items are optional
 case class UserContact(phone: Option[String], email: Option[String], twitter: Option[String], facebook: Option[String])
-case class UserBadges(count: Int)
-case class UserMayorships(count: Int /*, items: List[String]*/)
+case class UserBadgesCount(count: Int)
+case class UserMayorshipsSummary(count: Int, items: List[VenueCompact]) // items sometimes returned as empty list here
 
-case class UserCheckins(count: Int, items: List[CheckinForFriend])
-case class UserFriendGroup(`type`: String, name: String, count: Int /*, items: List[String] */)
-case class UserFriends(count: Int, groups: List[UserFriendGroup])
-case class UserFollowers(count: Int)
-case class UserFollowing(count: Int)
-case class UserRequests(count: Int)
-case class UserTips(count: Int)
-case class UserTodos(count: Int)
-case class UserScores(recent: Int, max: Int, checkinsCount: Int)
+case class UserCheckinsSummary(count: Int, items: List[CheckinForFriend]) // This is only ever the most recent checkin
+
+case class FriendGroupCompact(`type`: String, name: String, count: Int, items: List[UserCompact]) // mutual friends vs. other friends for self/friends/following/others
+case class FriendsOthersCompactView(count: Int, groups: List[FriendGroupCompact])
+
+case class UserFollowersCount(count: Int)
+case class UserFollowingCount(count: Int)
+case class UserRequestsCount(count: Int)
+case class UserTipsCount(count: Int)
+case class UserTodosCount(count: Int)
+case class UserScores(recent: Int, max: Int, goal: Option[Int], checkinsCount: Int)
 case class UserDetail(id: String, firstName: String, lastName: Option[String], photo: String,
                       gender: String, homeCity: String, relationship: Option[String],
-                      `type`: String, pings: Option[Boolean], contact: UserContact, badges: UserBadges,
-                      mayorships: UserMayorships, checkins: UserCheckins, friends: UserFriends,
-                      followers: Option[UserFollowers], following: Option[UserFollowing],
-                      requests: Option[UserRequests],
-                      tips: UserTips, todos: UserTodos, scores: UserScores) extends UserKernel
+                      `type`: String, pings: Option[Boolean], contact: UserContact,
+                      badges: UserBadgesCount, mayorships: UserMayorshipsSummary,
+                      checkins: UserCheckinsSummary, friends: FriendsOthersCompactView,
+                      followers: Option[UserFollowersCount], following: Option[UserFollowingCount],
+                      requests: Option[UserRequestsCount],
+                      tips: UserTipsCount, todos: UserTodosCount, scores: UserScores) extends UserKernel
 case class UserDetailResponse(user: UserDetail)
 
 case class UserCompact(id: String, firstName: String, lastName: Option[String], photo: String,
@@ -84,10 +98,12 @@ case class UserCore(id: String, firstName: String, lastName: Option[String], pho
 
 case class UserRequestResponse(requests: List[UserCompact])
 
-trait Primitive
+// TODO: not my favorite solution for polymorphic return data.  Will think on this.
+trait Primitive {}
 case class IntPrimitive(v: Int) extends Primitive
 case class DoublePrimitive(v: Double) extends Primitive
 case class StringPrimitive(v: String) extends Primitive
+case class BooleanPrimitive(v: Boolean) extends Primitive
 case object NothingPrimitive extends Primitive
 
 class UserSearchUnmatched(val map: Map[String, List[Primitive]])
@@ -106,18 +122,23 @@ trait UserKernel {
 // Venue Categories
 
 trait VenueCategoryKernel {
-  def id: String
+  def id: Option[String]
   def name: String
   def pluralName: String
   def icon: String
 }
-case class VenueCategoryCore(id: String, name: String, pluralName: String, icon: String) extends VenueCategoryKernel
-case class VenueCategoryCompact(id: String, name: String, pluralName: String, icon: String, parents: List[String], primary: Option[Boolean]) extends VenueCategoryKernel
-case class VenueCategoryWithChildren(id: String, name: String, pluralName: String, icon: String, categories: List[VenueCategoryWithChildren]) extends VenueCategoryKernel
+case class VenueCategoryCore(id: Option[String], name: String, pluralName: String, icon: String) extends VenueCategoryKernel
+case class VenueCategoryCompact(id: Option[String], name: String, pluralName: String, icon: String, parents: List[String], primary: Option[Boolean]) extends VenueCategoryKernel
+case class VenueCategoryWithChildren(id: Option[String], name: String, pluralName: String, icon: String, categories: List[VenueCategoryWithChildren]) extends VenueCategoryKernel
 
 case class VenueCategoriesResponse(categories: List[VenueCategoryWithChildren])
 
 case class UserPhotoUpdateResponse(user: UserDetail)
+
+case class UserCheckins(count: Int, items: List[CheckinForFriend])
+case class UserCheckinsResponse(checkins: UserCheckins)
+
+case class MentionEntity(indices: List[Int], `type`: String, user: Option[List[UserCompact]])
 
 case class CheckinLocation(name: String, lat: Double, lng: Double)
 case class CheckinForFriend(id: String,
@@ -127,15 +148,45 @@ case class CheckinForFriend(id: String,
                             shout: Option[String],
                             isMayor: Option[Boolean],
                             timeZone: String,
+                            entities: Option[List[MentionEntity]],
                             venue: Option[VenueCompact],
                             location: Option[CheckinLocation],
-                            event: Option[CompactEvent])
+                            event: Option[CompactEvent],
+                            photos: Option[PhotoList],
+                            comments: Option[CommentList],
+                            source: Option[OAuthSource])
+
+case class Comment(id: String, createdAt: Long, user: UserCompact, text: String, entities: Option[List[MentionEntity]])
+case class CommentList(count: Int, items: List[Comment])
 
 case class CompactEvent(id: String, name: Option[String])
 
 case class AddCheckinResponse(checkin: CheckinForFriend)
 
-case class LeaderboardScore(recent: Int, max: Int, checkinsCount: Int)
+// User Updates:
+case class UserSetPingsResponse(user: UserDetail)
+case class UserUnfriendResponse(user: UserDetail)
+case class UserFriendRequestResponse(user: UserDetail)
+case class UserApproveFriendResponse(user: UserDetail)
+case class UserDenyFriendshipResponse(user: UserDetail)
+
+case class UserFriendsList(count: Int, summary: Option[String], items: List[UserCompact])
+case class UserFriendsResponse(friends: UserFriendsList)
+
+case class AllSettings(receivePings: Boolean,
+                       receiveCommentPings: Boolean,
+                       twitter: Option[String],
+                       sendToTwitter: Boolean,
+                       sendMayorshipsToTwitter: Boolean,
+                       sendBadgesToTwitter: Boolean,
+                       facebook: Option[Long],
+                       sendToFacebook: Boolean,
+                       sendMayorshipsToFacebook: Boolean,
+                       sendBadgesToFacebook: Boolean,
+                       foreignConsent: String)
+case class AllSettingsResponse(settings: AllSettings)
+
+case class LeaderboardScore(recent: Int, max: Int, goal: Option[Int], checkinsCount: Int)
 case class LeaderboardItem(user: UserCompact, scores: LeaderboardScore, rank: Int)
 case class Leaderboard(count: Int, items: List[LeaderboardItem])
 case class LeaderboardResponse(leaderboard: Leaderboard)
@@ -148,8 +199,82 @@ case class Badge(id: String, badgeId: String, name: String, description: String,
 case class Badges(map: Map[String, Badge])
 case class UserBadgesResponse(sets: BadgeSets, badges: Badges, defaultSetType: String)
 
+// Tips
+case class TodoStat(count: Int)
+case class DoneStat(count: Int)
+
+trait TipKernel {
+  def id: String
+  def createdAt: Long
+  def itemId: String
+  def text: String
+  def url: Option[String]
+  def status: Option[String]
+  def photo: Option[String]
+  def photourl: Option[String]
+}
+
+trait TipStats {
+  def todo: TodoStat
+  def done: DoneStat
+}
+
+case class TipCore(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
+               photo: Option[String], photourl: Option[String]) extends TipKernel
+case class TipForList(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
+               photo: Option[String], photourl: Option[String], todo: TodoStat, done: DoneStat,
+               venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
+case class TipSearchResponse(tips: List[TipForList])
+
+case class TipDetail(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
+               photo: Option[String], photourl: Option[String], todo: TodoStat, done: DoneStat,
+               venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
+case class TipDetailResponse(tip: TipDetail)
+
+// Photos
+
+case class PhotoList(count: Int, items: List[PhotoForList])
+case class PhotoDimension(url: String, width: Int, height: Int)
+case class PhotoDimensionList(count: Int, items: List[PhotoDimension])
+case class OAuthSource(name: String, url: String)
+trait PhotoKernel {
+  def id: String
+  def createdAt: Long
+  def url: String
+  def sizes: PhotoDimensionList
+  def source: Option[OAuthSource]
+}
+case class PhotoForList(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource],
+                        user: Option[UserCompact], visibility: String) extends PhotoKernel
+
+case class PhotoDetail(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource],
+                        user: Option[UserCompact], venue: Option[VenueCompact], tip: Option[TipForList]) extends PhotoKernel
+
+
+case class AddPhotoResponse(photo: PhotoForList)
+case class PhotoDetailResponse(photo: PhotoDetail)
+
+
+// Specials
+case class SpecialRedemptionInteraction(prompt: String, waitingPrompt: Option[String], timeoutPrompt: Option[String],
+                                        timeoutExplanation: Option[String], input: String, entryUrl: Option[String],
+                                        purchaseUrl: Option[String], exitUrl: Option[String])
+
+case class Special(id: String, `type`: String, message: String, description: Option[String],
+                   finePrint: Option[String], unlocked: Option[Boolean],
+                   icon: String, title: String, state: Option[String], progress: Option[Int], progressDescription:
+                   Option[String], detail: Option[String], target: Option[Int], friendsHere: Option[List[UserCompact]],
+                   provider: String, iconUrl: Option[String], redemption: String,
+                   interaction: Option[SpecialRedemptionInteraction], venue: Option[VenueCore])
+
+case class SpecialDetailResponse(special: Special)
+
+case class SpecialList(count: Int, items: List[Special])
+case class SpecialsSearchResponse(specials: SpecialList)
+
+
 // Settings
-case class SettingsDetailResponse(value: Boolean) // TODO: Are these always boolean?  If not, how to convert?
+case class SettingsDetailResponse(value: Primitive)
 case class ChangeSettingsResponse() // (message: String)
 // {"meta":{"code":200},"notifications":[{"type":"notificationTray","item":{"unreadCount":0}}],"response":{"settings":{"receivePings":true,"receiveCommentPings":true,"twitter":"nfolkert","sendToTwitter":true,"sendMayorshipsToTwitter":true,"sendBadgesToTwitter":true,"facebook":203195,"sendToFacebook":true,"sendMayorshipsToFacebook":false,"sendBadgesToFacebook":true,"enableDebug":true,"foreignConsent":"undetermined"}}}
 
@@ -165,35 +290,26 @@ case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notificat
 // TODO:
 case class UpdateDetailResponse()
 case class CheckinDetailResponse()
-case class TipDetailResponse()
-case class PhotoDetailResponse()
-case class SpecialDetailResponse()
 case class VenueAddResponse()
 case class VenueExploreResponse()
 case class VenueSearchResponse()
 case class VenueTrendingResponse()
 case class RecentCheckinsResponse()
 case class AddTipResponse()
-case class TipSearchResponse()
 case class NotificationsResponse()
-case class AddPhotoResponse()
-case class AllSettingsResponse()
-case class SpecialsSearchResponse()
+
+
 case class VenueHereNowResponse()
 case class VenueTipsResponse()
 case class VenuePhotosResponse()
 case class VenueLinksResponse()
-case class UserCheckinsResponse()
-case class UserFriendsResponse()
+
+
+
 case class UserMayorshipsResponse()
 case class UserTipsResponse()
 case class UserTodosResponse()
 case class UserVenueHistoryResponse()
-case class UserFriendRequestResponse()
-case class UserUnfriendResponse()
-case class UserApproveFriendResponse()
-case class UserDenyFriendshipResponse()
-case class UserSetPingsResponse()
 case class FlagSpecialResponse()
 case class MarkNotificationsReadResponse()
 case class TipUnmarkResponse()

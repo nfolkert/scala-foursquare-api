@@ -1,7 +1,7 @@
 package org.scalafoursquare.response
 
-import net.liftweb.json.JsonAST.{JString, JDouble, JInt, JArray, JField, JObject, JValue, JNothing}
 import net.liftweb.json.{Extraction, DefaultFormats, TypeInfo, Formats, Serializer}
+import net.liftweb.json.JsonAST.{JBool, JString, JDouble, JInt, JArray, JField, JObject, JValue, JNothing}
 
 object APICustomSerializers {
   object Formats extends DefaultFormats
@@ -12,6 +12,7 @@ object APICustomSerializers {
       case IntPrimitive(v) => JInt(v)
       case DoublePrimitive(v) => JDouble(v)
       case StringPrimitive(v) => JString(v)
+      case BooleanPrimitive(v) => JBool(v)
       case NothingPrimitive => JNothing
     }
   }
@@ -20,6 +21,7 @@ object APICustomSerializers {
       case JInt(x) => IntPrimitive(x.intValue)
       case JDouble(x) => DoublePrimitive(x)
       case JString(x) => StringPrimitive(x)
+      case JBool(x) => BooleanPrimitive(x)
       case _ => NothingPrimitive
     }
   }

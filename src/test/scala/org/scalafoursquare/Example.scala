@@ -1,14 +1,14 @@
 package org.scalafoursquare
 
 import org.scalafoursquare.call.{AuthApp}
-import org.junit.Test
+import org.junit.{Ignore, Test}
 import org.specs.SpecsMatchers
 
 class Example extends SpecsMatchers {
 
   val P = TestUtil.propParams
 
-  @Test
+  @Ignore
   def example() {
     val caller = TestUtil.httpCaller
     val app = new AuthApp(caller, P.USER_TOKEN)

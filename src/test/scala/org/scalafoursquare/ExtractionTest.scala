@@ -13,7 +13,10 @@ class ExtractionTest extends SpecsMatchers {
   def testExtraction[T](jsonStr: String, checkMatch: Boolean = true)(implicit mf: Manifest[T]): T = {
     println()
     println(mf.erasure.getName)
+
+    // println(jsonStr)
     val json = JsonParser.parse(jsonStr)
+    // println(Printer.pretty(JsonAST.render(json)))
     val extracted = json.extract[T]
     val extJson = Extraction.decompose(extracted)
 
@@ -127,6 +130,28 @@ class ExtractionTest extends SpecsMatchers {
     def checkinForFriend1 = checkinCore1 ~ ("venue" -> compactVenue1) ~ ("location" -> checkinLocation1) ~ ("event" -> compactEvent1)
     def checkinForFriend2 = checkinCore2
 
+    def leaderboardItem1 = ("user" -> compactUser1) ~ ("scores" -> userScores1) ~ ("rank" -> 1)
+    def leaderboardItem2 = ("user" -> compactUser2) ~ ("scores" -> userScores2) ~ ("rank" -> 2)
+
+    def badgeGroup1 = ("type" -> "typeName") ~ ("name" -> "setName") ~ ("image" -> image1) ~
+      ("items" -> List("bh1id", "bh2id")) ~ ("groups" -> List(badgeGroup2))
+    def badgeGroup2 = ("type" -> "typeName") ~ ("name" -> "setName") ~ ("image" -> image2) ~
+      ("items" -> List[JValue]()) ~ ("groups" -> List[JValue]())
+
+    def badgeSet1 = ("groups" -> List(badgeGroup1, badgeGroup2))
+    def badgeSet2 = ("groups" -> List[JValue]())
+
+    def image1 = ("prefix" -> "imgPrefix") ~ ("sizes" -> List(100, 200)) ~ ("name" -> "imgName")
+    def image2 = ("prefix" -> "imgPrefix") ~ ("sizes" -> List[JValue]()) ~ ("name" -> "imgName")
+
+    def badge1 = ("id" -> "bh1id") ~ ("badgeId" -> "bid") ~ ("name" -> "badgeName") ~ ("description" -> "badgeText") ~
+      ("hint" -> "badgeHint") ~ ("image" -> image1) ~ ("unlocks" -> List(("checkins") -> List(checkinForFriend1, checkinForFriend2)))
+    def badge2 = ("id" -> "bh2id") ~ ("badgeId" -> "bid") ~ ("name" -> "badgeName") ~ ("image" -> image2) ~
+      ("unlocks" -> List[JValue]())
+
+    def badges1 = ("bh1id" -> badge1) ~ ("bh2id" -> badge2)
+    def badges2 = JObject(Nil)
+
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
     def json(v:JValue) = {
@@ -144,31 +169,40 @@ class ExtractionTest extends SpecsMatchers {
   
   @Test
   def leaderboard() {
-    val jsonStr = """
-    """
-    testExtraction[LeaderboardResponse](jsonStr)
+    testExtraction[LeaderboardResponse](C.json(("leaderboard" -> C.countList(2, List(C.leaderboardItem1, C.leaderboardItem2)))))
+    testExtraction[LeaderboardResponse](C.json(("leaderboard" -> C.countList(0, Nil))))
   }
 
   @Test
   def userSearch() {
-    val jsonStr = """
-    """
-    testExtraction[UserSearchResponse](jsonStr)
+    testExtraction[UserSearchResponse](C.json(
+      ("results" -> List(C.compactUser1, C.compactUser2)) ~
+      ("unmatched" -> (("twitter" -> List("tw1", "tw2")) ~ ("facebook" -> List(1234, 2345))))))
+
+    testExtraction[UserSearchResponse](C.json(
+      ("results" -> List[JValue]()) ~
+      ("unmatched" -> JObject(Nil))))
   }
 
   @Test
   def userRequest() {
-    val jsonStr = """
-    """
-    testExtraction[UserRequestResponse](jsonStr)
+    testExtraction[UserRequestResponse](C.json(("requests" -> List(C.compactUser1, C.compactUser2))))
+    testExtraction[UserRequestResponse](C.json(("requests" -> List[JValue]())))
   }
 
   @Test
   def userBadges() {
-    val jsonStr = """
+    testExtraction[UserBadgesResponse](C.json(
+      ("sets" -> C.badgeSet1) ~
+      ("badges" -> C.badges1) ~
+      ("defaultSetType" -> "aDefaultSetType")
+    ))
 
-    """
-    testExtraction[UserBadgesResponse](jsonStr)
+    testExtraction[UserBadgesResponse](C.json(
+      ("sets" -> C.badgeSet2) ~
+      ("badges" -> C.badges2) ~
+      ("defaultSetType" -> "")
+    ))
   }
 
   @Test

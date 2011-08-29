@@ -186,8 +186,7 @@ case class AllSettings(receivePings: Boolean,
                        foreignConsent: String)
 case class AllSettingsResponse(settings: AllSettings)
 
-case class LeaderboardScore(recent: Int, max: Int, goal: Option[Int], checkinsCount: Int)
-case class LeaderboardItem(user: UserCompact, scores: LeaderboardScore, rank: Int)
+case class LeaderboardItem(user: UserCompact, scores: UserScores, rank: Int)
 case class Leaderboard(count: Int, items: List[LeaderboardItem])
 case class LeaderboardResponse(leaderboard: Leaderboard)
 
@@ -195,7 +194,8 @@ case class BadgeImage(prefix: String, sizes: List[Int], name: String)
 case class BadgeGroup(`type`: String, name: String, image: BadgeImage, items: List[String], groups: List[BadgeGroup])
 case class BadgeSets(groups: List[BadgeGroup])
 case class BadgeUnlocks(checkins: List[CheckinForFriend])
-case class Badge(id: String, badgeId: String, name: String, description: String, image: BadgeImage , unlocks:List[BadgeUnlocks])
+case class Badge(id: String, badgeId: String, name: String, description: Option[String], hint: Option[String],
+                 image: BadgeImage , unlocks:List[BadgeUnlocks])
 case class Badges(map: Map[String, Badge])
 case class UserBadgesResponse(sets: BadgeSets, badges: Badges, defaultSetType: String)
 

@@ -8,15 +8,15 @@ case class VenueLocation(address: Option[String], crossStreet: Option[String],  
                          lat: Option[Double], lng: Option[Double], distance: Option[Int])
 case class VenueStats(checkinsCount: Int, usersCount: Int, tipCount: Int)
 
-case class VenueHereNowGroup(`type`: String, name: String, count: Int /*, items: List[String]*/)
+case class VenueHereNowGroup(`type`: String, name: String, count: Int, items: List[CheckinForVenue])
 case class VenueHereNow(count: Int, groups: List[VenueHereNowGroup])
 case class VenueMayor(count: Int)
 
-case class VenueTipGroup(`type`: String, name: String, count: Int /*, items: List[String]*/)
+case class VenueTipGroup(`type`: String, name: String, count: Int, items: List[TipForList])
 case class VenueTips(count: Int, groups: List[VenueTipGroup])
 case class VenueBeenHere(count: Int)
 
-case class VenuePhotoGroup(`type`: String, name: String, count: Int /*, items: List[String]*/)
+case class VenuePhotoGroup(`type`: String, name: String, count: Int /*, items: List[PhotoForList] */)
 case class VenuePhotos(count: Int, groups: List[VenuePhotoGroup])
 case class VenueTodos(count: Int /*, items: List[String]*/)
 case class VenueHereNowCompact(count: Int)
@@ -41,23 +41,53 @@ case class VenueCompact(id: String, name: String, itemId: String, contact: Venue
                         specials: Option[List[Special]], hereNow: Option[VenueHereNowCompact],
                         events: Option[List[CompactEvent]]) extends VenueKernel
 
-case class VenueDetail(
-  id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
-  categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String],
-  createAt: Long,
+case class VenueDetailExtended(
+  createdAt: Long,
   hereNow: VenueHereNow,
   mayor: VenueMayor,
   tips: VenueTips,
   tags: List[String],
   specials: List[Special],
-  // specialsNearby: List[Special], // TODO: need to decompose this and do custom serde since case classes only support 22 fields
+  specialsNearby: List[Special],
   shortUrl: String,
   timeZone: String,
   beenHere: Option[VenueBeenHere],
   photos: VenuePhotos,
   description: Option[String],
   events: List[CompactEvent],
-  todos: Option[VenueTodos]) extends VenueKernel
+  todos: Option[VenueTodos]
+)
+
+case class VenueDetail(
+  core: VenueCore,
+  extended: VenueDetailExtended
+) {
+  def id = core.id
+  def name = core.name
+  def itemId = core.itemId
+  def contact = core.contact
+  def location = core.location
+  def categories = core.categories
+  def verified = core.verified
+  def stats = core.stats
+  def url = core.url
+
+  def createdAt = extended.createdAt
+  def hereNow = extended.hereNow
+  def mayor = extended.mayor
+  def tips = extended.tips
+  def tags = extended.tags
+  def specials = extended.specials
+  def specialsNearby = extended.specialsNearby
+  def shortUrl = extended.shortUrl
+  def timeZone = extended.timeZone
+  def beenHere = extended.beenHere
+  def photos = extended.photos
+  def description = extended.description
+  def events = extended.events
+  def todos = extended.todos
+
+}
 
 case class VenueDetailResponse(venue: VenueDetail)
 
@@ -151,6 +181,9 @@ case class UserVenueHistoryResponse(venues: UserVenueHistoryList)
 case class MentionEntity(indices: List[Int], `type`: String, user: Option[List[UserCompact]])
 
 case class CheckinLocation(name: String, lat: Double, lng: Double)
+
+
+
 case class CheckinForFriend(id: String,
                             createdAt: Long,
                             `type`: String,
@@ -165,6 +198,15 @@ case class CheckinForFriend(id: String,
                             photos: Option[PhotoList],
                             comments: Option[CommentList],
                             source: Option[OAuthSource])
+
+case class CheckinForVenue(id: String,
+                           createdAt: Long,
+                           `type`: String,
+                           `private`: Option[Boolean],
+                           shout: Option[String],
+                           isMayor: Option[Boolean],
+                           timeZone: String,
+                           user: Option[UserCompact])
 
 case class Comment(id: String, createdAt: Long, user: UserCompact, text: String, entities: Option[List[MentionEntity]])
 case class CommentList(count: Int, items: List[Comment])

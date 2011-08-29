@@ -14,7 +14,7 @@ class ExtractionTest extends SpecsMatchers {
     println()
     println(mf.erasure.getName)
 
-    println(jsonStr)
+    // println(jsonStr)
     val json = JsonParser.parse(jsonStr)
     // println(Printer.pretty(JsonAST.render(json)))
     val extracted = json.extract[T]
@@ -117,6 +117,48 @@ class ExtractionTest extends SpecsMatchers {
       ("events" -> List(compactEvent1, compactEvent2))
     def compactVenue2 = venueCore2
 
+    def venueFriendGroup1 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 2) ~ ("items" -> List(checkinForVenue1, checkinForVenue2))
+    def venueFriendGroup2 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 0) ~ ("items" -> List[JValue]())
+
+    def venueHereNow1 = ("count" -> 2) ~ ("groups" -> List(venueFriendGroup1, venueFriendGroup2))
+    def venueHereNow2 = ("count" -> 0) ~ ("groups" -> List[JValue]())
+
+    def venueMayor1 = ("count" -> 5) ~ ("user" -> compactUser1)
+    def venueMayor2 = ("count" -> 2)
+
+    def venueTipGroup1 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 2) ~ ("items" -> List(tipForVenue1, tipForVenue2))
+    def venueTipGroup2 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 0) ~ ("items" -> List[JValue]())
+
+    def venueTipData1 = ("count" -> 2) ~ ("groups" -> List(venueTipGroup1, venueTipGroup2))
+    def venueTipData2 = ("count" -> 0) ~ ("groups" -> List[JValue]())
+
+    def venuePhotosData1 = ("count" -> 4) ~ ("groups" -> List(
+      ("type" -> "checkin") ~ ("name" -> "friends' checkin photos") ~ ("count" -> 2) ~ ("items" -> List(photoForVenueListWithCheckin1, photoForVenueListWithCheckin2)),
+      ("type" -> "venue") ~ ("name" -> "venue photos") ~ ("count" -> 2) ~ ("items" -> List(photoForList1, photoForList2))
+    ))
+    def venuePhotosData2 = ("count" -> 0) ~ ("groups" -> List(
+      ("type" -> "checkin") ~ ("name" -> "friends' checkin photos") ~ ("count" -> 0) ~ ("items" -> List[JValue]()),
+      ("type" -> "venue") ~ ("name" -> "venue photos") ~ ("count" -> 0) ~ ("items" -> List[JValue]())
+    ))
+
+    def specialNearby1 = venueSpecial1 ~ ("venue" -> venueCore1)
+    def specialNearby2 = venueSpecial2 ~ ("venue" -> venueCore2)
+
+    def genericVenueDetail1 = venueCore1 ~ ("createdAt" -> 1000) ~ ("hereNow" -> venueHereNow1) ~
+      ("mayor" -> venueMayor1) ~ ("tips" -> venueTipData1) ~ ("tags" -> List("tag1", "tag2")) ~
+      ("specials" -> List(venueSpecial1, venueSpecial2)) ~ ("specialsNearby" -> List(specialNearby1, specialNearby2)) ~
+      ("shortUrl" -> "venueShortUrl") ~ ("timeZone" -> "venueTimeZone") ~ ("beenHere" -> ("count" -> 5)) ~
+      ("photos" -> venuePhotosData1) ~ ("description" -> "venueDescription") ~
+      ("events" -> List(compactEvent1, compactEvent2)) ~ ("lists" -> countList(2, List("List1", "List2")))
+
+    def genericVenueDetail2 = venueCore2 ~ ("createdAt" -> 1000) ~ ("hereNow" -> venueHereNow2) ~
+      ("mayor" -> venueMayor2) ~ ("tips" -> venueTipData2) ~ ("tags" -> List("tag1", "tag2")) ~
+      ("specials" -> List[JValue]()) ~ ("specialsNearby" -> List[JValue]()) ~
+      ("shortUrl" -> "venueShortUrl") ~ ("timeZone" -> "venueTimeZone")
+
+    def venueDetail1 = genericVenueDetail1 ~ ("todos" -> countList(2, List(todoForVenue1, todoForVenue2)))
+    def venueDetail2 = genericVenueDetail2 ~ ("todos" -> countList(0, List[JValue]()))
+
     def checkinCore1 = ("id" -> "chid") ~ ("createdAt" -> 1000) ~ ("type" -> "checkin") ~ ("private" -> true) ~
       ("shout" -> "Shout!") ~ ("isMayor" -> false) ~ ("timeZone" -> "Time/Zone")
     def checkinCore2 = ("id" -> "chid") ~ ("createdAt" -> 1000) ~ ("type" -> "checkin") ~ ("isMayor" -> false) ~ ("timeZone" -> "Time/Zone")
@@ -129,6 +171,9 @@ class ExtractionTest extends SpecsMatchers {
 
     def checkinForFriend1 = checkinCore1 ~ ("venue" -> compactVenue1) ~ ("location" -> checkinLocation1) ~ ("event" -> compactEvent1)
     def checkinForFriend2 = checkinCore2
+
+    def checkinForVenue1 = checkinCore1 ~ ("user" -> compactUser1)
+    def checkinForVenue2 = checkinCore2
 
     def leaderboardItem1 = ("user" -> compactUser1) ~ ("scores" -> userScores1) ~ ("rank" -> 1)
     def leaderboardItem2 = ("user" -> compactUser2) ~ ("scores" -> userScores2) ~ ("rank" -> 2)
@@ -163,6 +208,12 @@ class ExtractionTest extends SpecsMatchers {
     def photoCore2 = ("id" -> "phid") ~ ("createdAt" -> 2000) ~ ("url" -> "photoUrl") ~
       ("sizes" -> countList(0, List[JValue]()))
 
+    def photoForList1 = photoCore1 ~ compactUser1 ~ ("visibility" -> "public")
+    def photoForList2 = photoCore2 ~ ("visibility" -> "friends")
+
+    def photoForVenueListWithCheckin1 = photoForList1 ~ ("checkin" -> checkinCore1)
+    def photoForVenueListWithCheckin2 = photoForList2
+
     def tipCore1 = ("id" -> "tid") ~ ("createdAt" -> 1000) ~ ("itemId" -> "eid") ~ ("text" -> "tipText") ~
       ("url" -> "tipUrl") ~ ("status" -> "tipBindStatus") ~ ("photo" -> photoCore1) ~ ("photourl" -> "tipPhotoUrl")
     def tipCore2 = ("id" -> "tid") ~ ("createdAt" -> 1000) ~ ("itemId" -> "eid") ~ ("text" -> "tipText")
@@ -176,11 +227,20 @@ class ExtractionTest extends SpecsMatchers {
     def tipForList1 = tipCore1 ~ tipStats1 ~ ("venue" -> compactVenue1) ~ ("user" -> compactUser1)
     def tipForList2 = tipCore2 ~ tipStats2
 
+    def tipForVenue1 = tipCore1 ~ tipStats1 ~ ("user" -> compactUser1)
+    def tipForVenue2 = tipCore2 ~ tipStats2
+
     def todoCore1 = ("id" -> "todoId") ~ ("createdAt" -> 1000)
     def todoCore2 = ("id" -> "todoId") ~ ("createdAt" -> 1000)
 
-    def todoForList1 = todoCore1 ~ ("list" -> ("name" -> "listName")) ~ ("tip" -> tipForList1)
-    def todoForList2 = todoCore2 ~ ("list" -> ("name" -> "listName"))
+    def todoListName1 = ("list" -> ("name" -> "listName"))
+    def todoListName2 = ("list" -> ("name" -> "listName"))
+
+    def todoForList1 = todoCore1 ~ todoListName1 ~ ("tip" -> tipForList1)
+    def todoForList2 = todoCore2 ~ todoListName2
+
+    def todoForVenue1 = todoCore1 ~ todoListName1 ~ ("tip" -> tipForVenue1)
+    def todoForVenue2 = todoCore2 ~ todoListName2
 
     def venueHistory1 = ("beenHere" -> 10) ~ ("venue" -> compactVenue1)
     def venueHistory2 = ("beenHere" -> 10) ~ ("venue" -> compactVenue2)
@@ -312,12 +372,15 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venueDetail() {
-    val jsonStr = """
-    """
-    testExtraction[VenueDetailResponse](jsonStr)
+
+    println("VENUE DETAIL")
+    testExtraction[VenueHereNow](C.json(C.venueHereNow1))
+
+    testExtraction[VenueDetailResponse](C.json(("venue" -> C.venueDetail1)))
+    testExtraction[VenueDetailResponse](C.json(("venue" -> C.venueDetail2)))
   }
 
-  // TODO venue add
+  @Test
   def venueAdd() {
     val jsonStr = """
     """
@@ -380,34 +443,33 @@ class ExtractionTest extends SpecsMatchers {
     testExtraction[VenueLinksResponse](jsonStr)
   }
 
-  /*
-  TODO: venue actions
-marktodo
-flag
-edit
-proposeedit
-   */
+  @Test
   def venueMarkTodo() {
     val jsonStr = """
     """
     testExtraction[VenueMarkTodoResponse](jsonStr)
   }
+
+  @Test
   def venueFlag() {
     val jsonStr = """
     """
     testExtraction[VenueFlagResponse](jsonStr)
   }
+
+  @Test
   def venueEdit() {
     val jsonStr = """
     """
     testExtraction[VenueEditResponse](jsonStr)
   }
+
+  @Test
   def venueProposeEdit() {
     val jsonStr = """
     """
     testExtraction[VenueProposeEditResponse](jsonStr)
   }
-
 
   @Test
   def checkinDetail() {
@@ -416,13 +478,12 @@ proposeedit
     testExtraction[CheckinDetailResponse](jsonStr)
   }
 
-  // TODO: checkins add
+  @Test
   def checkinAdd() {
     val jsonStr = """
     """
     testExtraction[AddCheckinResponse](jsonStr)
   }
-
 
   @Test
   def checkinsRecent() {
@@ -431,22 +492,19 @@ proposeedit
     testExtraction[RecentCheckinsResponse](jsonStr)
   }
 
-  /*
-  TODO: checkin actions
-addcomment
-deletecomment
-   */
+  @Test
   def addCheckinComment() {
     val jsonStr = """
     """
     testExtraction[CheckinAddCommentResponse](jsonStr)
   }
+
+  @Test
   def deleteCheckinComment() {
     val jsonStr = """
     """    
     testExtraction[CheckinDeleteCommentResponse](jsonStr)
   }
-
 
   @Test
   def tipDetail() {
@@ -455,7 +513,7 @@ deletecomment
     testExtraction[TipDetailResponse](jsonStr)
   }
 
-  // TODO: tips add
+  @Test
   def addTip() {
     val jsonStr = """
     """
@@ -469,30 +527,28 @@ deletecomment
     testExtraction[TipSearchResponse](jsonStr)
   }
 
-  /*
-  TODO: tip actions
-marktodo
-markdone
-unmark
-   */
+  @Test
   def markTipTodo() {
     val jsonStr = """
     """
     testExtraction[TipMarkTodoResponse](jsonStr)
   }
+
+  @Test
   def markTipDone() {
     val jsonStr = """
     """
     testExtraction[TipMarkDoneResponse](jsonStr)
   }
+
+  @Test
   def unmarkTip() {
     val jsonStr = """
     """
     testExtraction[TipUnmarkResponse](jsonStr)
   }
 
-
-  // TODO: update details
+  @Test
   def updateDetails() {
     val jsonStr = """
     """
@@ -507,7 +563,7 @@ unmark
     testExtraction[NotificationsResponse](jsonStr)
   }
 
-  // TODO: marknotificationsread
+  @Test
   def markNotificationsRead() {
     val jsonStr = """
     """
@@ -520,14 +576,15 @@ unmark
     """
     testExtraction[PhotoDetailResponse](jsonStr)
   }
-  
-  // TODO: photos add
+
+  @Test
   def addPhoto() {
     val jsonStr = """
     """
     testExtraction[AddPhotoResponse](jsonStr)
   }
 
+  @Test
   def settingDetail() {
     testExtraction[SettingsDetailResponse]("""{"value":true}""")
     testExtraction[SettingsDetailResponse]("""{"value":"yes"}""")
@@ -544,7 +601,7 @@ unmark
     testExtraction[AllSettingsResponse](jsonStr)
   }
 
-  // TODO: settings set
+  @Test
   def changeSettings() {
     val jsonStr = """
     """
@@ -565,14 +622,13 @@ unmark
     testExtraction[SpecialsSearchResponse](jsonStr)
   }
 
-  // TODO: flag specials
+  @Test
   def flagSpecial() {
     val jsonStr = """
     """
     testExtraction[FlagSpecialResponse](jsonStr)
   }
 
-  // TODO: MULTI
   @Test
   def multi() {
     val jsonStr = """

@@ -5,7 +5,7 @@ import net.liftweb.json.JsonAST.{JBool, JString, JDouble, JInt, JArray, JField, 
 
 object APICustomSerializers {
   object Formats extends DefaultFormats
-  def formats = Formats + UserSearchUnmatchedSerializer + PrimitiveSerializer + BadgesSerializer
+  def formats = Formats + UserSearchUnmatchedSerializer + PrimitiveSerializer + BadgesSerializer + VenueDetailSerializer
 
   def serializePrimitive(p: Primitive): JValue = {
     p match {
@@ -73,6 +73,21 @@ object APICustomSerializers {
           (f.name, f.value.extract[Badge])
         }).toMap
         new Badges(map)
+      }
+    }
+  }
+
+  val VenueDetailSerializer = new Serializer[VenueDetail] {
+    def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {
+      case x: VenueDetail => {
+        JObject(Extraction.decompose(x.core).asInstanceOf[JObject].obj ++
+          Extraction.decompose(x.extended).asInstanceOf[JObject].obj)
+      }
+    }
+    val theClass = classOf[VenueDetail]
+    def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), VenueDetail] = {
+      case (TypeInfo(cls, _), obj: JObject) if cls == theClass => {
+        VenueDetail(core = obj.extract[VenueCore], extended = obj.extract[VenueDetailExtended])
       }
     }
   }

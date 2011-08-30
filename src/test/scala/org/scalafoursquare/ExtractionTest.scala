@@ -249,6 +249,27 @@ class ExtractionTest extends SpecsMatchers {
     def venueHistory1 = ("beenHere" -> 10) ~ ("venue" -> compactVenue1)
     def venueHistory2 = ("beenHere" -> 10) ~ ("venue" -> compactVenue2)
 
+    def venueLink1 = ("provider" -> ("id" -> "pid")) ~ ("linkedId" -> "lid") ~ ("url" -> "linkUrl")
+    def venueLink2 = ("provider" -> ("id" -> "pid")) ~ ("linkedId" -> "lid")
+
+    def keyword1 = ("displayName" -> "name") ~ ("keyword" -> "keyword")
+    def keyword2 = ("displayName" -> "name") ~ ("keyword" -> "keyword")
+
+    def reasonStructure1 = ("type" -> "reasonType") ~ ("message" -> "reasonMessage")
+    def reasonStructure2 = ("type" -> "reasonType") ~ ("message" -> "reasonMessage")
+
+    def coreRecommendation1 = ("reasons" -> countList(2, List(reasonStructure1, reasonStructure2))) ~
+      ("venue" -> compactVenue1)
+    def coreRecommendation2 = ("reasons" -> countList(0, List[JValue]())) ~ ("venue" -> compactVenue2)
+
+    def compactRecommendation1 = coreRecommendation1 ~ ("todos" -> List(todoForVenue1, todoForVenue2)) ~
+      ("tips" -> List(tipForVenue1, tipForVenue2))
+    def compactRecommendation2 = coreRecommendation2
+
+    def exploreGroup1 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 2) ~
+      ("items" -> List(compactRecommendation1, compactRecommendation2))
+    def exploreGroup2 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("items" -> List[JValue]())
+
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
     def json(v:JValue) = {
@@ -394,9 +415,16 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venuesExplore() {
-    val jsonStr = """
-    """
-    testExtraction[VenueExploreResponse](jsonStr)
+    testExtraction[VenueExploreResponse](C.json(
+      ("keywords" -> C.countList(2, List(C.keyword1, C.keyword2))) ~
+      ("warning" -> ("text" -> "a warning")) ~
+      ("groups" -> List(C.exploreGroup1, C.exploreGroup2))
+    ))
+
+    testExtraction[VenueExploreResponse](C.json(
+      ("keywords" -> C.countList(0, List[JValue]())) ~
+      ("groups" -> List[JValue]())
+    ))
   }
 
   @Test
@@ -432,37 +460,29 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venuesLinks() {
-    val jsonStr = """
-    """
-    testExtraction[VenueLinksResponse](jsonStr)
+    testExtraction[VenueLinksResponse](C.json(("links" -> C.countList(2, List(C.venueLink1, C.venueLink1)))))
+    testExtraction[VenueLinksResponse](C.json(("links" -> C.countList(0, List[JValue]()))))
   }
 
   @Test
   def venueMarkTodo() {
-    val jsonStr = """
-    """
-    testExtraction[VenueMarkTodoResponse](jsonStr)
+    testExtraction[VenueMarkTodoResponse](C.json(("todo" -> C.todoForVenue1)))
+    testExtraction[VenueMarkTodoResponse](C.json(("todo" -> C.todoForVenue2)))
   }
 
   @Test
   def venueFlag() {
-    val jsonStr = """
-    """
-    testExtraction[VenueFlagResponse](jsonStr)
+    testExtraction[VenueFlagResponse](C.json(JObject(Nil)))
   }
 
   @Test
   def venueEdit() {
-    val jsonStr = """
-    """
-    testExtraction[VenueEditResponse](jsonStr)
+    testExtraction[VenueEditResponse](C.json(JObject(Nil)))
   }
 
   @Test
   def venueProposeEdit() {
-    val jsonStr = """
-    """
-    testExtraction[VenueProposeEditResponse](jsonStr)
+    testExtraction[VenueProposeEditResponse](C.json(JObject(Nil)))
   }
 
   @Test

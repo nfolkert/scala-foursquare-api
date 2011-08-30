@@ -109,6 +109,31 @@ case class VenueTipsResponse(tips: VenueTipsList)
 case class VenuePhotosList(count: Int, items: List[PhotoForList])
 case class VenuePhotosResponse(photos: VenuePhotosList)
 
+case class VenueLinkProvider(id: String)
+case class VenueLinkItem(provider: VenueLinkProvider, linkedId: String, url: Option[String])
+case class VenueLinksList(count: Int, items: List[VenueLinkItem])
+case class VenueLinksResponse(links: VenueLinksList)
+
+case class VenueMarkTodoResponse(todo: TodoForVenue)
+
+case class VenueFlagResponse()
+case class VenueEditResponse()
+case class VenueProposeEditResponse()
+
+case class VenueExploreReason(`type`: String, message: String)
+case class VenueExploreRecommendationReasonList(count: Int, items: List[VenueExploreReason])
+case class VenueExploreRecommendation(reasons: VenueExploreRecommendationReasonList,
+                                      venue: VenueCompact,
+                                      todos: Option[List[TodoForVenue]],
+                                      tips: Option[List[TipForList]])
+case class VenueExploreGroup(`type`: String, name: String, count: Option[Int], items: List[VenueExploreRecommendation])
+case class VenueExploreKeyword(displayName: String, keyword: String)
+case class VenueExploreWarning(text: String)
+case class VenueExploreKeywordList(count: Int, items:List[VenueExploreKeyword])
+case class VenueExploreResponse(keywords: VenueExploreKeywordList,
+                                warning: Option[VenueExploreWarning],
+                                groups: List[VenueExploreGroup])
+
 // User Details
 // TODO: find which of these can be merged; which items are optional
 case class UserContact(phone: Option[String], email: Option[String], twitter: Option[String], facebook: Option[String])
@@ -374,14 +399,14 @@ case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notificat
 // TODO:
 case class UpdateDetailResponse()
 case class CheckinDetailResponse()
-case class VenueExploreResponse()
+
+
 
 case class RecentCheckinsResponse()
 case class AddTipResponse()
 case class NotificationsResponse()
 
 
-case class VenueLinksResponse()
 
 
 
@@ -393,8 +418,4 @@ case class TipMarkDoneResponse()
 case class TipMarkTodoResponse()
 case class CheckinDeleteCommentResponse()
 case class CheckinAddCommentResponse()
-case class VenueProposeEditResponse()
-case class VenueEditResponse()
-case class VenueMarkTodoResponse()
-case class VenueFlagResponse()
 

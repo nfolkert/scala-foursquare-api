@@ -10,16 +10,18 @@ case class VenueStats(checkinsCount: Int, usersCount: Int, tipCount: Int)
 
 case class VenueHereNowGroup(`type`: String, name: String, count: Int, items: List[CheckinForVenue])
 case class VenueHereNow(count: Int, groups: List[VenueHereNowGroup])
-case class VenueMayor(count: Int)
+case class VenueMayor(count: Int, user: Option[UserCompact])
 
 case class VenueTipGroup(`type`: String, name: String, count: Int, items: List[TipForList])
 case class VenueTips(count: Int, groups: List[VenueTipGroup])
 case class VenueBeenHere(count: Int)
 
-case class VenuePhotoGroup(`type`: String, name: String, count: Int /*, items: List[PhotoForList] */)
+case class VenuePhotoGroup(`type`: String, name: String, count: Int, items: List[PhotoForList])
 case class VenuePhotos(count: Int, groups: List[VenuePhotoGroup])
-case class VenueTodos(count: Int /*, items: List[String]*/)
+case class VenueTodos(count: Int, items: List[TodoForVenue])
 case class VenueHereNowCompact(count: Int)
+
+case class VenueLists(count: Int, items: List[String])
 
 trait VenueKernel {
   def id: String
@@ -52,9 +54,10 @@ case class VenueDetailExtended(
   shortUrl: String,
   timeZone: String,
   beenHere: Option[VenueBeenHere],
-  photos: VenuePhotos,
+  photos: Option[VenuePhotos],
   description: Option[String],
-  events: List[CompactEvent],
+  events: Option[List[CompactEvent]],
+  lists: Option[VenueLists],
   todos: Option[VenueTodos]
 )
 
@@ -85,6 +88,7 @@ case class VenueDetail(
   def photos = extended.photos
   def description = extended.description
   def events = extended.events
+  def lists = extended.lists
   def todos = extended.todos
 
 }
@@ -182,7 +186,13 @@ case class MentionEntity(indices: List[Int], `type`: String, user: Option[List[U
 
 case class CheckinLocation(name: String, lat: Double, lng: Double)
 
-
+case class CheckinCore(id: String,
+                       createdAt: Long,
+                       `type`: String,
+                       `private`: Option[Boolean],
+                       shout: Option[String],
+                       isMayor: Option[Boolean],
+                       timeZone: String)
 
 case class CheckinForFriend(id: String,
                             createdAt: Long,
@@ -286,6 +296,7 @@ case class TipDetailResponse(tip: TipDetail)
 
 case class TodoListName(name: String)
 case class TodoForList(id: String, createdAt: Long, list: Option[TodoListName], tip: Option[TipForList])
+case class TodoForVenue(id: String, createdAt: Long, list: Option[TodoListName], tip: Option[TipForList])
 
 case class UserTodosList(count: Int, items: List[TodoForList])
 case class UserTodosResponse(todos: UserTodosList)
@@ -305,7 +316,7 @@ trait PhotoKernel {
 }
 case class PhotoCore(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource])
 case class PhotoForList(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource],
-                        user: Option[UserCompact], visibility: String) extends PhotoKernel
+                        user: Option[UserCompact], visibility: String, checkin: Option[CheckinForFriend]) extends PhotoKernel
 
 case class PhotoDetail(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource],
                         user: Option[UserCompact], venue: Option[VenueCompact], tip: Option[TipForList]) extends PhotoKernel

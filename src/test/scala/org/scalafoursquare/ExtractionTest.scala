@@ -208,7 +208,7 @@ class ExtractionTest extends SpecsMatchers {
     def photoCore2 = ("id" -> "phid") ~ ("createdAt" -> 2000) ~ ("url" -> "photoUrl") ~
       ("sizes" -> countList(0, List[JValue]()))
 
-    def photoForList1 = photoCore1 ~ compactUser1 ~ ("visibility" -> "public")
+    def photoForList1 = photoCore1 ~ ("user" -> compactUser1) ~ ("visibility" -> "public")
     def photoForList2 = photoCore2 ~ ("visibility" -> "friends")
 
     def photoForVenueListWithCheckin1 = photoForList1 ~ ("checkin" -> checkinCore1)
@@ -372,10 +372,6 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venueDetail() {
-
-    println("VENUE DETAIL")
-    testExtraction[VenueHereNow](C.json(C.venueHereNow1))
-
     testExtraction[VenueDetailResponse](C.json(("venue" -> C.venueDetail1)))
     testExtraction[VenueDetailResponse](C.json(("venue" -> C.venueDetail2)))
   }

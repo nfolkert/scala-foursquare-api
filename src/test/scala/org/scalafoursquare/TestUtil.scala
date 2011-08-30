@@ -2,7 +2,7 @@ package org.scalafoursquare
 
 import org.scalafoursquare.call.{HttpCaller}
 import net.liftweb.util.Props
-import net.liftweb.json.JsonAST.{JDouble, JInt, JBool, JString, JValue, JArray, JField, JObject, JNull}
+import net.liftweb.json.JsonAST.{JDouble, JInt, JBool, JString, JValue, JArray, JField, JObject, JNull, JNothing}
 
 object TestUtil {
 
@@ -29,7 +29,10 @@ object TestUtil {
   object JsonDiff {
 
     def compare(left: JValue, right: JValue): (Option[JValue], Option[JValue], Option[JValue]) = {
-      (intersect(left, right), minus(left, right), minus(right, left))
+      val intersection = intersect(left, right)
+      val missed = minus(left, right)
+      val extra = minus(right, left)
+      (intersection, missed, extra)
     }
 
     def intersect(left: JValue, right: JValue): Option[JValue] = {
@@ -42,6 +45,7 @@ object TestUtil {
         case (JString(l), JString(r)) if (l == r) => Some(JString(l))
         case (JDouble(l), JDouble(r)) if (l == r) => Some(JDouble(l))
         case (JNull, JNull) => Some(JNull)
+        case (JNothing, JNothing) => Some(JNothing)
         case (_, _) => None
       }
     }
@@ -75,20 +79,25 @@ object TestUtil {
         case (JString(l), JString(r)) if (l == r) => None
         case (JDouble(l), JDouble(r)) if (l == r) => None
         case (JNull, JNull) => None
-        case (l, _) => Some(l)
+        case (JNothing, JNothing) => None
+        case (l, _) => {
+          val x = l
+          Some(x)
+        }
       }
     }
 
     def minusObj(left: JObject, right: JObject): Option[JObject] = {
       val rmap: Map[String, JField] = right.obj.map(f=>(f.name, f)).toMap
-      val fields: List[JField] = left.obj.flatMap(f=>{
+      val fields: List[JField] = left.obj.filter(_.value != JNothing).flatMap(f=>{
         rmap.get(f.name).map(rf=>{
           minus(f.value, rf.value).map(v=>JField(f.name, v))
         }).getOrElse(Some(f))
       })
-      if (!fields.isEmpty)
-        Some(JObject(fields))
-      else
+      if (!fields.isEmpty) {
+        val x = fields
+        Some(JObject(x))
+      } else
         None
     }
 
@@ -101,7 +110,12 @@ object TestUtil {
       val ret = zip.flatMap(p=>{
         p._2.map(r=>minus(p._1, r)).getOrElse(Some(p._1))
       })
-      if (ret.isEmpty) None else Some(JArray(ret))
+      if (ret.isEmpty)
+        None
+      else {
+        val x = ret
+        Some(JArray(x))
+      }
     }
   }
 

@@ -37,7 +37,7 @@ class ExtractionTest extends SpecsMatchers {
       cmp._2.map(j=>println("Missed: " + Printer.pretty(JsonAST.render(j))))
       cmp._3.map(j=>println("Added: " + Printer.pretty(JsonAST.render(j))))
 
-      // unparsed == original must_== true
+      unparsed == original must_== true
     }
     extracted
   }

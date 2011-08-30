@@ -12,14 +12,14 @@ class CallTest extends SpecsMatchers {
 
   val P = TestUtil.propParams
 
-  @Ignore
+  @Test
   def oauthUrl() {
 
     println(P.FS_URL + "/oauth2/authenticate?client_id=" + P.CONSUMER_KEY +
       "&response_type=token&redirect_uri=" + P.CALLBACK_URL)
   }
 
-  @Ignore
+  @Test
   def errorHandling() {
     val mockCaller = TestCaller
     val mockApp = new UserlessApp(mockCaller)
@@ -36,7 +36,7 @@ class CallTest extends SpecsMatchers {
     failEndpoint.meta must_== Meta(404, Some("other"), Some("Endpoint not found"))
   }
 
-  @Ignore
+  @Test
   def venueDetail() {
     val mockCaller = TestCaller
     val mockApp = new UserlessApp(mockCaller)
@@ -59,7 +59,7 @@ class CallTest extends SpecsMatchers {
     println(venue.toString)
   }
 
-  @Ignore
+  @Test
   def changeSettings() {
     // This one actually makes a web call, and modifies the database!
 
@@ -73,14 +73,14 @@ class CallTest extends SpecsMatchers {
       app.changeSetting("sendMayorshipsToFacebook", false).get
 
     val turnOn = app.changeSetting("sendMayorshipsToFacebook", true).get
-    // println(turnOn.response.map(_.message).getOrElse(turnOn.meta.toString))
+    // println(turnOn.response.map(_.settings).getOrElse(turnOn.meta.toString))
 
-    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== true
+    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== BooleanPrimitive(true)
 
     val turnOff = app.changeSetting("sendMayorshipsToFacebook", false).get
     // println(turnOff.response.map(_.message).getOrElse(turnOff.meta.toString))
 
-    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== false
+    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== BooleanPrimitive(false)
 
     if (restoreOn)
       app.changeSetting("sendMayorshipsToFacebook", true).get
@@ -101,7 +101,7 @@ class CallTest extends SpecsMatchers {
     // Verified that this works.  API page on this is fail: no params listed, plus says returns photo object when really it returns user detail
   }
 
-  @Ignore
+  @Test
   def checkinAndAddPhoto() {
     // This one actually makes a web call, and modifies the database!
 
@@ -123,7 +123,7 @@ class CallTest extends SpecsMatchers {
 
   }
 
-  @Ignore
+  @Test
   def userDetail() {
     val mockCaller = TestCaller
     val mockUserApp = new AuthApp(mockCaller, "Just Testing!")
@@ -157,7 +157,7 @@ class CallTest extends SpecsMatchers {
     println(mtv.toString)
   }
 
-  @Ignore
+  @Test
   def venueCategories() {
     val mockCaller = TestCaller
     val mockApp = new UserlessApp(mockCaller)
@@ -168,7 +168,7 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories.length must_== 1
     mockVenueCategories.response.get.categories(0).name must_== "Fake Category"
     mockVenueCategories.response.get.categories(0).pluralName must_== "Fake Categories"
-    mockVenueCategories.response.get.categories(0).id must_== "fakeId"
+    mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
     mockVenueCategories.response.get.categories(0).categories.length must_== 0
 
@@ -182,7 +182,7 @@ class CallTest extends SpecsMatchers {
     println(venueCategories.toString)
   }
 
-  @Ignore
+  @Test
   def multiNoAuth() {
     val mockCaller = TestCaller
     val mockApp = new UserlessApp(mockCaller)
@@ -209,7 +209,7 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories.length must_== 1
     mockVenueCategories.response.get.categories(0).name must_== "Fake Category"
     mockVenueCategories.response.get.categories(0).pluralName must_== "Fake Categories"
-    mockVenueCategories.response.get.categories(0).id must_== "fakeId"
+    mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
     mockVenueCategories.response.get.categories(0).categories.length must_== 0
 
@@ -229,7 +229,7 @@ class CallTest extends SpecsMatchers {
     (multi.responses._2.get == venueCategories.get) must_== true
   }
 
-  @Ignore
+  @Test
   def multiAuthed() {
     val mockCaller = TestCaller
     val mockUserApp = new AuthApp(mockCaller, "Just Testing!")

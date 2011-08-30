@@ -448,12 +448,25 @@ case class ChangeSettingsResponse(settings: AllSettings)
 
 case class Meta(code: Int, errorType: Option[String], errorDetail: Option[String])
 
-case class Notification(`type`: String /*, item: DIFFERENT TYPES */)
+case class Placeholder(v: Option[String] = None)
 
-case class Response[T](meta: Meta, notifications: Option[List[Notification]], response: Option[T])
+case class NotificationTrayNotificationContent(unreadCount: Int)
 
-case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[List[Notification]], responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]))
-case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notification]], responses: Option[List[Response[A]]])
+trait NotificationItem {}
+case class BadgeNotification(v: Placeholder) extends NotificationItem
+case class TipNotification(v: Placeholder) extends NotificationItem
+case class TipAlertNotification(v: Placeholder) extends NotificationItem
+case class LeaderboardNotification(v: Placeholder) extends NotificationItem
+case class MayorshipNotification(v: Placeholder) extends NotificationItem
+case class SpecialsNotification(v: Placeholder) extends NotificationItem
+case class MessageNotification(v: Placeholder) extends NotificationItem
+case class NotificationTrayNotification(v: NotificationTrayNotificationContent) extends NotificationItem
+case object NothingNotificationItem extends NotificationItem
+
+case class Response[T](meta: Meta, notifications: Option[List[NotificationItem]], response: Option[T])
+
+case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[List[NotificationItem]], responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]))
+case class MultiResponseList[A](meta: Meta, notifications: Option[List[NotificationItem]], responses: Option[List[Response[A]]])
 
 case class Url(url: String)
 

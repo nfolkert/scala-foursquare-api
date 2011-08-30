@@ -120,7 +120,7 @@ abstract class App(val caller: Caller) {
 
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
     val response = {
       if (meta.code != 200)
         None
@@ -135,7 +135,7 @@ abstract class App(val caller: Caller) {
 
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
     val responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]) = {
       if (meta.code != 200)
         (None, None, None, None, None)
@@ -152,7 +152,7 @@ abstract class App(val caller: Caller) {
 
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
     val responses: Option[List[Response[A]]] = {
       if (meta.code != 200)
         None
@@ -174,7 +174,7 @@ object App {
       response(idx).map(res=>{
         val sfields = res.asInstanceOf[JObject].obj
         val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
-        val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+        val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
         val sresponse = {
           if (smeta.code != 200)
             None
@@ -193,7 +193,7 @@ object App {
     val resolved: List[Response[A]] = responses.arr.map(res => {
       val sfields = res.asInstanceOf[JObject].obj
       val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
-      val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+      val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
       val sresponse = {
         if (smeta.code != 200)
           None

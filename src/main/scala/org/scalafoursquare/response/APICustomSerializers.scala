@@ -6,7 +6,7 @@ import net.liftweb.json.JsonAST.{JBool, JString, JDouble, JInt, JArray, JField, 
 object APICustomSerializers {
   object Formats extends DefaultFormats
   def formats = Formats + UserSearchUnmatchedSerializer + PrimitiveSerializer + BadgesSerializer +
-    VenueDetailSerializer + UpdateTargetSerializer
+    VenueDetailSerializer + UpdateTargetSerializer + NotificationItemSerializer
 
   def serializePrimitive(p: Primitive): JValue = {
     p match {
@@ -80,6 +80,47 @@ object APICustomSerializers {
     }
   }
 
+  def serializeNotificationItem(t: NotificationItem)(implicit format: Formats): JValue = {
+    def tf(ty: String) = JField("type", JString(ty))
+    def ob(ov: JValue) = List(JField("item", ov))
+    t match {
+      case BadgeNotification(v) => JObject(tf("badge") :: ob(Extraction.decompose(v)))
+      case TipNotification(v) => JObject(tf("tip") :: ob(Extraction.decompose(v)))
+      case TipAlertNotification(v) => JObject(tf("tipAlert") :: ob(Extraction.decompose(v)))
+      case LeaderboardNotification(v) => JObject(tf("leaderboard") :: ob(Extraction.decompose(v)))
+      case MayorshipNotification(v) => JObject(tf("mayorship") :: ob(Extraction.decompose(v)))
+      case SpecialsNotification(v) => JObject(tf("specials") :: ob(Extraction.decompose(v)))
+      case MessageNotification(v) => JObject(tf("message") :: ob(Extraction.decompose(v)))
+      case NotificationTrayNotification(v) => JObject(tf("notificationTray") :: ob(Extraction.decompose(v)))
+      case _ => JNothing
+    }
+  }
+
+  def deserializeNotificationItem(obj: JObject)(implicit format: Formats): NotificationItem = {
+    val t = obj.obj.find(_.name == "type").map(_.value)
+    val v = obj.obj.find(_.name == "item").map(_.value)
+    (t,v) match {
+      case (Some(JString("badge")), Some(obj: JObject))  => BadgeNotification(obj.extract[Placeholder])
+      case (Some(JString("tip")), Some(obj: JObject))  => TipNotification(obj.extract[Placeholder])
+      case (Some(JString("tipAlert")), Some(obj: JObject))  => TipAlertNotification(obj.extract[Placeholder])
+      case (Some(JString("leadership")), Some(obj: JObject))  => LeaderboardNotification(obj.extract[Placeholder])
+      case (Some(JString("mayorship")), Some(obj: JObject))  => MayorshipNotification(obj.extract[Placeholder])
+      case (Some(JString("specials")), Some(obj: JObject))  => SpecialsNotification(obj.extract[Placeholder])
+      case (Some(JString("message")), Some(obj: JObject))  => MessageNotification(obj.extract[Placeholder])
+      case (Some(JString("notificationTray")), Some(obj: JObject)) => NotificationTrayNotification(obj.extract[NotificationTrayNotificationContent])
+      case _ => NothingNotificationItem
+    }
+  }
+
+  val NotificationItemSerializer = new Serializer[NotificationItem] {
+    def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {
+      case x: NotificationItem => {serializeNotificationItem(x)}
+    }
+    val theClass = classOf[NotificationItem]
+    def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), NotificationItem] = {
+      case (TypeInfo(cls, _), obj: JObject) if cls == theClass => deserializeNotificationItem(obj)
+    }
+  }
 
   val UserSearchUnmatchedSerializer = new Serializer[UserSearchUnmatched] {
     def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {

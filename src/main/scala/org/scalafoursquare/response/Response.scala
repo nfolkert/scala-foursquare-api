@@ -220,7 +220,7 @@ case class UserVenueHistoryElement(beenHere: Int, venue: VenueCompact)
 case class UserVenueHistoryList(count: Int, items: List[UserVenueHistoryElement])
 case class UserVenueHistoryResponse(venues: UserVenueHistoryList)
 
-case class MentionEntity(indices: List[Int], `type`: String, user: Option[List[UserCompact]])
+case class MentionEntity(indices: List[Int], `type`: String, user: UserCompact)
 
 case class CheckinLocation(name: String, lat: Double, lng: Double)
 
@@ -255,6 +255,28 @@ case class CheckinForVenue(id: String,
                            isMayor: Option[Boolean],
                            timeZone: String,
                            user: Option[UserCompact])
+
+case class CheckinOverlapList(count: Int, items: List[CheckinForVenue])
+case class CheckinDetail(id: String,
+                         createdAt: Long,
+                         `type`: String,
+                         `private`: Option[Boolean],
+                         shout: Option[String],
+                         isMayor: Option[Boolean],
+                         timeZone: String,
+                         entities: Option[List[MentionEntity]],
+                         user: Option[UserCompact],
+                         venue: Option[VenueCompact],
+                         location: Option[CheckinLocation],
+                         source: Option[OAuthSource],
+                         distance: Option[Int],
+                         photos: Option[PhotoList],
+                         comments: Option[CommentList],
+                         event: Option[CompactEvent],
+                         overlaps: Option[CheckinOverlapList])
+
+case class CheckinDetailResponse(checkin: CheckinDetail)
+
 
 case class Comment(id: String, createdAt: Long, user: UserCompact, text: String, entities: Option[List[MentionEntity]])
 case class CommentList(count: Int, items: List[Comment])
@@ -398,7 +420,6 @@ case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notificat
 
 // TODO:
 case class UpdateDetailResponse()
-case class CheckinDetailResponse()
 
 
 

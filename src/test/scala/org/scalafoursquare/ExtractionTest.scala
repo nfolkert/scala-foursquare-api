@@ -179,6 +179,27 @@ class ExtractionTest extends SpecsMatchers {
     def checkinForVenue1 = checkinCore1 ~ ("user" -> compactUser1)
     def checkinForVenue2 = checkinCore2
 
+    def userMentionEntity1 = ("indices" -> List(1, 5)) ~ ("type" -> "user") ~ ("user" -> compactUser1)
+    def userMentionEntity2 = ("indices" -> List(1, 5)) ~ ("type" -> "user") ~ ("user" -> compactUser2)
+
+    def commentsCore1 = ("id" -> "cmid") ~ ("createdAt" -> 1000) ~
+      ("user" -> compactUser1) ~ ("text" -> "commentText") ~ ("entities" -> List(userMentionEntity1, userMentionEntity2))
+    def commentsCore2 = ("id" -> "cmid") ~ ("createdAt" -> 1000) ~
+      ("user" -> compactUser2) ~ ("text" -> "commentText") ~ ("entities" -> List[JValue]())
+
+    def checkinDetail1 = checkinCore1 ~ ("entities" -> List(userMentionEntity1, userMentionEntity2)) ~
+      ("user" -> compactUser1) ~
+      ("venue" -> compactVenue1) ~
+      ("location" -> checkinLocation1) ~
+      ("source" -> oauthSrc1) ~
+      ("distance" -> 25) ~
+      ("photos" -> countList(2, List(photoForList1, photoForList2))) ~
+      ("comments" -> countList(2, List(commentsCore1, commentsCore2))) ~
+      ("event" -> compactEvent1) ~
+      ("overlaps" -> countList(2, List(checkinForVenue1, checkinForVenue2)))
+
+    def checkinDetail2 = checkinCore2 ~ ("entities" -> List[JValue]())
+
     def leaderboardItem1 = ("user" -> compactUser1) ~ ("scores" -> userScores1) ~ ("rank" -> 1)
     def leaderboardItem2 = ("user" -> compactUser2) ~ ("scores" -> userScores2) ~ ("rank" -> 2)
 
@@ -487,9 +508,8 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def checkinDetail() {
-    val jsonStr = """
-    """
-    testExtraction[CheckinDetailResponse](jsonStr)
+    testExtraction[CheckinDetailResponse](C.json(("checkin" -> C.checkinDetail1)))
+    testExtraction[CheckinDetailResponse](C.json(("checkin" -> C.checkinDetail2)))
   }
 
   @Test

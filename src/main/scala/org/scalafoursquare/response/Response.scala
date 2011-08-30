@@ -103,6 +103,11 @@ case class VenueAddResponse(venue: VenueDetail)
 case class VenueHereNowList(count: Int, items: List[CheckinForVenue])
 case class VenueHereNowResponse(hereNow: VenueHereNowList)
 
+case class VenueTipsList(count: Int, items: List[TipForList])
+case class VenueTipsResponse(tips: VenueTipsList)
+
+case class VenuePhotosList(count: Int, items: List[PhotoForList])
+case class VenuePhotosResponse(photos: VenuePhotosList)
 
 // User Details
 // TODO: find which of these can be merged; which items are optional
@@ -374,9 +379,11 @@ case class VenueExploreResponse()
 case class RecentCheckinsResponse()
 case class AddTipResponse()
 case class NotificationsResponse()
-case class VenueTipsResponse()
-case class VenuePhotosResponse()
+
+
 case class VenueLinksResponse()
+
+
 
 
 case class FlagSpecialResponse()

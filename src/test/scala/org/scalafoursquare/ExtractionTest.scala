@@ -419,16 +419,15 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venuesTips() {
-    val jsonStr = """
-    """
-    testExtraction[VenueTipsResponse](jsonStr)
+    testExtraction[VenueTipsResponse](C.json(("tips" -> C.countList(2, List(C.tipForVenue1, C.tipForVenue2)))))
+    testExtraction[VenueTipsResponse](C.json(("tips" -> C.countList(0, List[JValue]()))))
   }
 
   @Test
   def venuesPhotos() {
-    val jsonStr = """
-    """
-    testExtraction[VenuePhotosResponse](jsonStr)
+    testExtraction[VenuePhotosResponse](C.json(("photos" -> C.countList(2, List(C.photoForList1, C.photoForList2)))))
+    testExtraction[VenuePhotosResponse](C.json(("photos" -> C.countList(2, List(C.photoForVenueListWithCheckin1, C.photoForVenueListWithCheckin2)))))
+    testExtraction[VenuePhotosResponse](C.json(("photos" -> C.countList(0, List[JValue]()))))
   }
 
   @Test

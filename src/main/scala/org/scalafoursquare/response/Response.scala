@@ -432,6 +432,8 @@ case class SpecialDetailResponse(special: Special)
 case class SpecialList(count: Int, items: List[Special])
 case class SpecialsSearchResponse(specials: SpecialList)
 
+case class FlagSpecialResponse()
+
 // Notifications
 case class UpdateDetailResponse(notification: UpdateDetail)
 
@@ -470,9 +472,5 @@ case class UpdateDetail(ids: List[String], createdAt: Long, unread: Boolean,
                         image: Image, imageType: String, icon: Option[Image],
                         target: UpdateTarget, text: String, entities: List[AnnotatedEntity])
 
-// TODO:
-
-
-case class FlagSpecialResponse()
 
 

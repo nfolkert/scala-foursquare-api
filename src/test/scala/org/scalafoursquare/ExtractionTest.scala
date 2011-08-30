@@ -715,23 +715,19 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def specialsDetail() {
-    val jsonStr = """
-    """
-    testExtraction[SpecialDetailResponse](jsonStr)
+    testExtraction[SpecialDetailResponse](C.json(("special" -> C.venueSpecial1)))
+    testExtraction[SpecialDetailResponse](C.json(("special" -> C.venueSpecial2)))
   }
 
   @Test
   def specialsSearch() {
-    val jsonStr = """
-    """
-    testExtraction[SpecialsSearchResponse](jsonStr)
+    testExtraction[SpecialsSearchResponse](C.json(("specials" -> C.countList(2, List[JValue](C.venueSpecial1, C.venueSpecial2)))))
+    testExtraction[SpecialsSearchResponse](C.json(("specials" -> C.countList(0, List[JValue]()))))
   }
 
   @Test
   def flagSpecial() {
-    val jsonStr = """
-    """
-    testExtraction[FlagSpecialResponse](jsonStr)
+    testExtraction[FlagSpecialResponse](C.json(JObject(Nil)))
   }
 
   @Test

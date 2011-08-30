@@ -95,6 +95,14 @@ case class VenueDetail(
 
 case class VenueDetailResponse(venue: VenueDetail)
 
+case class VenueTrendingResponse(venues: List[VenueCompact])
+case class VenueSearchResponse(venues: List[VenueCompact])
+
+case class VenueAddResponse(venue: VenueDetail)
+
+case class VenueHereNowList(count: Int, items: List[CheckinForVenue])
+case class VenueHereNowResponse(hereNow: VenueHereNowList)
+
 
 // User Details
 // TODO: find which of these can be merged; which items are optional
@@ -361,16 +369,11 @@ case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notificat
 // TODO:
 case class UpdateDetailResponse()
 case class CheckinDetailResponse()
-case class VenueAddResponse()
 case class VenueExploreResponse()
-case class VenueSearchResponse()
-case class VenueTrendingResponse()
+
 case class RecentCheckinsResponse()
 case class AddTipResponse()
 case class NotificationsResponse()
-
-
-case class VenueHereNowResponse()
 case class VenueTipsResponse()
 case class VenuePhotosResponse()
 case class VenueLinksResponse()

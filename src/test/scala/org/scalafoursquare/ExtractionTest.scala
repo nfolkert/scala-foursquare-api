@@ -86,6 +86,10 @@ class ExtractionTest extends SpecsMatchers {
     def compactCategory1 = categoryCore1 ~ ("parents" -> List("Parent", "GrandParent")) ~ ("primary" -> true)
     def compactCategory2 = categoryCore2 ~ ("parents" -> List[JValue]()) ~ ("primary" -> true)
 
+    def categoryWithChildren1 = categoryCore1 ~ ("categories" -> List(categoryWithChildren2, categoryWithChildren3))
+    def categoryWithChildren2 = categoryCore2 ~ ("categories" -> List(categoryWithChildren3))
+    def categoryWithChildren3 = categoryCore1 ~ ("categories" -> List[JValue]())
+
     def venueStats1 = ("checkinsCount" -> 10) ~ ("usersCount" -> 11) ~ ("tipCount" -> 12)
     def venueStats2 = ("checkinsCount" -> 10) ~ ("usersCount" -> 11) ~ ("tipCount" -> 12)
 
@@ -378,16 +382,14 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venueAdd() {
-    val jsonStr = """
-    """
-    testExtraction[VenueAddResponse](jsonStr)
+    testExtraction[VenueAddResponse](C.json(("venue" -> C.venueDetail1)))
+    testExtraction[VenueAddResponse](C.json(("venue" -> C.venueDetail2)))
   }
 
   @Test
   def venuesCategories() {
-    val jsonStr = """
-    """
-    testExtraction[VenueCategoriesResponse](jsonStr)
+    testExtraction[VenueCategoriesResponse](C.json(("categories" -> List(C.categoryWithChildren1, C.categoryWithChildren2, C.categoryWithChildren3))))
+    testExtraction[VenueCategoriesResponse](C.json(("categories" -> List[JValue]())))
   }
 
   @Test
@@ -399,23 +401,20 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venuesSearch() {
-    val jsonStr = """
-    """
-    testExtraction[VenueSearchResponse](jsonStr)
+    testExtraction[VenueSearchResponse](C.json(("venues" -> List(C.compactVenue1, C.compactVenue2))))
+    testExtraction[VenueSearchResponse](C.json(("venues" -> List[JValue]())))
   }
 
   @Test
   def venuesTrending() {
-    val jsonStr = """
-    """
-    testExtraction[VenueTrendingResponse](jsonStr)
+    testExtraction[VenueTrendingResponse](C.json(("venues" -> List(C.compactVenue1, C.compactVenue2))))
+    testExtraction[VenueTrendingResponse](C.json(("venues" -> List[JValue]())))
   }
 
   @Test
   def venuesHereNow() {
-    val jsonStr = """
-    """
-    testExtraction[VenueHereNowResponse](jsonStr)
+    testExtraction[VenueHereNowResponse](C.json(("hereNow" -> C.countList(2, List(C.checkinForVenue1, C.checkinForVenue2)))))
+    testExtraction[VenueHereNowResponse](C.json(("hereNow" -> C.countList(0, List[JValue]()))))
   }
 
   @Test

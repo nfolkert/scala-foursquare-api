@@ -363,6 +363,12 @@ class ExtractionTest extends SpecsMatchers {
     def notificationForListUrl = notificationCore1 ~ notificationImage1 ~
       ("target" -> notificationTargetUrl) ~ notificationText1
 
+    def allSettings1 = ("receivePings" -> true) ~ ("receiveCommentPings" -> true) ~
+      ("twitter" -> "twitter1") ~ ("sendToTwitter" -> false) ~
+      ("sendMayorshipsToTwitter" -> true) ~ ("sendBadgesToTwitter" -> false) ~
+      ("facebook" -> 1234) ~ ("sendToFacebook" -> false) ~ ("sendMayorshipsToFacebook" -> false) ~
+      ("sendBadgesToFacebook" -> false) ~ ("foreignConsent" -> "undetermined")
+
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
     def json(v:JValue) = {
@@ -677,26 +683,22 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def addPhoto() {
-    val jsonStr = """
-    """
-    testExtraction[AddPhotoResponse](jsonStr)
+    testExtraction[AddPhotoResponse](C.json(("photo" -> C.photoCore1)))
+    testExtraction[AddPhotoResponse](C.json(("photo" -> C.photoCore2)))
   }
 
   @Test
   def settingDetail() {
-    testExtraction[SettingsDetailResponse]("""{"value":true}""")
-    testExtraction[SettingsDetailResponse]("""{"value":"yes"}""")
-    testExtraction[SettingsDetailResponse]("""{"value":1}""")
+    testExtraction[SettingsDetailResponse](C.json(("value" -> true)))
+    testExtraction[SettingsDetailResponse](C.json(("value" -> "yes")))
+    testExtraction[SettingsDetailResponse](C.json(("value" -> null)))
+    testExtraction[SettingsDetailResponse](C.json(("value" -> 1)))
+    testExtraction[SettingsDetailResponse](C.json(("value" -> 2.5)))
   }
 
   @Test
   def allSettings() {
-    val jsonStr = """
-      {"settings":{"receivePings":true,"receiveCommentPings":true,"twitter":"twitter1","sendToTwitter":false,"sendMayorshipsToTwitter":true,
-      "sendBadgesToTwitter":false,"facebook":1234,"sendToFacebook":false,"sendMayorshipsToFacebook":false,
-      "sendBadgesToFacebook":false,"foreignConsent":"undetermined"}}
-    """
-    testExtraction[AllSettingsResponse](jsonStr)
+    testExtraction[AllSettingsResponse](C.json(("settings" -> C.allSettings1)))
   }
 
   @Test

@@ -400,7 +400,7 @@ case class PhotoDetail(id: String, createdAt: Long, url: String, sizes: PhotoDim
                         checkin: Option[CheckinCore], tip: Option[TipForList]) extends PhotoKernel
 
 
-case class AddPhotoResponse(photo: PhotoForList)
+case class AddPhotoResponse(photo: PhotoCore)
 case class PhotoDetailResponse(photo: PhotoDetail)
 
 

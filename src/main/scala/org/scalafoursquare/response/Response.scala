@@ -387,6 +387,21 @@ case class TodoForVenue(id: String, createdAt: Long, list: Option[TodoListName],
 case class UserTodosList(count: Int, items: List[TodoForList])
 case class UserTodosResponse(todos: UserTodosList)
 
+// Lists
+
+case class ListFollowerList(count: Int, items: Option[List[String]])
+case class ListItemsList(count: Int, items: Option[List[String]])
+
+case class ListCore(id: String, name: String, description: String, user: Option[UserCompact],
+                    editable: Boolean, public: Boolean, collaborative: Boolean,
+                    url: String, createdAt: Option[Long], updatedAt: Option[Long],
+                    photo: Option[PhotoForList])
+case class ListForList(id: String, name: String, description: String, user: Option[UserCompact],
+                       editable: Boolean, public: Boolean, collaborative: Boolean,
+                       url: String, createdAt: Option[Long], updatedAt: Option[Long],
+                       photo: Option[PhotoForList], followers: ListFollowerList,
+                       listItems: ListItemsList)
+
 // Photos
 
 case class PhotoList(count: Int, items: List[PhotoForList])
@@ -486,7 +501,7 @@ trait UpdateTarget {}
 case class UserUpdateTarget(v: UserCompact) extends UpdateTarget
 case class CheckinUpdateTarget(v: CheckinForFeed) extends UpdateTarget
 case class VenueUpdateTarget(v: VenueCompact) extends UpdateTarget
-case class ListUpdateTarget(/*v : List*/) extends UpdateTarget
+case class ListUpdateTarget(v : ListForList) extends UpdateTarget
 case class TipUpdateTarget(v: TipForList) extends UpdateTarget
 case class BadgeUpdateTarget(v: Badge) extends UpdateTarget
 case class SpecialUpdateTarget(v: Special) extends UpdateTarget

@@ -44,9 +44,9 @@ object APICustomSerializers {
     def ob(ov: JValue) = List(JField("object", ov))
     t match {
       case UserUpdateTarget(v) => JObject(tf("user") :: ob(Extraction.decompose(v)))
-      case CheckinUpdateTarget(v) => JObject(tf("checkin") :: ob(Extraction.decompose(v))) // TODO
+      case CheckinUpdateTarget(v) => JObject(tf("checkin") :: ob(Extraction.decompose(v)))
       case VenueUpdateTarget(v) => JObject(tf("venue") :: ob(Extraction.decompose(v)))
-      case ListUpdateTarget(/*v*/) => JObject(tf("list") :: ob(JNull /*Extraction.decompose(v)*/)) // TODO
+      case ListUpdateTarget(v) => JObject(tf("list") :: ob(Extraction.decompose(v)))
       case TipUpdateTarget(v) => JObject(tf("tip") :: ob(Extraction.decompose(v)))
       case BadgeUpdateTarget(v) => JObject(tf("badge") :: ob(Extraction.decompose(v)))
       case SpecialUpdateTarget(v) => JObject(tf("special") :: ob(Extraction.decompose(v)))
@@ -62,7 +62,7 @@ object APICustomSerializers {
       case (Some(JString("user")), Some(obj: JObject))  => UserUpdateTarget(obj.extract[UserCompact])
       case (Some(JString("checkin")), Some(obj: JObject))  => CheckinUpdateTarget(obj.extract[CheckinForFeed])
       case (Some(JString("venue")), Some(obj: JObject))  => VenueUpdateTarget(obj.extract[VenueCompact])
-      case (Some(JString("list")), Some(obj: JObject))  => ListUpdateTarget(/*obj.extract[UserCompact]*/)
+      case (Some(JString("list")), Some(obj: JObject))  => ListUpdateTarget(obj.extract[ListForList])
       case (Some(JString("tip")), Some(obj: JObject))  => TipUpdateTarget(obj.extract[TipForList])
       case (Some(JString("badge")), Some(obj: JObject))  => BadgeUpdateTarget(obj.extract[Badge])
       case (Some(JString("special")), Some(obj: JObject))  => SpecialUpdateTarget(obj.extract[Special])

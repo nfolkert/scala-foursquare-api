@@ -321,12 +321,20 @@ class ExtractionTest extends SpecsMatchers {
   def updateDetails() {
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListUser1)))
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListUser2)))
+
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListCheckin)))
+
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListVenue)))
-    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListList)))
+
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListList1)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListList2)))
+
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListTip)))
+
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListBadge)))
+
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListSpecial)))
+
     testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListUrl)))
   }
 

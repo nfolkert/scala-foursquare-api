@@ -277,6 +277,10 @@ case class CheckinDetail(id: String,
 
 case class CheckinDetailResponse(checkin: CheckinDetail)
 
+case class RecentCheckinsResponse(recent: List[CheckinDetail])
+
+case class CheckinDeleteCommentResponse(checkin: CheckinDetail)
+case class CheckinAddCommentResponse(comment: Comment)
 
 case class Comment(id: String, createdAt: Long, user: UserCompact, text: String, entities: Option[List[MentionEntity]])
 case class CommentList(count: Int, items: List[Comment])
@@ -423,7 +427,7 @@ case class UpdateDetailResponse()
 
 
 
-case class RecentCheckinsResponse()
+
 case class AddTipResponse()
 case class NotificationsResponse()
 
@@ -437,6 +441,4 @@ case class MarkNotificationsReadResponse()
 case class TipUnmarkResponse()
 case class TipMarkDoneResponse()
 case class TipMarkTodoResponse()
-case class CheckinDeleteCommentResponse()
-case class CheckinAddCommentResponse()
 

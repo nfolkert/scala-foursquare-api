@@ -514,30 +514,26 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def checkinAdd() {
-    val jsonStr = """
-    """
-    testExtraction[AddCheckinResponse](jsonStr)
+    testExtraction[AddCheckinResponse](C.json(("checkin" -> C.checkinForFriend1)))
+    testExtraction[AddCheckinResponse](C.json(("checkin" -> C.checkinForFriend2)))
   }
 
   @Test
   def checkinsRecent() {
-    val jsonStr = """
-    """
-    testExtraction[RecentCheckinsResponse](jsonStr)
+    testExtraction[RecentCheckinsResponse](C.json(("recent" -> List(C.checkinDetail1, C.checkinDetail2))))
+    testExtraction[RecentCheckinsResponse](C.json(("recent" -> List[JValue]())))
   }
 
   @Test
   def addCheckinComment() {
-    val jsonStr = """
-    """
-    testExtraction[CheckinAddCommentResponse](jsonStr)
+    testExtraction[CheckinAddCommentResponse](C.json(("comment" -> C.commentsCore1)))
+    testExtraction[CheckinAddCommentResponse](C.json(("comment" -> C.commentsCore2)))
   }
 
   @Test
   def deleteCheckinComment() {
-    val jsonStr = """
-    """    
-    testExtraction[CheckinDeleteCommentResponse](jsonStr)
+    testExtraction[CheckinDeleteCommentResponse](C.json(("checkin" -> C.checkinDetail1)))
+    testExtraction[CheckinDeleteCommentResponse](C.json(("checkin" -> C.checkinDetail2)))
   }
 
   @Test

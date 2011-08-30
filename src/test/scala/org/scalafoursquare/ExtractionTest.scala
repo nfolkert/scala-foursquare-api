@@ -111,6 +111,9 @@ class ExtractionTest extends SpecsMatchers {
       ("icon" -> "theIcon") ~ ("title" -> "theTitle") ~
       redemptionInfo2
 
+    def specialForNotification1 = venueSpecial1 ~ ("venue" -> venueCore1)
+    def specialForNotification2 = venueSpecial2 ~ ("venue" -> venueCore2)
+
     def venueCore1 = ("id" -> "vid") ~ ("name" -> "venueName") ~ ("itemId" -> "tlid") ~ ("contact" -> venueContact1) ~
       ("location" -> venueLocation1) ~ ("categories" -> List(compactCategory1, compactCategory2)) ~
       ("verified" -> true) ~ ("stats" -> venueStats1) ~ ("url" -> "url.com")
@@ -179,6 +182,9 @@ class ExtractionTest extends SpecsMatchers {
     def checkinForVenue1 = checkinCore1 ~ ("user" -> compactUser1)
     def checkinForVenue2 = checkinCore2
 
+    def checkinForFeed1 = checkinCore1 ~ ("venue" -> compactVenue1) ~ ("location" -> checkinLocation1) ~ ("user" -> compactUser1)
+    def checkinForFeed2 = checkinCore2
+
     def userMentionEntity1 = ("indices" -> List(1, 5)) ~ ("type" -> "user") ~ ("user" -> compactUser1)
     def userMentionEntity2 = ("indices" -> List(1, 5)) ~ ("type" -> "user") ~ ("user" -> compactUser2)
 
@@ -213,6 +219,9 @@ class ExtractionTest extends SpecsMatchers {
 
     def image1 = ("prefix" -> "imgPrefix") ~ ("sizes" -> List(100, 200)) ~ ("name" -> "imgName")
     def image2 = ("prefix" -> "imgPrefix") ~ ("sizes" -> List[JValue]()) ~ ("name" -> "imgName")
+
+    def imagePath1 = ("fullPath" -> "imagePath")
+    def imagePath2 = ("fullPath" -> "imagePath")
 
     def badge1 = ("id" -> "bh1id") ~ ("badgeId" -> "bid") ~ ("name" -> "badgeName") ~ ("description" -> "badgeText") ~
       ("hint" -> "badgeHint") ~ ("image" -> image1) ~ ("unlocks" -> List(("checkins") -> List(checkinForFriend1, checkinForFriend2)))
@@ -302,6 +311,50 @@ class ExtractionTest extends SpecsMatchers {
     def exploreGroup1 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 2) ~
       ("items" -> List(compactRecommendation1, compactRecommendation2))
     def exploreGroup2 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("items" -> List[JValue]())
+
+    def notificationCore1 = ("ids" -> List("id1", "id2")) ~ ("createdAt" -> 1000) ~ ("unread" -> true)
+    def notificationCore2 = ("ids" -> List[JValue]()) ~ ("createdAt" -> 1000) ~ ("unread" -> false)
+
+    def notificationImage1 = ("image" -> imagePath1) ~ ("imageType" -> "imageType") ~ ("icon" -> image1)
+    def notificationImage2 = ("image" -> imagePath2) ~ ("imageType" -> "imageType")
+
+    def notificationText1 = ("text" -> "notificationText") ~ entitiesAnnotation1
+    def notificationText2 = ("text" -> "notificationText") ~ entitiesAnnotation2
+
+    def entityAnnotation1 = ("indices" -> List(1, 2)) ~ ("type" -> "entityType")
+    def entityAnnotation2 = ("indices" -> List(1, 2)) ~ ("type" -> "entityType")
+
+    def entitiesAnnotation1 = ("entities" -> List(entityAnnotation1, entityAnnotation2))
+    def entitiesAnnotation2 = ("entities" -> List[JValue]())
+
+    def notificationTargetUser1 = ("type" -> "user") ~ ("object" -> compactUser1)
+    def notificationTargetUser2 = ("type" -> "user") ~ ("object" -> compactUser2)
+    def notificationTargetCheckin = ("type" -> "checkin") ~ ("object" -> checkinForFeed1)
+    def notificationTargetVenue = ("type" -> "venue") ~ ("object" -> compactVenue1)
+    def notificationTargetList = ("type" -> "list") ~ ("object" -> "what?") // TODO
+    def notificationTargetTip = ("type" -> "tip") ~ ("object" -> tipForList1)
+    def notificationTargetBadge = ("type" -> "badge") ~ ("object" -> "what?") // TODO
+    def notificationTargetSpecial = ("type" -> "special") ~ ("object" -> specialForNotification1)
+    def notificationTargetUrl = ("type" -> "url") ~ ("object" -> ("url" -> "someUrl"))
+
+    def notificationForListUser1 = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetUser1) ~ notificationText1
+    def notificationForListUser2 = notificationCore2 ~ notificationImage2 ~
+      ("target" -> notificationTargetUser2) ~ notificationText2
+    def notificationForListCheckin = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetCheckin) ~ notificationText1
+    def notificationForListVenue = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetVenue) ~ notificationText1
+    def notificationForListList = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetList) ~ notificationText1
+    def notificationForListTip = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetTip) ~ notificationText1
+    def notificationForListBadge = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetBadge) ~ notificationText1
+    def notificationForListSpecial = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetSpecial) ~ notificationText1
+    def notificationForListUrl = notificationCore1 ~ notificationImage1 ~
+      ("target" -> notificationTargetUrl) ~ notificationText1
 
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
@@ -586,9 +639,15 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def updateDetails() {
-    val jsonStr = """
-    """
-    testExtraction[UpdateDetailResponse](jsonStr)
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListUser1)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListUser2)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListCheckin)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListVenue)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListList)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListTip)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListBadge)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListSpecial)))
+    testExtraction[UpdateDetailResponse](C.json(("notification" -> C.notificationForListUrl)))
   }
 
 

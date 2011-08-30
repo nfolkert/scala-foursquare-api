@@ -1,11 +1,12 @@
 package org.scalafoursquare.response
 
 import net.liftweb.json.{Extraction, DefaultFormats, TypeInfo, Formats, Serializer}
-import net.liftweb.json.JsonAST.{JBool, JString, JDouble, JInt, JArray, JField, JObject, JValue, JNothing}
+import net.liftweb.json.JsonAST.{JBool, JString, JDouble, JInt, JArray, JField, JObject, JValue, JNothing, JNull}
 
 object APICustomSerializers {
   object Formats extends DefaultFormats
-  def formats = Formats + UserSearchUnmatchedSerializer + PrimitiveSerializer + BadgesSerializer + VenueDetailSerializer
+  def formats = Formats + UserSearchUnmatchedSerializer + PrimitiveSerializer + BadgesSerializer +
+    VenueDetailSerializer + UpdateTargetSerializer
 
   def serializePrimitive(p: Primitive): JValue = {
     p match {
@@ -14,6 +15,7 @@ object APICustomSerializers {
       case StringPrimitive(v) => JString(v)
       case BooleanPrimitive(v) => JBool(v)
       case NothingPrimitive => JNothing
+      case _ => JNothing
     }
   }
   def deserializePrimitive(v: JValue): Primitive = {
@@ -35,6 +37,48 @@ object APICustomSerializers {
       case (TypeInfo(cls, _), v) if cls == theClass => deserializePrimitive(v)
     }
   }
+
+  def serializeUpdateTarget(t: UpdateTarget)(implicit format: Formats): JValue = {
+    def tf(ty: String) = JField("type", JString(ty))
+    def ob(ov: JValue) = List(JField("object", ov))
+    t match {
+      case UserUpdateTarget(v) => JObject(tf("user") :: ob(Extraction.decompose(v)))
+      case CheckinUpdateTarget(/*v*/) => JObject(tf("checkin") :: ob(JNull /*Extraction.decompose(v)*/)) // TODO
+      case VenueUpdateTarget(v) => JObject(tf("venue") :: ob(Extraction.decompose(v)))
+      case ListUpdateTarget(/*v*/) => JObject(tf("list") :: ob(JNull /*Extraction.decompose(v)*/)) // TODO
+      case BadgeUpdateTarget(v) => JObject(tf("badge") :: ob(Extraction.decompose(v)))
+      case SpecialUpdateTarget(v) => JObject(tf("special") :: ob(Extraction.decompose(v)))
+      case UrlUpdateTarget(v) => JObject(tf("url") :: ob(Extraction.decompose(v)))
+      case _ => JNothing
+    }
+  }
+
+  def deserializeUpdateTarget(obj: JObject)(implicit format: Formats): UpdateTarget = {
+    val t = obj.obj.find(_.name == "type").map(_.value)
+    val v = obj.obj.find(_.name == "object").map(_.value)
+    (t,v) match {
+      case (Some(JString("user")), Some(obj: JObject))  => UserUpdateTarget(obj.extract[UserCompact])
+      case (Some(JString("checkin")), Some(obj: JObject))  => CheckinUpdateTarget(/*obj.extract[CheckinForFeed]*/)
+      case (Some(JString("venue")), Some(obj: JObject))  => VenueUpdateTarget(obj.extract[VenueCompact])
+      case (Some(JString("list")), Some(obj: JObject))  => ListUpdateTarget(/*obj.extract[UserCompact]*/)
+      case (Some(JString("tip")), Some(obj: JObject))  => TipUpdateTarget(obj.extract[TipForList])
+      case (Some(JString("badge")), Some(obj: JObject))  => BadgeUpdateTarget(obj.extract[Badge])
+      case (Some(JString("special")), Some(obj: JObject))  => SpecialUpdateTarget(obj.extract[Special])
+      case (Some(JString("url")), Some(obj: JObject))  => UrlUpdateTarget(obj.extract[Url])
+      case _ => NothingUpdateTarget
+    }
+  }
+
+  val UpdateTargetSerializer = new Serializer[UpdateTarget] {
+    def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {
+      case x: UpdateTarget => {serializeUpdateTarget(x)}
+    }
+    val theClass = classOf[UpdateTarget]
+    def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), UpdateTarget] = {
+      case (TypeInfo(cls, _), obj: JObject) if cls == theClass => deserializeUpdateTarget(obj)
+    }
+  }
+
 
   val UserSearchUnmatchedSerializer = new Serializer[UserSearchUnmatched] {
     def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {

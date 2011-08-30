@@ -220,6 +220,7 @@ case class UserVenueHistoryElement(beenHere: Int, venue: VenueCompact)
 case class UserVenueHistoryList(count: Int, items: List[UserVenueHistoryElement])
 case class UserVenueHistoryResponse(venues: UserVenueHistoryList)
 
+case class AnnotatedEntity(indices: List[Int], `type`: String)
 case class MentionEntity(indices: List[Int], `type`: String, user: UserCompact)
 
 case class CheckinLocation(name: String, lat: Double, lng: Double)
@@ -316,12 +317,13 @@ case class LeaderboardItem(user: UserCompact, scores: UserScores, rank: Int)
 case class Leaderboard(count: Int, items: List[LeaderboardItem])
 case class LeaderboardResponse(leaderboard: Leaderboard)
 
-case class BadgeImage(prefix: String, sizes: List[Int], name: String)
-case class BadgeGroup(`type`: String, name: String, image: BadgeImage, items: List[String], groups: List[BadgeGroup])
+case class Image(prefix: Option[String], sizes: Option[List[Int]], name: Option[String], fullPath: Option[String])
+
+case class BadgeGroup(`type`: String, name: String, image: Image, items: List[String], groups: List[BadgeGroup])
 case class BadgeSets(groups: List[BadgeGroup])
 case class BadgeUnlocks(checkins: List[CheckinForFriend])
 case class Badge(id: String, badgeId: String, name: String, description: Option[String], hint: Option[String],
-                 image: BadgeImage , unlocks:List[BadgeUnlocks])
+                 image: Image , unlocks:List[BadgeUnlocks])
 case class Badges(map: Map[String, Badge])
 case class UserBadgesResponse(sets: BadgeSets, badges: Badges, defaultSetType: String)
 
@@ -433,8 +435,25 @@ case class Response[T](meta: Meta, notifications: Option[List[Notification]], re
 case class MultiResponse[A,B,C,D,E](meta: Meta, notifications: Option[List[Notification]], responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]))
 case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notification]], responses: Option[List[Response[A]]])
 
+case class Url(url: String)
+
+trait UpdateTarget {}
+case class UserUpdateTarget(v: UserCompact) extends UpdateTarget
+case class CheckinUpdateTarget(/*v: CheckinForFeed*/) extends UpdateTarget
+case class VenueUpdateTarget(v: VenueCompact) extends UpdateTarget
+case class ListUpdateTarget(/*v : List*/) extends UpdateTarget
+case class TipUpdateTarget(v: TipForList) extends UpdateTarget
+case class BadgeUpdateTarget(v: Badge) extends UpdateTarget
+case class SpecialUpdateTarget(v: Special) extends UpdateTarget
+case class UrlUpdateTarget(v: Url) extends UpdateTarget
+case object NothingUpdateTarget extends UpdateTarget
+
+case class UpdateDetail(ids: List[String], createdAt: Long, unread: Boolean,
+                        image: Image, imageType: String, icon: Option[Image],
+                        target: UpdateTarget, text: String, entities: List[AnnotatedEntity])
+
 // TODO:
-case class UpdateDetailResponse()
+case class UpdateDetailResponse(notification: UpdateDetail)
 
 case class NotificationsResponse()
 

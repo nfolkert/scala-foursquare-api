@@ -3,6 +3,7 @@ package org.scalafoursquare
 import net.liftweb.json.{JsonAST, Printer, Extraction, JsonParser}
 import net.liftweb.json.JsonAST.{JValue, JObject}
 import net.liftweb.json.JsonDSL._
+import org.scalafoursquare.call.App
 import org.scalafoursquare.response._
 import org.specs.SpecsMatchers
 import org.junit.{Ignore, Test}
@@ -228,6 +229,9 @@ class ExtractionTest extends SpecsMatchers {
     def badge2 = ("id" -> "bh2id") ~ ("badgeId" -> "bid") ~ ("name" -> "badgeName") ~ ("image" -> image2) ~
       ("unlocks" -> List[JValue]())
 
+    def badgePlusUser1 = badge1 ~ ("user" -> compactUser1)
+    def badgePlusUser2 = badge2
+
     def badges1 = ("bh1id" -> badge1) ~ ("bh2id" -> badge2)
     def badges2 = JObject(Nil)
 
@@ -340,7 +344,7 @@ class ExtractionTest extends SpecsMatchers {
     def notificationTargetVenue = ("type" -> "venue") ~ ("object" -> compactVenue1)
     def notificationTargetList = ("type" -> "list") ~ ("object" -> "what?") // TODO
     def notificationTargetTip = ("type" -> "tip") ~ ("object" -> tipForList1)
-    def notificationTargetBadge = ("type" -> "badge") ~ ("object" -> "what?") // TODO
+    def notificationTargetBadge = ("type" -> "badge") ~ ("object" -> badgePlusUser1)
     def notificationTargetSpecial = ("type" -> "special") ~ ("object" -> specialForNotification1)
     def notificationTargetUrl = ("type" -> "url") ~ ("object" -> ("url" -> "someUrl"))
 
@@ -732,8 +736,19 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def multi() {
-    val jsonStr = """
-    """
-    testExtraction[MultiResponse[SettingsDetailResponse, SettingsDetailResponse, SettingsDetailResponse, SettingsDetailResponse, SettingsDetailResponse]](jsonStr)
+    val oneResponse = ("meta" -> ("code" -> 200)) ~ ("response" -> ("value" -> "yes"))
+    val json = ("responses" -> List(oneResponse, oneResponse, oneResponse))
+
+    val res = App.extractMultiResponse[SettingsDetailResponse, SettingsDetailResponse, SettingsDetailResponse, Nothing, Nothing](json)
+
+    res._1.isDefined must_== true
+    res._2.isDefined must_== true
+    res._3.isDefined must_== true
+    res._4.isDefined must_== false
+    res._5.isDefined must_== false
+
+    val resList = App.extractMultiListResponse[SettingsDetailResponse](json)
+    resList.isDefined must_== true
+    resList.get.length must_== 3
   }
 }

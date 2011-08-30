@@ -334,7 +334,7 @@ case class BadgeGroup(`type`: String, name: String, image: Image, items: List[St
 case class BadgeSets(groups: List[BadgeGroup])
 case class BadgeUnlocks(checkins: List[CheckinForFriend])
 case class Badge(id: String, badgeId: String, name: String, description: Option[String], hint: Option[String],
-                 image: Image , unlocks:List[BadgeUnlocks])
+                 image: Image , unlocks:List[BadgeUnlocks], user: Option[UserCompact])
 case class Badges(map: Map[String, Badge])
 case class UserBadgesResponse(sets: BadgeSets, badges: Badges, defaultSetType: String)
 

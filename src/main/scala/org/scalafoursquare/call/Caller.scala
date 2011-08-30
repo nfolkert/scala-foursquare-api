@@ -1,6 +1,6 @@
 package org.scalafoursquare.call
 
-import net.liftweb.json.{DefaultFormats, JsonParser}
+import net.liftweb.json.{Formats, JsonParser}
 import net.liftweb.json.JsonAST.{JArray, JObject}
 import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
@@ -136,29 +136,12 @@ abstract class App(val caller: Caller) {
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
     val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
-    val responses = {
+    val responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]) = {
       if (meta.code != 200)
         (None, None, None, None, None)
       else {
-        val responses = fields.find(_.name == "response").get.value.asInstanceOf[JObject].obj.find(_.name == "responses").get.value.asInstanceOf[JArray]
-        def response(idx: Int) = if (idx >= responses.arr.length) None else Some(responses.arr(idx))
-
-        def convert[T](idx: Int)(implicit mf: Manifest[T]): Option[Response[T]] = {
-          response(idx).map(res=>{
-            val sfields = res.asInstanceOf[JObject].obj
-            val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
-            val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
-            val sresponse = {
-              if (smeta.code != 200)
-                None
-              else
-                Some(sfields.find(_.name == "response").get.value.extract[T])
-            }
-            Response[T](smeta, snotifications, sresponse)
-          })
-        }
-
-        (convert[A](0), convert[B](1), convert[C](2), convert[D](3), convert[E](4))
+        val parentResponse = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
+        App.extractMultiResponse(parentResponse)
       }
     }
     MultiResponse[A,B,C,D,E](meta, notifications, responses)
@@ -170,27 +153,56 @@ abstract class App(val caller: Caller) {
     val fields = json.asInstanceOf[JObject].obj
     val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
     val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
-    val responses = {
+    val responses: Option[List[Response[A]]] = {
       if (meta.code != 200)
         None
       else {
-        val responses = fields.find(_.name == "response").get.value.asInstanceOf[JObject].obj.find(_.name == "responses").asInstanceOf[JArray]
-        val resolved: List[Response[A]] = responses.arr.map(res => {
-          val sfields = res.asInstanceOf[JObject].obj
-          val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
-          val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
-          val sresponse = {
-            if (smeta.code != 200)
-              None
-            else
-              Some(sfields.find(_.name == "response").get.value.extract[A])
-          }
-          Response[A](smeta, snotifications, sresponse)
-        })
-        Some(resolved)
+        val parentResponse = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
+        App.extractMultiListResponse(parentResponse)
       }
     }
     MultiResponseList[A](meta, notifications, responses)
+  }
+}
+
+object App {
+  def extractMultiResponse[A,B,C,D,E](obj: JObject)(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E], formats: Formats) = {
+    val responses = obj.obj.find(_.name == "responses").get.value.asInstanceOf[JArray]
+    def response(idx: Int) = if (idx >= responses.arr.length) None else Some(responses.arr(idx))
+
+    def convert[T](idx: Int)(implicit mf: Manifest[T]): Option[Response[T]] = {
+      response(idx).map(res=>{
+        val sfields = res.asInstanceOf[JObject].obj
+        val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
+        val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+        val sresponse = {
+          if (smeta.code != 200)
+            None
+          else
+            Some(sfields.find(_.name == "response").get.value.extract[T])
+        }
+        Response[T](smeta, snotifications, sresponse)
+      })
+    }
+
+    (convert[A](0), convert[B](1), convert[C](2), convert[D](3), convert[E](4))
+  }
+  
+  def extractMultiListResponse[A](obj: JObject)(implicit mf: Manifest[A], formats: Formats) = {
+    val responses = obj.obj.find(_.name == "responses").get.value.asInstanceOf[JArray]
+    val resolved: List[Response[A]] = responses.arr.map(res => {
+      val sfields = res.asInstanceOf[JObject].obj
+      val smeta = sfields.find(_.name == "meta").map(_.extract[Meta]).get
+      val snotifications = sfields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[Notification]))
+      val sresponse = {
+        if (smeta.code != 200)
+          None
+        else
+          Some(sfields.find(_.name == "response").get.value.extract[A])
+      }
+      Response[A](smeta, snotifications, sresponse)
+    })
+    Some(resolved)
   }
 }
 

@@ -91,6 +91,7 @@ object APICustomSerializers {
       case MayorshipNotification(v) => JObject(tf("mayorship") :: ob(Extraction.decompose(v)))
       case SpecialsNotification(v) => JObject(tf("specials") :: ob(Extraction.decompose(v)))
       case MessageNotification(v) => JObject(tf("message") :: ob(Extraction.decompose(v)))
+      case ScoreNotification(v) => JObject(tf("score") :: ob(Extraction.decompose(v)))
       case NotificationTrayNotification(v) => JObject(tf("notificationTray") :: ob(Extraction.decompose(v)))
       case _ => JNothing
     }
@@ -100,13 +101,14 @@ object APICustomSerializers {
     val t = obj.obj.find(_.name == "type").map(_.value)
     val v = obj.obj.find(_.name == "item").map(_.value)
     (t,v) match {
-      case (Some(JString("badge")), Some(obj: JObject))  => BadgeNotification(obj.extract[Placeholder])
-      case (Some(JString("tip")), Some(obj: JObject))  => TipNotification(obj.extract[Placeholder])
-      case (Some(JString("tipAlert")), Some(obj: JObject))  => TipAlertNotification(obj.extract[Placeholder])
-      case (Some(JString("leadership")), Some(obj: JObject))  => LeaderboardNotification(obj.extract[Placeholder])
-      case (Some(JString("mayorship")), Some(obj: JObject))  => MayorshipNotification(obj.extract[Placeholder])
-      case (Some(JString("specials")), Some(obj: JObject))  => SpecialsNotification(obj.extract[Placeholder])
-      case (Some(JString("message")), Some(obj: JObject))  => MessageNotification(obj.extract[Placeholder])
+      case (Some(JString("badge")), Some(obj: JObject))  => BadgeNotification(obj.extract[BadgeNotificationContent])
+      case (Some(JString("tip")), Some(obj: JObject))  => TipNotification(obj.extract[TipNotificationContent])
+      case (Some(JString("tipAlert")), Some(obj: JObject))  => TipAlertNotification(obj.extract[TipAlertNotificationContent])
+      case (Some(JString("leaderboard")), Some(obj: JObject))  => LeaderboardNotification(obj.extract[LeaderboardNotificationContent])
+      case (Some(JString("mayorship")), Some(obj: JObject))  => MayorshipNotification(obj.extract[MayorshipNotificationContent])
+      case (Some(JString("specials")), Some(obj: JObject))  => SpecialsNotification(obj.extract[SpecialNotificationContent])
+      case (Some(JString("message")), Some(obj: JObject))  => MessageNotification(obj.extract[MessageNotificationContent])
+      case (Some(JString("score")), Some(obj: JObject)) => ScoreNotification(obj.extract[ScoreNotificationContent])
       case (Some(JString("notificationTray")), Some(obj: JObject)) => NotificationTrayNotification(obj.extract[NotificationTrayNotificationContent])
       case _ => NothingNotificationItem
     }

@@ -26,7 +26,6 @@ case class VenueLists(count: Int, items: List[String])
 trait VenueKernel {
   def id: String
   def name: String
-  def itemId: String
   def contact: VenueContact
   def location: VenueLocation
   def categories: List[VenueCategoryCompact]
@@ -35,10 +34,10 @@ trait VenueKernel {
   def url: Option[String]
 }
 
-case class VenueCore(id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
+case class VenueCore(id: String, name: String, contact: VenueContact, location: VenueLocation,
                      categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String])
 
-case class VenueCompact(id: String, name: String, itemId: String, contact: VenueContact, location: VenueLocation,
+case class VenueCompact(id: String, name: String, contact: VenueContact, location: VenueLocation,
                         categories: List[VenueCategoryCompact], verified: Boolean, stats: VenueStats, url: Option[String],
                         specials: Option[List[Special]], hereNow: Option[VenueHereNowCompact],
                         events: Option[List[CompactEvent]]) extends VenueKernel
@@ -67,7 +66,6 @@ case class VenueDetail(
 ) {
   def id = core.id
   def name = core.name
-  def itemId = core.itemId
   def contact = core.contact
   def location = core.location
   def categories = core.categories
@@ -345,7 +343,6 @@ case class DoneStat(count: Int)
 trait TipKernel {
   def id: String
   def createdAt: Long
-  def itemId: String
   def text: String
   def url: Option[String]
   def status: Option[String]
@@ -358,9 +355,9 @@ trait TipStats {
   def done: DoneStat
 }
 
-case class TipCore(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
+case class TipCore(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String]) extends TipKernel
-case class TipForList(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
+case class TipForList(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String], todo: TodoStat, done: DoneStat,
                venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
 case class TipSearchResponse(tips: List[TipForList])
@@ -371,7 +368,7 @@ case class DoneDetailGroup(`type`: String, name: String, count: Option[Int], ite
 case class TodoDetail(count: Int, groups: List[TodoDetailGroup])
 case class DoneDetail(count: Int, groups: List[DoneDetailGroup])
 
-case class TipDetail(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
+case class TipDetail(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String], venue: Option[VenueCompact],
                user: Option[UserCompact], todo: TodoDetail, done: DoneDetail) extends TipKernel
 case class TipDetailResponse(tip: TipDetail)
@@ -448,18 +445,32 @@ case class ChangeSettingsResponse(settings: AllSettings)
 
 case class Meta(code: Int, errorType: Option[String], errorDetail: Option[String])
 
-case class Placeholder(v: Option[String] = None)
-
+case class CompactBadgeAwardPlan(id: String, name: String, description: String, image: Image)
+case class BadgeNotificationContent(badge: CompactBadgeAwardPlan)
 case class NotificationTrayNotificationContent(unreadCount: Int)
+case class MessageNotificationContent(message: String)
+case class TipNotificationContent(tip: TipForList, name: String)
+case class TipAlertNotificationContent(tip: TipForList)
+case class SpecialNotificationContent(special: Special)
+
+case class MayorshipNotificationContent(`type`: String, checkins: Option[Int], daysBehind: Option[Int],
+                                        user: Option[UserCompact], message: String, image: String)
+
+case class LeaderboardNotificationContent(leaderboard: List[LeaderboardItem], message: String,
+                                          scores: List[ScoreNotificationItem], total: Int)
+
+case class ScoreNotificationItem(points: Int, icon: String, message: String)
+case class ScoreNotificationContent(scores: List[ScoreNotificationItem], total: Int)
 
 trait NotificationItem {}
-case class BadgeNotification(v: Placeholder) extends NotificationItem
-case class TipNotification(v: Placeholder) extends NotificationItem
-case class TipAlertNotification(v: Placeholder) extends NotificationItem
-case class LeaderboardNotification(v: Placeholder) extends NotificationItem
-case class MayorshipNotification(v: Placeholder) extends NotificationItem
-case class SpecialsNotification(v: Placeholder) extends NotificationItem
-case class MessageNotification(v: Placeholder) extends NotificationItem
+case class BadgeNotification(v: BadgeNotificationContent) extends NotificationItem
+case class TipNotification(v: TipNotificationContent) extends NotificationItem
+case class TipAlertNotification(v: TipAlertNotificationContent) extends NotificationItem
+case class LeaderboardNotification(v: LeaderboardNotificationContent) extends NotificationItem
+case class MayorshipNotification(v: MayorshipNotificationContent) extends NotificationItem
+case class SpecialsNotification(v: SpecialNotificationContent) extends NotificationItem
+case class MessageNotification(v: MessageNotificationContent) extends NotificationItem
+case class ScoreNotification(v: ScoreNotificationContent) extends NotificationItem
 case class NotificationTrayNotification(v: NotificationTrayNotificationContent) extends NotificationItem
 case object NothingNotificationItem extends NotificationItem
 

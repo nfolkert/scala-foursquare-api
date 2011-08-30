@@ -255,6 +255,18 @@ class ExtractionTest extends SpecsMatchers {
     def tipForVenue1 = tipCore1 ~ tipStats1 ~ ("user" -> compactUser1)
     def tipForVenue2 = tipCore2 ~ tipStats2
 
+    def tipTodoGroup1 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 2) ~
+      ("items" -> List(compactUser1, compactUser2))
+    def tipTodoGroup2 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ 
+      ("items" -> List[JValue]())
+
+    def tipTodoGroups1 = ("count" -> 2) ~ ("groups" -> List(tipTodoGroup1, tipTodoGroup2))
+    def tipTodoGroups2 = ("count" -> 0) ~ ("groups" -> List[JValue]())
+
+    def tipDetail1 = tipCore1 ~ ("venue" -> compactVenue1) ~ ("user" -> compactUser1) ~
+      ("todo" -> tipTodoGroups1) ~ ("done" -> tipTodoGroups1)
+    def tipDetail2 = tipCore1 ~ ("todo" -> tipTodoGroups2) ~ ("done" -> tipTodoGroups2)
+
     def todoCore1 = ("id" -> "todoId") ~ ("createdAt" -> 1000)
     def todoCore2 = ("id" -> "todoId") ~ ("createdAt" -> 1000)
 
@@ -538,9 +550,8 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def tipDetail() {
-    val jsonStr = """
-    """
-    testExtraction[TipDetailResponse](jsonStr)
+    testExtraction[TipDetailResponse](C.json(("tip" -> C.tipDetail1)))
+    testExtraction[TipDetailResponse](C.json(("tip" -> C.tipDetail2)))
   }
 
   @Test

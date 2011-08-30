@@ -352,9 +352,15 @@ case class TipForList(id: String, createdAt: Long, itemId: String, text: String,
                venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
 case class TipSearchResponse(tips: List[TipForList])
 
+case class TodoDetailGroup(`type`: String, name: String, count: Option[Int], items: List[UserCompact])
+case class DoneDetailGroup(`type`: String, name: String, count: Option[Int], items: List[UserCompact])
+
+case class TodoDetail(count: Int, groups: List[TodoDetailGroup])
+case class DoneDetail(count: Int, groups: List[DoneDetailGroup])
+
 case class TipDetail(id: String, createdAt: Long, itemId: String, text: String, url: Option[String], status: Option[String],
-               photo: Option[PhotoCore], photourl: Option[String], todo: TodoStat, done: DoneStat,
-               venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
+               photo: Option[PhotoCore], photourl: Option[String], venue: Option[VenueCompact],
+               user: Option[UserCompact], todo: TodoDetail, done: DoneDetail) extends TipKernel
 case class TipDetailResponse(tip: TipDetail)
 
 

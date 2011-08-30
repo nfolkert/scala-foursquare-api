@@ -257,6 +257,17 @@ case class CheckinForVenue(id: String,
                            timeZone: String,
                            user: Option[UserCompact])
 
+case class CheckinForFeed(id: String,
+                          createdAt: Long,
+                          `type`: String,
+                          `private`: Option[Boolean],
+                          shout: Option[String],
+                          isMayor: Option[Boolean],
+                          timeZone: String,
+                          venue: Option[VenueCompact],
+                          location: Option[CheckinLocation],
+                          user: Option[UserCompact])
+
 case class CheckinOverlapList(count: Int, items: List[CheckinForVenue])
 case class CheckinDetail(id: String,
                          createdAt: Long,
@@ -431,8 +442,7 @@ case class MarkNotificationsReadResponse()
 
 // Settings
 case class SettingsDetailResponse(value: Primitive)
-case class ChangeSettingsResponse() // (message: String)
-// {"meta":{"code":200},"notifications":[{"type":"notificationTray","item":{"unreadCount":0}}],"response":{"settings":{"receivePings":true,"receiveCommentPings":true,"twitter":"nfolkert","sendToTwitter":true,"sendMayorshipsToTwitter":true,"sendBadgesToTwitter":true,"facebook":203195,"sendToFacebook":true,"sendMayorshipsToFacebook":false,"sendBadgesToFacebook":true,"enableDebug":true,"foreignConsent":"undetermined"}}}
+case class ChangeSettingsResponse(settings: AllSettings)
 
 case class Meta(code: Int, errorType: Option[String], errorDetail: Option[String])
 
@@ -447,7 +457,7 @@ case class Url(url: String)
 
 trait UpdateTarget {}
 case class UserUpdateTarget(v: UserCompact) extends UpdateTarget
-case class CheckinUpdateTarget(/*v: CheckinForFeed*/) extends UpdateTarget
+case class CheckinUpdateTarget(v: CheckinForFeed) extends UpdateTarget
 case class VenueUpdateTarget(v: VenueCompact) extends UpdateTarget
 case class ListUpdateTarget(/*v : List*/) extends UpdateTarget
 case class TipUpdateTarget(v: TipForList) extends UpdateTarget

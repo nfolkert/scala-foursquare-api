@@ -368,6 +368,11 @@ class ExtractionTest extends SpecsMatchers {
       ("sendMayorshipsToTwitter" -> true) ~ ("sendBadgesToTwitter" -> false) ~
       ("facebook" -> 1234) ~ ("sendToFacebook" -> false) ~ ("sendMayorshipsToFacebook" -> false) ~
       ("sendBadgesToFacebook" -> false) ~ ("foreignConsent" -> "undetermined")
+    def allSettings2 = ("receivePings" -> true) ~ ("receiveCommentPings" -> true) ~
+      ("sendToTwitter" -> false) ~ ("sendMayorshipsToTwitter" -> true) ~
+      ("sendBadgesToTwitter" -> false) ~ ("sendToFacebook" -> false) ~
+      ("sendMayorshipsToFacebook" -> false) ~ ("sendBadgesToFacebook" -> false) ~
+      ("foreignConsent" -> "undetermined")
 
     def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
@@ -699,13 +704,13 @@ class ExtractionTest extends SpecsMatchers {
   @Test
   def allSettings() {
     testExtraction[AllSettingsResponse](C.json(("settings" -> C.allSettings1)))
+    testExtraction[AllSettingsResponse](C.json(("settings" -> C.allSettings2)))
   }
 
   @Test
   def changeSettings() {
-    val jsonStr = """
-    """
-    testExtraction[ChangeSettingsResponse](jsonStr)
+    testExtraction[ChangeSettingsResponse](C.json(("settings" -> C.allSettings1)))
+    testExtraction[ChangeSettingsResponse](C.json(("settings" -> C.allSettings2)))
   }
 
   @Test

@@ -261,7 +261,7 @@ class UserlessApp(caller: Caller) extends App(caller) {
   def venueSearch(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None, altAcc: Option[Double]=None,
                   query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None,
                   categoryId: Option[String]=None, url: Option[String]=None, providerId: Option[String]=None,
-                  linkedId: Option[String]) =
+                  linkedId: Option[String]=None) =
     new Request[VenueSearchResponse](this, "/venues/search",
       p("ll", lat + "," + long) ++
       op("llAcc", llAcc) ++

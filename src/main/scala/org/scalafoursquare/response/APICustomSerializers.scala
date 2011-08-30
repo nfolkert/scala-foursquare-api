@@ -14,7 +14,7 @@ object APICustomSerializers {
       case DoublePrimitive(v) => JDouble(v)
       case StringPrimitive(v) => JString(v)
       case BooleanPrimitive(v) => JBool(v)
-      case NothingPrimitive => JNothing
+      case NullPrimitive => JNull
       case _ => JNothing
     }
   }
@@ -24,6 +24,7 @@ object APICustomSerializers {
       case JDouble(x) => DoublePrimitive(x)
       case JString(x) => StringPrimitive(x)
       case JBool(x) => BooleanPrimitive(x)
+      case JNull => NullPrimitive
       case _ => NothingPrimitive
     }
   }

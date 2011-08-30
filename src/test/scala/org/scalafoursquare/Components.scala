@@ -1,12 +1,8 @@
 package org.scalafoursquare
 
-import net.liftweb.json.{JsonAST, Printer, Extraction, JsonParser}
+import net.liftweb.json.{JsonAST, Printer}
 import net.liftweb.json.JsonAST.{JValue, JObject}
 import net.liftweb.json.JsonDSL._
-import org.scalafoursquare.call.App
-import org.scalafoursquare.response._
-import org.specs.SpecsMatchers
-import org.junit.{Ignore, Test}
 
 object Components {
   def userContact1 = ("phone" -> "7018675309") ~ ("email" -> "user@email.com") ~ ("twitter" -> "handle") ~ ("facebook" -> "fbid")

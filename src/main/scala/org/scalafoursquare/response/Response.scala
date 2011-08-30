@@ -174,6 +174,7 @@ case class IntPrimitive(v: Int) extends Primitive
 case class DoublePrimitive(v: Double) extends Primitive
 case class StringPrimitive(v: String) extends Primitive
 case class BooleanPrimitive(v: Boolean) extends Primitive
+case object NullPrimitive extends Primitive
 case object NothingPrimitive extends Primitive
 
 class UserSearchUnmatched(val map: Map[String, List[Primitive]])

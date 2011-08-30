@@ -556,37 +556,32 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def addTip() {
-    val jsonStr = """
-    """
-    testExtraction[AddTipResponse](jsonStr)
+    testExtraction[AddTipResponse](C.json(("tip" -> C.tipForVenue1)))
+    testExtraction[AddTipResponse](C.json(("tip" -> C.tipForVenue2)))
   }
 
   @Test
   def tipSearch() {
-    val jsonStr = """
-    """
-    testExtraction[TipSearchResponse](jsonStr)
+    testExtraction[TipSearchResponse](C.json(("tips" -> List(C.tipForList1, C.tipForList2))))
+    testExtraction[TipSearchResponse](C.json(("tips" -> List[JValue]())))
   }
 
   @Test
   def markTipTodo() {
-    val jsonStr = """
-    """
-    testExtraction[TipMarkTodoResponse](jsonStr)
+    testExtraction[TipMarkTodoResponse](C.json(("todo" -> C.todoForList1)))
+    testExtraction[TipMarkTodoResponse](C.json(("todo" -> C.todoForList2)))
   }
 
   @Test
   def markTipDone() {
-    val jsonStr = """
-    """
-    testExtraction[TipMarkDoneResponse](jsonStr)
+    testExtraction[TipMarkDoneResponse](C.json(("tip" -> C.tipDetail1)))
+    testExtraction[TipMarkDoneResponse](C.json(("tip" -> C.tipDetail2)))
   }
 
   @Test
   def unmarkTip() {
-    val jsonStr = """
-    """
-    testExtraction[TipUnmarkResponse](jsonStr)
+    testExtraction[TipUnmarkResponse](C.json(("tip" -> C.tipDetail1)))
+    testExtraction[TipUnmarkResponse](C.json(("tip" -> C.tipDetail2)))
   }
 
   @Test

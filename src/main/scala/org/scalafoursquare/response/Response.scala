@@ -363,6 +363,11 @@ case class TipDetail(id: String, createdAt: Long, itemId: String, text: String, 
                user: Option[UserCompact], todo: TodoDetail, done: DoneDetail) extends TipKernel
 case class TipDetailResponse(tip: TipDetail)
 
+case class AddTipResponse(tip: TipForList)
+case class TipMarkTodoResponse(todo: TodoForList)
+
+case class TipUnmarkResponse(tip: TipDetail)
+case class TipMarkDoneResponse(tip: TipDetail)
 
 case class TodoListName(name: String)
 case class TodoForList(id: String, createdAt: Long, list: Option[TodoListName], tip: Option[TipForList])
@@ -431,10 +436,6 @@ case class MultiResponseList[A](meta: Meta, notifications: Option[List[Notificat
 // TODO:
 case class UpdateDetailResponse()
 
-
-
-
-case class AddTipResponse()
 case class NotificationsResponse()
 
 
@@ -444,7 +445,5 @@ case class NotificationsResponse()
 
 case class FlagSpecialResponse()
 case class MarkNotificationsReadResponse()
-case class TipUnmarkResponse()
-case class TipMarkDoneResponse()
-case class TipMarkTodoResponse()
+
 

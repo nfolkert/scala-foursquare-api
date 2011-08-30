@@ -396,7 +396,8 @@ case class PhotoForList(id: String, createdAt: Long, url: String, sizes: PhotoDi
                         user: Option[UserCompact], visibility: String, checkin: Option[CheckinForFriend]) extends PhotoKernel
 
 case class PhotoDetail(id: String, createdAt: Long, url: String, sizes: PhotoDimensionList, source: Option[OAuthSource],
-                        user: Option[UserCompact], venue: Option[VenueCompact], tip: Option[TipForList]) extends PhotoKernel
+                        user: Option[UserCompact], venue: Option[VenueCompact],
+                        checkin: Option[CheckinCore], tip: Option[TipForList]) extends PhotoKernel
 
 
 case class AddPhotoResponse(photo: PhotoForList)
@@ -419,6 +420,13 @@ case class SpecialDetailResponse(special: Special)
 
 case class SpecialList(count: Int, items: List[Special])
 case class SpecialsSearchResponse(specials: SpecialList)
+
+// Notifications
+case class UpdateDetailResponse(notification: UpdateDetail)
+
+case class NotificationList(count: Int, items: List[UpdateDetail])
+case class NotificationsResponse(notifications: NotificationList)
+case class MarkNotificationsReadResponse()
 
 
 // Settings
@@ -453,16 +461,8 @@ case class UpdateDetail(ids: List[String], createdAt: Long, unread: Boolean,
                         target: UpdateTarget, text: String, entities: List[AnnotatedEntity])
 
 // TODO:
-case class UpdateDetailResponse(notification: UpdateDetail)
-
-case class NotificationsResponse()
-
-
-
-
 
 
 case class FlagSpecialResponse()
-case class MarkNotificationsReadResponse()
 
 

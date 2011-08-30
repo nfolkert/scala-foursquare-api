@@ -248,6 +248,10 @@ class ExtractionTest extends SpecsMatchers {
     def photoForVenueListWithCheckin1 = photoForList1 ~ ("checkin" -> checkinCore1)
     def photoForVenueListWithCheckin2 = photoForList2
 
+    def photoDetail1 = photoCore1 ~ ("user" -> compactUser1) ~ ("venue" -> compactVenue1) ~
+      ("checkin" -> checkinCore1) ~ ("tip" -> tipForPhoto1)
+    def photoDetail2 = photoCore2
+
     def tipCore1 = ("id" -> "tid") ~ ("createdAt" -> 1000) ~ ("itemId" -> "eid") ~ ("text" -> "tipText") ~
       ("url" -> "tipUrl") ~ ("status" -> "tipBindStatus") ~ ("photo" -> photoCore1) ~ ("photourl" -> "tipPhotoUrl")
     def tipCore2 = ("id" -> "tid") ~ ("createdAt" -> 1000) ~ ("itemId" -> "eid") ~ ("text" -> "tipText")
@@ -263,6 +267,9 @@ class ExtractionTest extends SpecsMatchers {
 
     def tipForVenue1 = tipCore1 ~ tipStats1 ~ ("user" -> compactUser1)
     def tipForVenue2 = tipCore2 ~ tipStats2
+
+    def tipForPhoto1 = tipCore1 ~ tipStats1
+    def tipForPhoto2 = tipCore2 ~ tipStats2
 
     def tipTodoGroup1 = ("type" -> "groupType") ~ ("name" -> "groupName") ~ ("count" -> 2) ~
       ("items" -> List(compactUser1, compactUser2))
@@ -653,23 +660,19 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def notifications() {
-    val jsonStr = """
-    """
-    testExtraction[NotificationsResponse](jsonStr)
+    testExtraction[NotificationsResponse](C.json("notifications" -> C.countList(2, List(C.notificationForListUser1, C.notificationForListUser2))))
+    testExtraction[NotificationsResponse](C.json("notifications" -> C.countList(0, List[JValue]())))
   }
 
   @Test
   def markNotificationsRead() {
-    val jsonStr = """
-    """
-    testExtraction[MarkNotificationsReadResponse](jsonStr)
+    testExtraction[MarkNotificationsReadResponse](C.json(JObject(Nil)))
   }
 
   @Test
   def photoDetail() {
-    val jsonStr = """
-    """
-    testExtraction[PhotoDetailResponse](jsonStr)
+    testExtraction[PhotoDetailResponse](C.json(("photo" -> C.photoDetail1)))
+    testExtraction[PhotoDetailResponse](C.json(("photo" -> C.photoDetail2)))
   }
 
   @Test

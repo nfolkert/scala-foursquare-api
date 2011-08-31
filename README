@@ -1,7 +1,7 @@
 This is a Scala implementation of a caller for the foursquare API.
 
 To use, you need to create an HttpCaller object and supply it with your client information (you can get
-client credentials at foursquare.com/oauth).  This caller object gets passed into either a 
+client credentials at https://foursquare.com/oauth).  This caller object gets passed into either a 
 UserlessApp (which makes all requests using only your client secret rather than an access token, so 
 only a limited set of endpoints are available) or an AuthApp (which requires a user's access token, thus
 binding any requests made to that user).  To get a user's access token, you need to go through one of the 

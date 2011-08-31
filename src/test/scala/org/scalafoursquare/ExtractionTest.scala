@@ -103,7 +103,7 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def userMayorships() {
-    testExtraction[UserMayorshipsResponse](C.json(("mayorships" -> C.countList(2, List(C.compactVenue1, C.compactVenue2)))))
+    testExtraction[UserMayorshipsResponse](C.json(("mayorships" -> C.countList(2, List(("venue" -> C.compactVenue1), ("venue" -> C.compactVenue2))))))
     testExtraction[UserMayorshipsResponse](C.json(("mayorships" -> C.countList(0, List[JValue]()))))
   }
 

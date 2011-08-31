@@ -206,7 +206,8 @@ case class VenueCategoriesResponse(categories: List[VenueCategoryWithChildren])
 
 case class UserPhotoUpdateResponse(user: UserDetail)
 
-case class UserMayorshipsList(count: Int, items: List[VenueCompact])
+case class MayorshipListEntry(venue: VenueCompact)
+case class UserMayorshipsList(count: Int, items: List[MayorshipListEntry])
 case class UserMayorshipsResponse(mayorships: UserMayorshipsList)
 
 case class UserTipsList(count: Int, items: List[TipForList])

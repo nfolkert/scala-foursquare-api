@@ -13,6 +13,7 @@ class UserlessEndpointTest extends SpecsMatchers {
 
   // MAY NEED TO MODIFY THESE IF TIPS/SPECIALS/VENUES HAVE CHANGED!
   def VENUE_ID = "49d22274f964a5209a5b1fe3"
+  def ANOTHER_VENUE_ID = "4a468cd9f964a52015a91fe3"
   def TIP_ID = "4e5d72bbbd41bd3bc3a94bda"
   def SPECIAL_ID = "4e5d778dbd41022d87273eac"
 
@@ -92,5 +93,17 @@ class UserlessEndpointTest extends SpecsMatchers {
   def specialsSearch() {
     val specials = app.specialsSearch(40.6748, -73.9721).get
     println(specials)
+  }
+
+  @Test
+  def multi() {
+    val mult = app.multi(app.venueCategories, app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID), app.venueTips(ANOTHER_VENUE_ID)).get
+    println(mult)
+  }
+
+  @Test
+  def multiList() {
+    val mult = app.multi(List(app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID))).get
+    println(mult)
   }
 }

@@ -521,8 +521,22 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def listSpecials() {
-
+    testExtraction[ListSpecialResponse](C.json(("specials" -> C.specialsList1)))
+    testExtraction[ListSpecialResponse](C.json(("specials" -> C.specialsList2)))
   }
+
+  @Test
+  def specialConfigurationDetail() {
+    testExtraction[SpecialConfigurationDetailResponse](C.json(("special" -> C.specialDetail1)))
+    testExtraction[SpecialConfigurationDetailResponse](C.json(("special" -> C.specialDetail2)))
+  }
+
+  @Test
+  def addSpecial() {
+    testExtraction[AddSpecialResponse](C.json(("special" -> C.specialDetail1)))
+    testExtraction[AddSpecialResponse](C.json(("special" -> C.specialDetail2)))
+  }
+
 
   @Test
   def managedVenues() {
@@ -539,20 +553,12 @@ class ExtractionTest extends SpecsMatchers {
 
   }
 
-  @Test
-  def specialConfigurationDetail() {
-
-  }
 
   @Test
   def campaignTimeSeries() {
 
   }
 
-  @Test
-  def addSpecial() {
-
-  }
 
   @Test
   def retireSpecial() {

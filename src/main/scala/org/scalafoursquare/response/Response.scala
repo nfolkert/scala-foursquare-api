@@ -534,7 +534,7 @@ case class RemoveVenueFromGroupResponse()
 case class AddVenueGroupResponse(venueGroup: VenueGroupDetail)
 case class DeleteVenueGroupResponse()
 
-
+// Campaigns
 
 case class SpecialCompact(id: String, name: String, text: String)
 
@@ -559,14 +559,45 @@ case class ListCampaignResponse(campaigns: CampaignList)
 
 case class AddCampaignResponse(campaign: CampaignDetail)
 
+// Specials
+
+case class SpecialsList(count: Int, items: List[SpecialCompact])
+case class ListSpecialResponse(specials: SpecialsList)
+
+// TODO: better names for these
+case class SpecialConfigurationDetail1(id: String,
+                                       `type`: String,
+                                       status: String,
+                                       count1: Option[Int],
+                                       count2: Option[Int],
+                                       count3: Option[Int],
+                                       name: Option[String],
+                                       text: Option[String],
+                                       unlockedText: Option[String],
+                                       finePrint: Option[String],
+                                       notifyText: Option[String],
+                                       offerId: Option[String],
+                                       purchaseUrl: Option[String],
+                                       exitUrl: Option[String])
+case class SpecialConfigurationDetail2(cost: Option[Int],
+                                       value: Option[Int],
+                                       currency: Option[String],
+                                       imageUrls: Option[List[String]],
+                                       layout: Option[String],
+                                       visibility: Option[String],
+                                       redeemStartDate: Option[Long],
+                                       redeemEndDate: Option[Long],
+                                       redeemStartTime: Option[Int],
+                                       redeemEndTime: Option[Int])
+case class SpecialConfigurationDetail(detail1: SpecialConfigurationDetail1, detail2: SpecialConfigurationDetail2)
+
+case class AddSpecialResponse(special: SpecialConfigurationDetail)
+case class SpecialConfigurationDetailResponse(special: SpecialConfigurationDetail)
 
 // TODO:
-case class AddSpecialResponse()
-case class ListSpecialResponse()
 case class ManagedVenuesResponse()
 case class VenuesTimeSeriesResponse()
 case class VenueStatsResponse()
-case class SpecialConfigurationDetailResponse()
 case class CampaignTimeSeriesResponse()
 case class StartCampaignResponse()
 case class EndCampaignResponse()

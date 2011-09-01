@@ -428,6 +428,17 @@ object Components {
   def campaignList1 = countList(2, List(compactCampaign1, compactCampaign2))
   def campaignList2 = countList(0, List[JValue]())
 
+  def specialsList1 = countList(2, List(compactSpecial1, compactSpecial2))
+  def specialsList2 = countList(0, List[JValue]())
+
+  def specialDetail1 = ("id" -> "spid") ~ ("type" -> "type") ~ ("status" -> "active") ~ ("count1" -> 1) ~
+    ("count2" -> 2) ~ ("count3" -> 3) ~ ("name" -> "name") ~ ("text" -> "text") ~ ("unlockedText" -> "text") ~
+    ("finePrint" -> "text") ~ ("notifyText" -> "text") ~ ("offerId" -> "oid") ~ ("purchaseUrl" -> "url") ~
+    ("exitUrl" -> "url") ~ ("cost" -> 5) ~ ("value" -> 5) ~ ("currency" -> "$") ~ ("imageUrls" -> List("url1", "url2")) ~
+    ("layout" -> "layout") ~ ("visibility" -> "visibility") ~ ("redeemStartDate" -> 1000) ~ ("redeemEndDate" -> 2000) ~
+    ("redeemStartTime" -> 1) ~ ("redeemEndTime" -> 12)
+  def specialDetail2 = ("id" -> "spid") ~ ("type" -> "type") ~ ("status" -> "active")
+
   def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
   def json(v: JValue) = {

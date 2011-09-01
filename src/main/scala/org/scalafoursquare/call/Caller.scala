@@ -550,40 +550,97 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def venueGroupDetails(id: String) = new Request[VenueGroupDetailResponse](this, "/venuegroups/" + id)
   def campaignDetails(id: String) = new Request[CampaignDetailResponse](this, "/campaigns/" + id)
 
-  def addCampaign(specialId: String, groupId: Option[List[String]], venueId: Option[List[String]],
-                  startAt: Option[Long], endAt: Option[Long]) =
+  def addCampaign(specialId: String, groupId: Option[List[String]]=None, venueId: Option[List[String]]=None,
+                  startAt: Option[Long]=None, endAt: Option[Long]=None) =
     new PostRequest[AddCampaignResponse](this, "/campaigns/add",
       p("specialId", specialId) ++
-      op("groupId", groupId) ++
-      op("venueId", venueId) ++
+      op("groupId", groupId.map(_.join(","))) ++
+      op("venueId", venueId.map(_.join(","))) ++
       op("startAt", startAt) ++
       op("endAt", endAt)
     )
 
   // status = pending, active, expired, all
-  def listCampaigns(specialId: Option[String], groupId: Option[String], status: Option[String]) =
+  def listCampaigns(specialId: Option[String]=None, groupId: Option[String]=None, status: Option[String]=None) =
     new Request[ListCampaignResponse](this, "/campaigns/list",
       op("specialId", specialId) ++
       op("groupId", groupId) ++
       op("status", status)
     )
 
-  def addSpecial() = new PostRequest[AddSpecialResponse](this, "/")
-  def listSpecials() = new Request[ListSpecialResponse](this, "/")
-  def addVenueGroup() = new PostRequest[AddVenueGroupResponse](this, "/")
-  def listVenueGroups() = new Request[ListVenueGroupResponse](this, "/")
-  def deleteVenueGroup(id: String) = new PostRequest[DeleteVenueGroupResponse](this, "/")
-  def managedVenues() = new Request[ManagedVenuesResponse](this, "/")
-  def venuesTimeSeries() = new Request[VenuesTimeSeriesResponse](this, "/")
-  def venueStats() = new Request[VenueStatsResponse](this, "/")
-  def specialConfigurationDetail() = new Request[SpecialConfigurationDetailResponse](this, "/")
-  def campaignTimeSeries() = new Request[CampaignTimeSeriesResponse](this, "/")
-  def startCampaign() = new PostRequest[StartCampaignResponse](this, "/")
-  def endCampaign() = new PostRequest[EndCampaignResponse](this, "/")
-  def deleteCampaign() = new PostRequest[DeleteCampaignResponse](this, "/")
-  def retireCampaign() = new PostRequest[RetireCampaignResponse](this, "/")
-  def addVenueToGroup() = new PostRequest[AddVenueToGroupResponse](this, "/")
-  def removeVenueFromGroup() = new PostRequest[RemoveVenueFromGroupResponse](this, "/")
+  // type = mayor, frequency, count, regular, swarm, friends, flash
+  def addSpecial(`type`: String, text: String, unlockedText: String, finePrint: Option[String]=None,
+                 count1: Option[Int]=None, count2: Option[Int]=None, count3: Option[Int]=None) =
+    new PostRequest[AddSpecialResponse](this, "/specials/add",
+      p("text", text) ++
+      p("unlockedText", unlockedText) ++
+      op("finePrint", finePrint) ++
+      op("count1", count1) ++
+      op("count2", count2) ++
+      op("count3", count3) ++
+      p("type", `type`)
+    )
+
+  // active = pending, active, expired, all
+  def listSpecials(venueId: Option[List[String]]=None, status: Option[String]=None) =
+    new Request[ListSpecialResponse](this, "/specials/list",
+      op("venueId", venueId.map(_.join(","))) ++
+      op("status", status)
+    )
+
+  def addVenueGroup(name: String) =
+    new PostRequest[AddVenueGroupResponse](this, "/venuegroups/add", p("name", name))
+
+  def listVenueGroups() = new Request[ListVenueGroupResponse](this, "/venuegroups/list")
+
+
+  def deleteVenueGroup(id: String) =
+    new PostRequest[DeleteVenueGroupResponse](this, "/venuegroups/" + id + "/delete")
+
+  def managedVenues() = new Request[ManagedVenuesResponse](this, "/venues/managed")
+
+  def venuesTimeSeries(venueId: List[String], startAt: Long, endAt: Option[Long]=None) =
+    new Request[VenuesTimeSeriesResponse](this, "/venues/timeseries",
+      p("venueId", venueId.join(",")) ++
+      p("startAt", startAt) ++
+      op("endAt", endAt)
+    )
+
+  def venueStats(id: String, startAt: Option[Long]=None, endAt: Option[Long]=None) =
+    new Request[VenueStatsResponse](this, "/venues/" + id + "/stats",
+      op("startAt", startAt) ++
+      op("endAt", endAt)
+    )
+
+
+  def specialConfigurationDetail(id: String) =
+    new Request[SpecialConfigurationDetailResponse](this, "/specials/" + id + "/configuration")
+
+  def campaignTimeSeries(id: String, startAt: Option[Long]=None, endAt: Option[Long]=None) =
+    new Request[CampaignTimeSeriesResponse](this, "/campaigns/" + id + "/timeseries")
+
+  def startCampaign(id: String) =
+    new PostRequest[StartCampaignResponse](this, "/campaigns/" + id + "/start")
+
+  def endCampaign(id: String) =
+    new PostRequest[EndCampaignResponse](this, "/campaigns/" + id + "/end")
+
+  def deleteCampaign(id: String) =
+    new PostRequest[DeleteCampaignResponse](this, "/campaigns/" + id + "/delete")
+
+  def retireSpecial(id: String) =
+    new PostRequest[RetireSpecialResponse](this, "/specials/" + id + "/retire")
+
+  // venueId required?  Not in spec.
+  def addVenueToGroup(id: String, venueId: List[String]) =
+    new PostRequest[AddVenueToGroupResponse](this, "/venuegroups/" + id + "/addvenue",
+      p("venueId", venueId.join(","))
+    )
+
+  def removeVenueFromGroup(id: String, venueId: List[String]) =
+    new PostRequest[RemoveVenueFromGroupResponse](this, "/venuegroups/" + id + "/removevenue",
+      p("venueId", venueId.join(","))
+    )
 
 
   case class VenueGroupDetailResponse()
@@ -603,7 +660,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   case class StartCampaignResponse()
   case class EndCampaignResponse()
   case class DeleteCampaignResponse()
-  case class RetireCampaignResponse()
+  case class RetireSpecialResponse()
   case class AddVenueToGroupResponse()
   case class RemoveVenueFromGroupResponse()
   

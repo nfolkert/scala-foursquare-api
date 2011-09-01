@@ -581,7 +581,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       p("type", `type`)
     )
 
-  // active = pending, active, expired, all
+  // status = pending, active, expired, all
   def listSpecials(venueId: Option[List[String]]=None, status: Option[String]=None) =
     new Request[ListSpecialResponse](this, "/specials/list",
       op("venueId", venueId.map(_.join(","))) ++

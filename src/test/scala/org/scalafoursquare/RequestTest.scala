@@ -125,5 +125,32 @@ class RequestTest extends SpecsMatchers {
     val marknote = app.markNotificationsRead(1000L)
 
     val spflag = app.flagSpecial("id", "vid", "not_redeemable", Some("wtf special"))
+
+    // MERCHANT GET
+
+    val vgdet = app.venueGroupDetails("id")
+    val cmpdet = app.campaignDetails("id")
+    val lscmp = app.listCampaigns(Some("id"), Some("gid"), Some("pending"))
+    val lssps = app.listSpecials(Some(List("vid1", "vid2")), Some("active"))
+    val lsvg = app.listVenueGroups()
+    val manven = app.managedVenues()
+    val vents = app.venuesTimeSeries(List("vid1", "vid2"), 1000L, Some(2000L))
+    val venstats = app.venueStats("id", Some(1000L), Some(2000L))
+    val spcnf = app.specialConfigurationDetail("id")
+    val cmpts = app.campaignTimeSeries("id", Some(1000L), Some(2000L))
+
+    // MERCHANT POST
+    val addcmp = app.addCampaign("id", Some(List("gid1", "gid2")), Some(List("vid1", "vid2")), Some(1000L), Some(2000L))
+    val addsp = app.addSpecial("mayor", "text", "unlockText", Some("finePrint"), Some(1), Some(2), Some(3))
+
+    val addvg = app.addVenueGroup("name")
+    val delvg = app.deleteVenueGroup("id")
+
+    val strcmp = app.startCampaign("id")
+    val endcmp = app.endCampaign("id")
+    val delcmp = app.deleteCampaign("id")
+    val retsp = app.retireSpecial("id")
+    val avtg = app.addVenueToGroup("id", List("vid1", "vid2"))
+    val rmvfg = app.removeVenueFromGroup("id", List("vid1", "vid2"))
   }
 }

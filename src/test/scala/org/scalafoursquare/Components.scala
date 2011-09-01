@@ -398,6 +398,15 @@ object Components {
   def notifyTray1 = ("unreadCount" -> 10)
   def notifyTray2 = ("unreadCount" -> 10)
 
+  def venueGroupCompact1 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(2, List(("id" -> "vid1"), ("id" -> "vid2"))))
+  def venueGroupCompact2 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(0, List[JValue]()))
+
+  def venueGroupList1 = countList(2, List(venueGroupCompact1, venueGroupCompact2))
+  def venueGroupList2 = countList(0, List[JValue]())
+
+  def venueGroupDetail1 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(2, List(compactVenue1, compactVenue2)))
+  def venueGroupDetail2 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(0, List[JValue]()))
+
   def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
   def json(v: JValue) = {

@@ -513,5 +513,36 @@ case class UpdateDetail(ids: List[String], createdAt: Long, unread: Boolean,
                         image: Image, imageType: String, icon: Option[Image],
                         target: UpdateTarget, text: String, entities: List[AnnotatedEntity])
 
+// MERCHANT API Extractions
+
+case class VenueGroupDetailList(count: Int, items: List[VenueCompact])
+case class VenueGroupDetail(id: String, name: String, venues: VenueGroupDetailList)
+case class VenueGroupDetailResponse(venueGroup: VenueGroupDetail)
+
+case class VenueId(id: String)
+case class VenueGroupCompactList(count: Int, items: List[VenueId])
+case class VenueGroupCompact(id: String, name: String, venues: VenueGroupCompactList)
+case class VenueGroupList(count: Int, items: List[VenueGroupCompact])
+case class ListVenueGroupResponse(venueGroups: VenueGroupList)
+
+case class AddVenueToGroupResponse()
+case class RemoveVenueFromGroupResponse()
+case class AddVenueGroupResponse(venueGroup: VenueGroupDetail)
+case class DeleteVenueGroupResponse()
 
 
+// TODO:
+case class CampaignDetailResponse()
+case class AddCampaignResponse()
+case class ListCampaignResponse()
+case class AddSpecialResponse()
+case class ListSpecialResponse()
+case class ManagedVenuesResponse()
+case class VenuesTimeSeriesResponse()
+case class VenueStatsResponse()
+case class SpecialConfigurationDetailResponse()
+case class CampaignTimeSeriesResponse()
+case class StartCampaignResponse()
+case class EndCampaignResponse()
+case class DeleteCampaignResponse()
+case class RetireSpecialResponse()

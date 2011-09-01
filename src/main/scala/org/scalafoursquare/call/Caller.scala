@@ -641,27 +641,4 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     new PostRequest[RemoveVenueFromGroupResponse](this, "/venuegroups/" + id + "/removevenue",
       p("venueId", venueId.join(","))
     )
-
-
-  case class VenueGroupDetailResponse()
-  case class CampaignDetailResponse()
-  case class AddCampaignResponse()
-  case class ListCampaignResponse()
-  case class AddSpecialResponse()
-  case class ListSpecialResponse()
-  case class AddVenueGroupResponse()
-  case class ListVenueGroupResponse()
-  case class DeleteVenueGroupResponse()
-  case class ManagedVenuesResponse()
-  case class VenuesTimeSeriesResponse()
-  case class VenueStatsResponse()
-  case class SpecialConfigurationDetailResponse()
-  case class CampaignTimeSeriesResponse()
-  case class StartCampaignResponse()
-  case class EndCampaignResponse()
-  case class DeleteCampaignResponse()
-  case class RetireSpecialResponse()
-  case class AddVenueToGroupResponse()
-  case class RemoveVenueFromGroupResponse()
-  
 }

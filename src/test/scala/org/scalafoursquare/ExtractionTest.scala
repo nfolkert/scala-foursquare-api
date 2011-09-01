@@ -450,4 +450,37 @@ class ExtractionTest extends SpecsMatchers {
     resList.isDefined must_== true
     resList.get.length must_== 3
   }
+
+  @Test
+  def venueGroupDetail() {
+    testExtraction[VenueGroupDetailResponse](C.json(("venueGroup" -> C.venueGroupDetail1)))
+    testExtraction[VenueGroupDetailResponse](C.json(("venueGroup" -> C.venueGroupDetail2)))
+  }
+
+  @Test
+  def listVenueGroups() {
+    testExtraction[ListVenueGroupResponse](C.json(("venueGroups" -> C.venueGroupList1)))
+    testExtraction[ListVenueGroupResponse](C.json(("venueGroups" -> C.venueGroupList2)))
+  }
+
+  @Test
+  def addVenueToGroup() {
+    testExtraction[AddVenueToGroupResponse](C.json(JObject(Nil)))
+  }
+
+  @Test
+  def removeVenueFromGroup() {
+    testExtraction[RemoveVenueFromGroupResponse](C.json(JObject(Nil)))
+  }
+
+  @Test
+  def deleteVenueGroup() {
+    testExtraction[DeleteVenueGroupResponse](C.json(JObject(Nil)))
+  }
+
+  @Test
+  def addVenueGroup() {
+    testExtraction[AddVenueGroupResponse](C.json(("venueGroup" -> C.venueGroupDetail1)))
+    testExtraction[AddVenueGroupResponse](C.json(("venueGroup" -> C.venueGroupDetail2)))
+  }
 }

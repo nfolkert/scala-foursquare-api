@@ -540,8 +540,14 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def managedVenues() {
-
+    testExtraction[ManagedVenuesResponse](C.json(("venues" -> List(C.compactVenue1, C.compactVenue2))))
+    testExtraction[ManagedVenuesResponse](C.json(("venues" -> List[JValue]())))
   }
+
+  @Test
+  def retireSpecial() {
+    testExtraction[RetireSpecialResponse](C.json(JObject(Nil)))
+  }  
 
   @Test
   def venuesTimeSeries() {
@@ -556,12 +562,6 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def campaignTimeSeries() {
-
-  }
-
-
-  @Test
-  def retireSpecial() {
 
   }
 }

@@ -619,12 +619,14 @@ case class SpecialConfigurationDetail(detail1: SpecialConfigurationDetail1, deta
 case class AddSpecialResponse(special: SpecialConfigurationDetail)
 case class SpecialConfigurationDetailResponse(special: SpecialConfigurationDetail)
 
-// TODO:
-case class ManagedVenuesResponse()
-case class VenuesTimeSeriesResponse()
-case class VenueStatsResponse()
-case class CampaignTimeSeriesResponse()
+case class ManagedVenuesResponse(venues: List[VenueCompact])
+
 case class StartCampaignResponse()
 case class EndCampaignResponse()
 case class DeleteCampaignResponse()
 case class RetireSpecialResponse()
+
+// TODO:
+case class VenuesTimeSeriesResponse()
+case class VenueStatsResponse()
+case class CampaignTimeSeriesResponse()

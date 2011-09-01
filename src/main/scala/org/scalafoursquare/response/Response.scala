@@ -589,7 +589,32 @@ case class SpecialConfigurationDetail2(cost: Option[Int],
                                        redeemEndDate: Option[Long],
                                        redeemStartTime: Option[Int],
                                        redeemEndTime: Option[Int])
-case class SpecialConfigurationDetail(detail1: SpecialConfigurationDetail1, detail2: SpecialConfigurationDetail2)
+case class SpecialConfigurationDetail(detail1: SpecialConfigurationDetail1, detail2: SpecialConfigurationDetail2) {
+  def id = detail1.id
+  def `type` = detail1.`type`
+  def status = detail1.status
+  def count1 = detail1.count1
+  def count2 = detail1.count2
+  def count3 = detail1.count3
+  def name = detail1.name
+  def text = detail1.text
+  def unlockedText = detail1.unlockedText
+  def finePrint = detail1.finePrint
+  def notifyText = detail1.notifyText
+  def offerId = detail1.offerId
+  def purchaseUrl = detail1.purchaseUrl
+  def exitUrl = detail1.exitUrl
+
+  def cost = detail2.cost
+  def value = detail2.value
+  def currency = detail2.currency
+  def layout = detail2.layout
+  def visibility = detail2.visibility
+  def redeemStartDate = detail2.redeemStartDate
+  def redeemEndDate = detail2.redeemEndDate
+  def redeemStartTime = detail2.redeemStartTime
+  def redeemEndTime = detail2.redeemEndTime
+}
 
 case class AddSpecialResponse(special: SpecialConfigurationDetail)
 case class SpecialConfigurationDetailResponse(special: SpecialConfigurationDetail)

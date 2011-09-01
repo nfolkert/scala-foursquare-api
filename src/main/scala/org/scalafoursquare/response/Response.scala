@@ -520,8 +520,10 @@ case class VenueGroupDetail(id: String, name: String, venues: VenueGroupDetailLi
 case class VenueGroupDetailResponse(venueGroup: VenueGroupDetail)
 
 case class VenueId(id: String)
-case class VenueGroupCompactList(count: Int, items: List[VenueId])
-case class VenueGroupCompact(id: String, name: String, venues: VenueGroupCompactList)
+case class VenueIdList(count: Int, items: List[VenueId])
+case class VenueGroupCompactList(count: Int, items: List[VenueGroupCompact])
+case class VenueGroupCompact(id: String, name: String, venues: VenueIdList)
+
 case class VenueGroupList(count: Int, items: List[VenueGroupCompact])
 case class ListVenueGroupResponse(venueGroups: VenueGroupList)
 
@@ -531,8 +533,23 @@ case class AddVenueGroupResponse(venueGroup: VenueGroupDetail)
 case class DeleteVenueGroupResponse()
 
 
+
+case class SpecialCompact(id: String, name: String, text: String)
+
+case class CampaignCompact()
+
+case class CampaignDetail(id: String,
+                          venues: VenueIdList,
+                          startsAt: Option[Long],
+                          endsAt: Option[Long],
+                          special: Option[SpecialCompact],
+                          venueGroups: VenueGroupCompactList)
+
+case class CampaignDetailResponse(campaign: CampaignDetail)
+
+
+
 // TODO:
-case class CampaignDetailResponse()
 case class AddCampaignResponse()
 case class ListCampaignResponse()
 case class AddSpecialResponse()

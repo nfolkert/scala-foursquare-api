@@ -1,6 +1,7 @@
 package org.scalafoursquare.call
 
-import net.liftweb.json.{Formats, JsonParser}
+import net.liftweb.json.{Formats, JsonParser, Printer}
+import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonAST.{JArray, JObject}
 import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
@@ -22,8 +23,15 @@ object PhotoData {
   }
 }
 
-class ExtractionFailed(msg: String, cause: Throwable, raw: String) extends Throwable {
+case class ExtractionFailed(msg: String, cause: Throwable, json: JObject) extends Throwable {
+  def pretty = Printer.pretty(JsonAST.render(json))
+  def compact = Printer.compact(JsonAST.render(json))
+}
+
+case class ParseFailed(msg: String, cause: Throwable, raw: String) extends Throwable {
   def getJson: JObject = JsonParser.parse(raw).asInstanceOf[JObject]
+  def pretty = Printer.pretty(JsonAST.render(getJson))
+  def compact = Printer.pretty(JsonAST.render(getJson))
 }
 
 class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil, val method: String = "GET", val postData: Option[PostData]=None) {
@@ -115,58 +123,91 @@ abstract class App(val caller: Caller) {
   def p[T](key: String, value: T) = List((key, value.toString))
   def op[T](key: String, value: Option[T]) = value.map(v=>(key, v.toString)).toList
 
-  def convertSingle[T](raw: String)(implicit mf: Manifest[T]): Response[T] = {
-    val json = JsonParser.parse(raw)
-
-    val fields = json.asInstanceOf[JObject].obj
-    val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
-    val response = {
-      if (meta.code != 200)
-        None
-      else
-        Some(fields.find(_.name == "response").get.value.extract[T])
+  private def parse(raw: String): JObject = {
+    try {
+      JsonParser.parse(raw).asInstanceOf[JObject]
+    } catch {
+      case e => {
+        val failure = new ParseFailed("Failed to parse results from the server as Json", e, raw)
+        throw failure
+      }
     }
-    Response[T](meta, notifications, response)
+  }
+
+  private def extract[T](json: JObject)(f: => T): T = {
+    try {
+      f
+    } catch {
+      case e => {
+        val failure = new ExtractionFailed("Failed to extract results from Json as a scala object", e, json)
+        throw e
+      }
+    }
+  }
+
+
+  def convertSingle[T](raw: String)(implicit mf: Manifest[T]): Response[T] = {
+    val json = parse(raw)
+    extract(json) {
+      val fields = json.obj
+      val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
+      val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
+      val response = {
+        if (meta.code != 200)
+          None
+        else {
+          val full = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
+          App.extractSingleResponse[T](full)
+        }
+      }
+      Response[T](meta, notifications, response)
+    }
   }
 
   def convertMulti[A,B,C,D,E](raw: String)(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E]) = {
-    val json = JsonParser.parse(raw)
-
-    val fields = json.asInstanceOf[JObject].obj
-    val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
-    val responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]) = {
-      if (meta.code != 200)
-        (None, None, None, None, None)
-      else {
-        val parentResponse = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
-        App.extractMultiResponse(parentResponse)
+    val json = parse(raw)
+    extract(json) {
+      val fields = json.obj
+      val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
+      val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
+      val responses: (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]) = {
+        if (meta.code != 200)
+          (None, None, None, None, None)
+        else {
+          val parentResponse = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
+          App.extractMultiResponse[A,B,C,D,E](parentResponse)
+        }
       }
+      MultiResponse[A,B,C,D,E](meta, notifications, responses)
     }
-    MultiResponse[A,B,C,D,E](meta, notifications, responses)
   }
 
   def convertMultiList[A](raw: String)(implicit mf: Manifest[A]) = {
-    val json = JsonParser.parse(raw)
-
-    val fields = json.asInstanceOf[JObject].obj
-    val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
-    val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
-    val responses: Option[List[Response[A]]] = {
-      if (meta.code != 200)
-        None
-      else {
-        val parentResponse = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
-        App.extractMultiListResponse(parentResponse)
+    val json = parse(raw)
+    extract(json) {
+      val fields = json.obj
+      val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
+      val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
+      val responses: Option[List[Response[A]]] = {
+        if (meta.code != 200)
+          None
+        else {
+          val parentResponse = fields.find(_.name == "response").get.value.asInstanceOf[JObject]
+          App.extractMultiListResponse[A](parentResponse)
+        }
       }
+      MultiResponseList[A](meta, notifications, responses)
     }
-    MultiResponseList[A](meta, notifications, responses)
   }
 }
 
 object App {
-  def extractMultiResponse[A,B,C,D,E](obj: JObject)(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E], formats: Formats) = {
+  def extractSingleResponse[A](obj: JObject)(implicit mf: Manifest[A], formats: Formats): Option[A] = {
+    Some(obj.extract[A])
+  }
+
+  def extractMultiResponse[A,B,C,D,E](obj: JObject)(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E], formats: Formats):
+    (Option[Response[A]], Option[Response[B]], Option[Response[C]], Option[Response[D]], Option[Response[E]]) = {
     val responses = obj.obj.find(_.name == "responses").get.value.asInstanceOf[JArray]
     def response(idx: Int) = if (idx >= responses.arr.length) None else Some(responses.arr(idx))
 
@@ -188,7 +229,7 @@ object App {
     (convert[A](0), convert[B](1), convert[C](2), convert[D](3), convert[E](4))
   }
   
-  def extractMultiListResponse[A](obj: JObject)(implicit mf: Manifest[A], formats: Formats) = {
+  def extractMultiListResponse[A](obj: JObject)(implicit mf: Manifest[A], formats: Formats): Option[List[Response[A]]] = {
     val responses = obj.obj.find(_.name == "responses").get.value.asInstanceOf[JArray]
     val resolved: List[Response[A]] = responses.arr.map(res => {
       val sfields = res.asInstanceOf[JObject].obj

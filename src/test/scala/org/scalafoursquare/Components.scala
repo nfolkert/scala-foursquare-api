@@ -71,6 +71,9 @@ object Components {
     ("icon" -> "theIcon") ~ ("title" -> "theTitle") ~
     redemptionInfo2
 
+  def compactSpecial1 = ("id" -> "spid") ~ ("name" -> "name") ~ ("text" -> "text")
+  def compactSpecial2 = ("id" -> "spid") ~ ("name" -> "name") ~ ("text" -> "text")
+
   def specialForNotification1 = venueSpecial1 ~ ("venue" -> venueCore1)
   def specialForNotification2 = venueSpecial2 ~ ("venue" -> venueCore2)
 
@@ -398,14 +401,30 @@ object Components {
   def notifyTray1 = ("unreadCount" -> 10)
   def notifyTray2 = ("unreadCount" -> 10)
 
-  def venueGroupCompact1 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(2, List(("id" -> "vid1"), ("id" -> "vid2"))))
-  def venueGroupCompact2 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(0, List[JValue]()))
+  def venueIdList1 = countList(2, List(("id" -> "vid1"), ("id" -> "vid2")))
+  def venueIdList2 = countList(0, List[JValue]())
+
+  def venueGroupIdList1 = countList(2, List(("id" -> "vgid1"), ("id" -> "vgid2")))
+  def venueGroupIdList2 = countList(0, List[JValue]())
+
+  def venueGroupCompact1 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> venueIdList1)
+  def venueGroupCompact2 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> venueIdList2)
 
   def venueGroupList1 = countList(2, List(venueGroupCompact1, venueGroupCompact2))
   def venueGroupList2 = countList(0, List[JValue]())
 
   def venueGroupDetail1 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(2, List(compactVenue1, compactVenue2)))
   def venueGroupDetail2 = ("id" -> "vgid") ~ ("name" -> "name") ~ ("venues" -> countList(0, List[JValue]()))
+
+  def campaignCommon1 = ("id" -> "cid") ~ ("venues" -> venueIdList1) ~ ("startsAt" -> 1000) ~ ("endsAt" -> 2000)
+  def campaignCommon2 = ("id" -> "cid") ~ ("venues" -> venueIdList2)
+
+  def campaignDetail1 = campaignCommon1 ~ ("special" -> compactSpecial1) ~ ("venueGroups" -> venueGroupList1)
+  def campaignDetail2 = campaignCommon2 ~ ("special" -> compactSpecial2) ~ ("venueGroups" -> venueGroupList2)
+
+  def compactCampaign1 = campaignCommon1 ~ ("specialId" -> "spid") ~ ("venueGroupIds" -> venueGroupIdList1)
+  def compactCampaign2 = campaignCommon2 ~ ("specialId" -> "spid") ~ ("venueGroupIds" -> venueGroupIdList2)
+
 
   def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 

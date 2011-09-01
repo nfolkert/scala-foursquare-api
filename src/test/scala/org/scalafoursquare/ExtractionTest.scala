@@ -483,4 +483,10 @@ class ExtractionTest extends SpecsMatchers {
     testExtraction[AddVenueGroupResponse](C.json(("venueGroup" -> C.venueGroupDetail1)))
     testExtraction[AddVenueGroupResponse](C.json(("venueGroup" -> C.venueGroupDetail2)))
   }
+
+  @Test
+  def campaignDetail() {
+    testExtraction[CampaignDetailResponse](C.json(("campaign" -> C.campaignDetail1)))
+    testExtraction[CampaignDetailResponse](C.json(("campaign" -> C.campaignDetail2)))
+  }
 }

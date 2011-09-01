@@ -101,7 +101,7 @@ case class HttpCaller(clientId: String, clientSecret: String,
       case e: HttpException => {e.body}
     }
 
-    println(result)
+    // println(result)
 
     result
   }

@@ -12,8 +12,8 @@ class ExtractionTest extends SpecsMatchers {
   implicit val formats = APICustomSerializers.formats
 
   def testExtraction[T](jsonStr: String, checkMatch: Boolean = true)(implicit mf: Manifest[T]): T = {
-    println()
-    println(mf.erasure.getName)
+    // println()
+    // println(mf.erasure.getName)
 
     // println(jsonStr)
     val json = JsonParser.parse(jsonStr)
@@ -24,9 +24,9 @@ class ExtractionTest extends SpecsMatchers {
     val original = Printer.compact(JsonAST.render(json))
     val unparsed = Printer.compact(JsonAST.render(extJson))
 
-    println(original)
-    println(extracted)
-    println(unparsed)
+    // println(original)
+    // println(extracted)
+    // println(unparsed)
 
     if (checkMatch && unparsed != original) {
       println("Original: " + Printer.pretty(JsonAST.render(json)))

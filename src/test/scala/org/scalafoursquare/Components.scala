@@ -425,6 +425,8 @@ object Components {
   def compactCampaign1 = campaignCommon1 ~ ("specialId" -> "spid") ~ ("venueGroupIds" -> venueGroupIdList1)
   def compactCampaign2 = campaignCommon2 ~ ("specialId" -> "spid") ~ ("venueGroupIds" -> venueGroupIdList2)
 
+  def campaignList1 = countList(2, List(compactCampaign1, compactCampaign2))
+  def campaignList2 = countList(0, List[JValue]())
 
   def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 

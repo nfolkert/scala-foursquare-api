@@ -489,4 +489,73 @@ class ExtractionTest extends SpecsMatchers {
     testExtraction[CampaignDetailResponse](C.json(("campaign" -> C.campaignDetail1)))
     testExtraction[CampaignDetailResponse](C.json(("campaign" -> C.campaignDetail2)))
   }
+
+  @Test
+  def listCampaigns() {
+    testExtraction[ListCampaignResponse](C.json(("campaigns" -> C.campaignList1)))
+    testExtraction[ListCampaignResponse](C.json(("campaigns" -> C.campaignList2)))
+  }
+
+
+  @Test
+  def addCampaign() {
+    testExtraction[AddCampaignResponse](C.json(("campaign" -> C.campaignDetail1)))
+    testExtraction[AddCampaignResponse](C.json(("campaign" -> C.campaignDetail2)))
+  }
+
+  @Test
+  def deleteCampaign() {
+    testExtraction[DeleteCampaignResponse](C.json(JObject(Nil)))
+  }
+
+  @Test
+  def startCampaign() {
+    testExtraction[StartCampaignResponse](C.json(JObject(Nil)))
+  }
+
+  @Test
+  def endCampaign() {
+    testExtraction[EndCampaignResponse](C.json(JObject(Nil)))
+  }
+
+
+  @Test
+  def listSpecials() {
+
+  }
+
+  @Test
+  def managedVenues() {
+
+  }
+
+  @Test
+  def venuesTimeSeries() {
+
+  }
+
+  @Test
+  def venueStats() {
+
+  }
+
+  @Test
+  def specialConfigurationDetail() {
+
+  }
+
+  @Test
+  def campaignTimeSeries() {
+
+  }
+
+  @Test
+  def addSpecial() {
+
+  }
+
+  @Test
+  def retireSpecial() {
+
+  }
 }

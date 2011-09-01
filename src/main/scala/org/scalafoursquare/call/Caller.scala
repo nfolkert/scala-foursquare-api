@@ -543,4 +543,68 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       p("problem", problem) ++
       op("text", text)
     )
+
+  // MERCHANT API
+  // TODO: ADD ALL THE REQUESTS BELOW, TEST EXTRACTION, TEST API
+
+  def venueGroupDetails(id: String) = new Request[VenueGroupDetailResponse](this, "/venuegroups/" + id)
+  def campaignDetails(id: String) = new Request[CampaignDetailResponse](this, "/campaigns/" + id)
+
+  def addCampaign(specialId: String, groupId: Option[List[String]], venueId: Option[List[String]],
+                  startAt: Option[Long], endAt: Option[Long]) =
+    new PostRequest[AddCampaignResponse](this, "/campaigns/add",
+      p("specialId", specialId) ++
+      op("groupId", groupId) ++
+      op("venueId", venueId) ++
+      op("startAt", startAt) ++
+      op("endAt", endAt)
+    )
+
+  // status = pending, active, expired, all
+  def listCampaigns(specialId: Option[String], groupId: Option[String], status: Option[String]) =
+    new Request[ListCampaignResponse](this, "/campaigns/list",
+      op("specialId", specialId) ++
+      op("groupId", groupId) ++
+      op("status", status)
+    )
+
+  def addSpecial() = new PostRequest[AddSpecialResponse](this, "/")
+  def listSpecials() = new Request[ListSpecialResponse](this, "/")
+  def addVenueGroup() = new PostRequest[AddVenueGroupResponse](this, "/")
+  def listVenueGroups() = new Request[ListVenueGroupResponse](this, "/")
+  def deleteVenueGroup(id: String) = new PostRequest[DeleteVenueGroupResponse](this, "/")
+  def managedVenues() = new Request[ManagedVenuesResponse](this, "/")
+  def venuesTimeSeries() = new Request[VenuesTimeSeriesResponse](this, "/")
+  def venueStats() = new Request[VenueStatsResponse](this, "/")
+  def specialConfigurationDetail() = new Request[SpecialConfigurationDetailResponse](this, "/")
+  def campaignTimeSeries() = new Request[CampaignTimeSeriesResponse](this, "/")
+  def startCampaign() = new PostRequest[StartCampaignResponse](this, "/")
+  def endCampaign() = new PostRequest[EndCampaignResponse](this, "/")
+  def deleteCampaign() = new PostRequest[DeleteCampaignResponse](this, "/")
+  def retireCampaign() = new PostRequest[RetireCampaignResponse](this, "/")
+  def addVenueToGroup() = new PostRequest[AddVenueToGroupResponse](this, "/")
+  def removeVenueFromGroup() = new PostRequest[RemoveVenueFromGroupResponse](this, "/")
+
+
+  case class VenueGroupDetailResponse()
+  case class CampaignDetailResponse()
+  case class AddCampaignResponse()
+  case class ListCampaignResponse()
+  case class AddSpecialResponse()
+  case class ListSpecialResponse()
+  case class AddVenueGroupResponse()
+  case class ListVenueGroupResponse()
+  case class DeleteVenueGroupResponse()
+  case class ManagedVenuesResponse()
+  case class VenuesTimeSeriesResponse()
+  case class VenueStatsResponse()
+  case class SpecialConfigurationDetailResponse()
+  case class CampaignTimeSeriesResponse()
+  case class StartCampaignResponse()
+  case class EndCampaignResponse()
+  case class DeleteCampaignResponse()
+  case class RetireCampaignResponse()
+  case class AddVenueToGroupResponse()
+  case class RemoveVenueFromGroupResponse()
+  
 }

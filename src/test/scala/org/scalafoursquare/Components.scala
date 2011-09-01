@@ -439,6 +439,50 @@ object Components {
     ("redeemStartTime" -> 1) ~ ("redeemEndTime" -> 12)
   def specialDetail2 = ("id" -> "spid") ~ ("type" -> "type") ~ ("status" -> "active")
 
+  def hourBreakdownBucket1 = ("hour" -> 1) ~ ("checkins" -> 10)
+  def hourBreakdownBucket2 = ("hour" -> 2) ~ ("checkins" -> 20)
+
+  def venueHistogramBucket1 = ("checkins" -> 20) ~ ("users" -> 5)
+  def venueHistogramBucket2 = ("checkins" -> 10) ~ ("users" -> 10)
+
+  def ageBreakdownBucket1 = ("age" -> "13-17") ~ ("checkins" -> 10)
+  def ageBreakdownBucket2 = ("age" -> "18-24") ~ ("checkins" -> 10)
+
+  def topVisitor1 = ("user" -> compactUser1) ~ ("checkins" -> 10)
+  def topVisitor2 = ("user" -> compactUser2) ~ ("checkins" -> 10)
+
+  def recentVisitor1 = ("user" -> compactUser1) ~ ("lastCheckin" -> 1000)
+  def recentVisitor2 = ("user" -> compactUser2) ~ ("lastCheckin" -> 2000)
+
+  def venueStatsDetail1 = ("totalCheckins" -> 200) ~ ("newCheckins" -> 100) ~ ("uniqueVisitors" -> 50) ~
+    ("sharing" -> (("twitter" -> 40) ~ ("facebook" -> 20))) ~
+    ("genderBreakdown" -> (("female" -> 10) ~ ("male" -> 20))) ~
+    ("ageBreakdown" -> List(ageBreakdownBucket1, ageBreakdownBucket2)) ~
+    ("hourBreakdown" -> List(hourBreakdownBucket1, hourBreakdownBucket2)) ~
+    ("visitCountHistogram" -> List(venueHistogramBucket1, venueHistogramBucket2)) ~
+    ("topVisitors" -> List(topVisitor1, topVisitor2)) ~
+    ("recentVisitors" -> List(recentVisitor1, recentVisitor2))
+
+  def venueStatsDetail2 = ("totalCheckins" -> 200) ~ ("newCheckins" -> 100) ~ ("uniqueVisitors" -> 50) ~
+    ("sharing" -> (("twitter" -> 40) ~ ("facebook" -> 20))) ~
+    ("genderBreakdown" -> (("female" -> 10) ~ ("male" -> 20))) ~
+    ("ageBreakdown" -> List[JValue]()) ~
+    ("hourBreakdown" -> List[JValue]()) ~
+    ("visitCountHistogram" -> List[JValue]()) ~
+    ("topVisitors" -> List[JValue]())
+
+  def venueTimeSeries1 = ("venueId" -> "vid") ~ ("totalCheckins" -> List(1, 2)) ~ ("newCheckins" -> List(3, 4))
+  def venueTimeSeries2 = ("venueId" -> "vid") ~ ("totalCheckins" -> List[JValue]()) ~ ("newCheckins" -> List[JValue]())
+
+  def campaignTimeSeriesEntry1 = ("venueId" -> "vid") ~ ("totalCheckins" -> List(1, 2)) ~
+    ("newCheckins" -> List(3, 4)) ~ ("viewingUsers" -> List(5, 6)) ~ ("unlockingUsers" -> List(7, 8))
+
+  def campaignTimeSeriesEntry2 = ("venueId" -> "vid") ~ ("totalCheckins" -> List[JValue]()) ~
+    ("newCheckins" -> List[JValue]()) ~ ("viewingUsers" -> List[JValue]()) ~ ("unlockingUsers" -> List[JValue]())
+
+  def campaignTimeSeries1 = List(campaignTimeSeriesEntry1, campaignTimeSeriesEntry2)
+  def campaignTimeSeries2 = List[JValue]()
+
   def countList(count: Int, items: List[JValue]) = ("count" -> count) ~ ("items" -> items)
 
   def json(v: JValue) = {

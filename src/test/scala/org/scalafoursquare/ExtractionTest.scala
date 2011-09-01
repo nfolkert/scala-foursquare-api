@@ -551,17 +551,20 @@ class ExtractionTest extends SpecsMatchers {
 
   @Test
   def venuesTimeSeries() {
-
+    testExtraction[VenuesTimeSeriesResponse](C.json(("timeseries" -> List(C.venueTimeSeries1, C.venueTimeSeries2))))
+    testExtraction[VenuesTimeSeriesResponse](C.json(("timeseries" -> List[JValue]())))
   }
 
   @Test
   def venueStats() {
-
+    testExtraction[VenueStatsResponse](C.json(("stats" -> C.venueStatsDetail1)))
+    testExtraction[VenueStatsResponse](C.json(("stats" -> C.venueStatsDetail2)))
   }
 
 
   @Test
   def campaignTimeSeries() {
-
+    testExtraction[CampaignTimeSeriesResponse](C.json(("timeseries" -> C.campaignTimeSeries1)))
+    testExtraction[CampaignTimeSeriesResponse](C.json(("timeseries" -> C.campaignTimeSeries2)))
   }
 }

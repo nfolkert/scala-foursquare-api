@@ -638,26 +638,26 @@ case class VenueSharingStats(twitter: Int, facebook: Int)
 case class VenueGenderBreakdownStats(female: Int, male: Int)
 
 case class VenueAgeStatBucket(age: String, checkins: Int)
-case class VenueHourStatBucket(hour: Int, checkins: String)
+case class VenueHourStatBucket(hour: Int, checkins: Int)
 case class VenueVisitHistogramBucket(checkins: Int, users: Int)
 case class VenueTopVisitor(user: Option[UserCompact], checkins: Int)
 case class VenueRecentVisitor(user: Option[UserCompact], lastCheckin: Long)
 
 case class VenueDetailStats(totalCheckins: Int,
-                      newCheckins: Int,
-                      uniqueVisitors: Int,
-                      sharing: VenueSharingStats,
-                      genderBreakdown: VenueGenderBreakdownStats,
-                      ageBreakdown: List[VenueAgeStatBucket],
-                      hourBreakdown: List[VenueHourStatBucket],
-                      visitCountHistogram: List[VenueVisitHistogramBucket],
-                      topVisitors: List[VenueTopVisitor],
-                      recentVisitors: List[VenueRecentVisitor])
+                            newCheckins: Int,
+                            uniqueVisitors: Int,
+                            sharing: VenueSharingStats,
+                            genderBreakdown: VenueGenderBreakdownStats,
+                            ageBreakdown: List[VenueAgeStatBucket],
+                            hourBreakdown: List[VenueHourStatBucket],
+                            visitCountHistogram: List[VenueVisitHistogramBucket],
+                            topVisitors: List[VenueTopVisitor],
+                            recentVisitors: Option[List[VenueRecentVisitor]])
 case class VenueStatsResponse(stats: VenueDetailStats)
 
 case class CampaignVenueTimeSeries(venueId: String,
                                    totalCheckins: List[Int],
                                    newCheckins: List[Int],
                                    viewingUsers: List[Int],
-                                   unlockingUser: List[Int])
+                                   unlockingUsers: List[Int])
 case class CampaignTimeSeriesResponse(timeseries: List[CampaignVenueTimeSeries])

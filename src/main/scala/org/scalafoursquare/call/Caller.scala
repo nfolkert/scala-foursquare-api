@@ -537,7 +537,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     new PostRequest[MarkNotificationsReadResponse](this, "/updates/marknotificationsread", p("highWatermark", highWatermark))
 
   // problem = not_redeemable, not_valuable, other
-  def flagSpecial(id: String, venueId: String, problem: String, text: Option[String]) =
+  def flagSpecial(id: String, venueId: String, problem: String, text: Option[String]=None) =
     new PostRequest[FlagSpecialResponse](this, "/specials/" + id + "/flag",
       p("venueId", venueId) ++
       p("problem", problem) ++

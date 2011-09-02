@@ -21,6 +21,26 @@ object PhotoData {
     val bytes = Http(url).options(HttpOptions.connTimeout(500), HttpOptions.readTimeout(5000)).asBytes
     new PhotoData(url.substring(url.lastIndexOf("/")), bytes)
   }
+
+  def fromFile(path: String) = {
+    // Better way to read bytes from a file?  Just grabbed this from Http.asBytes.
+    def fileToBytes(file: java.io.File): Array[Byte] = {
+      val in = new java.io.FileInputStream(file)
+      val bos = new java.io.ByteArrayOutputStream
+      val ba = new Array[Byte](4096)
+
+      def readOnce {
+        val len = in.read(ba)
+        if (len > 0) bos.write(ba, 0, len)
+        if (len >= 0) readOnce
+      }
+      readOnce
+      bos.toByteArray
+    }
+    val file = new java.io.File(path)
+    val bytes = fileToBytes(file)
+    new PhotoData(file.getName, bytes)
+  }
 }
 
 case class ExtractionFailed(msg: String, cause: Throwable, json: JObject) extends Throwable {
@@ -528,7 +548,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     p("value", (if (value) 1 else 0)))
 
   // TODO: add other update parameters?
-  def updatePhoto(data: PhotoData) = new PostDataRequest[UserPhotoUpdateResponse](this, "/users/self/update", postData=data)
+  def updateSelf(data: PhotoData) = new PostDataRequest[UserPhotoUpdateResponse](this, "/users/self/update", postData=data)
 
   def markVenueTodo(id: String, text: Option[String]=None) = new PostRequest[VenueMarkTodoResponse](this, "/venues/" + id + "/marktodo", op("text", text))
 
@@ -587,7 +607,6 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     )
 
   // MERCHANT API
-  // TODO: ADD ALL THE REQUESTS BELOW, TEST EXTRACTION, TEST API
 
   def venueGroupDetails(id: String) = new Request[VenueGroupDetailResponse](this, "/venuegroups/" + id)
   def campaignDetails(id: String) = new Request[CampaignDetailResponse](this, "/campaigns/" + id)

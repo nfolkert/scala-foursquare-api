@@ -132,7 +132,7 @@ class RequestTest extends SpecsMatchers {
 
     val setchg = app.changeSetting("sendToTwitter", false)
 
-    val uppho = app.updatePhoto(TestPhotoData) // TODO: is this all we can do here?
+    val uppho = app.updateSelf(TestPhotoData) // TODO: is this all we can do here?
 
     val vtodo = app.markVenueTodo("id", Some("should do this"))
     val vtodo2 = app.markVenueTodo("id")

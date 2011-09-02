@@ -96,7 +96,7 @@ class CallTest extends SpecsMatchers {
     val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
     val data = PhotoData.fromUrl(photoUrl)
 
-    app.updatePhoto(data).get
+    app.updateSelf(data).get
 
     // Verified that this works.  API page on this is fail: no params listed, plus says returns photo object when really it returns user detail
   }

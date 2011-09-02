@@ -198,9 +198,12 @@ trait VenueCategoryKernel {
   def pluralName: String
   def icon: String
 }
-case class VenueCategoryCore(id: Option[String], name: String, pluralName: String, icon: String) extends VenueCategoryKernel
-case class VenueCategoryCompact(id: Option[String], name: String, pluralName: String, icon: String, parents: List[String], primary: Option[Boolean]) extends VenueCategoryKernel
-case class VenueCategoryWithChildren(id: Option[String], name: String, pluralName: String, icon: String, categories: List[VenueCategoryWithChildren]) extends VenueCategoryKernel
+case class VenueCategoryCore(id: Option[String], name: String, pluralName: String, shortName: String,
+                             icon: String) extends VenueCategoryKernel
+case class VenueCategoryCompact(id: Option[String], name: String, pluralName: String, shortName: String,
+                                icon: String, parents: List[String], primary: Option[Boolean]) extends VenueCategoryKernel
+case class VenueCategoryWithChildren(id: Option[String], name: String, pluralName: String, shortName: String,
+                                     icon: String, categories: Option[List[VenueCategoryWithChildren]]) extends VenueCategoryKernel
 
 case class VenueCategoriesResponse(categories: List[VenueCategoryWithChildren])
 

@@ -40,15 +40,15 @@ object Components {
     ("type" -> "others") ~ ("name" -> "other friends") ~ ("count" -> 0) ~ ("items" -> List[JValue]())
   ))
 
-  def categoryCore1 = ("id" -> "cid") ~ ("name" -> "Cat") ~ ("pluralName" -> "Cats") ~ ("icon" -> "picture.jpg")
-  def categoryCore2 = ("name" -> "Cat") ~ ("pluralName" -> "Cats") ~ ("icon" -> "picture.jpg")
+  def categoryCore1 = ("id" -> "cid") ~ ("name" -> "Cat") ~ ("pluralName" -> "Cats") ~ ("shortName" -> "Ca") ~ ("icon" -> "picture.jpg")
+  def categoryCore2 = ("name" -> "Cat") ~ ("pluralName" -> "Cats") ~ ("shortName" -> "Ca") ~ ("icon" -> "picture.jpg")
 
   def compactCategory1 = categoryCore1 ~ ("parents" -> List("Parent", "GrandParent")) ~ ("primary" -> true)
   def compactCategory2 = categoryCore2 ~ ("parents" -> List[JValue]()) ~ ("primary" -> true)
 
   def categoryWithChildren1 = categoryCore1 ~ ("categories" -> List(categoryWithChildren2, categoryWithChildren3))
   def categoryWithChildren2 = categoryCore2 ~ ("categories" -> List(categoryWithChildren3))
-  def categoryWithChildren3 = categoryCore1 ~ ("categories" -> List[JValue]())
+  def categoryWithChildren3 = categoryCore1
 
   def venueStats1 = ("checkinsCount" -> 10) ~ ("usersCount" -> 11) ~ ("tipCount" -> 12)
   def venueStats2 = ("checkinsCount" -> 10) ~ ("usersCount" -> 11) ~ ("tipCount" -> 12)

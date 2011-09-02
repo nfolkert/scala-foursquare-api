@@ -19,7 +19,7 @@ object TestCaller extends Caller {
         }).getOrElse("""{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}""")
       }
       case "/venues/categories" => {
-        m("""{"categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","icon":"noIcon","categories":[]}]}""")
+        m("""{"categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","shortName":"Fa Ca","icon":"noIcon"}]}""")
       }
       case "/users/self" | "/users/someUserId" => m("""
       {"user":{
@@ -32,7 +32,7 @@ object TestCaller extends Caller {
           "venue":{"id":"fakeId","name":"Fake Venue","itemId":"fakeId",
             "contact":{"twitter":"fakeTwitter"},
             "location":{"address":"East Village","city":"New York","state":"NY","postalCode":"10003","lat":40,"lng":-73.5},
-            "categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","icon":"noIcon","parents":["Fake Parent","Fake Grandpa"],"primary":true}],
+            "categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","shortName":"Fa Ca","icon":"noIcon","parents":["Fake Parent","Fake Grandpa"],"primary":true}],
             "verified":true,"stats":{"checkinsCount":500,"usersCount":200,"tipCount":100},"url":"fakeUrl"}}]},
          "friends":{"count":60,"groups":[{"type":"others","name":"other friends","count":149,"items":[]}]},
          "following":{"count":70},
@@ -47,7 +47,7 @@ object TestCaller extends Caller {
         "contact":{"phone":"8675309","formattedPhone":"(701) 867-5309"},
         "location":{"address":"Fake Address","crossStreet":"At Fake Street","city":"New York",
           "state":"NY","postalCode":"10018","lat":40,"lng":-74},
-        "categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories",
+        "categories":[{"id":"fakeId","name":"Fake Category","pluralName":"Fake Categories","shortName":"Fa Ca",
           "icon":"noIcon","parents":["Fake Parent"],"primary":true}],
         "verified":true,"stats":{"checkinsCount":500,"usersCount":300,"tipCount":20}, "createdAt":5000,
         "hereNow":{"count":5,"groups":[

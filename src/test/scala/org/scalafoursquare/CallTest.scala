@@ -170,7 +170,7 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).pluralName must_== "Fake Categories"
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
-    mockVenueCategories.response.get.categories(0).categories.length must_== 0
+    mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
 
     // This one actually makes a web call!
     
@@ -211,7 +211,7 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).pluralName must_== "Fake Categories"
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
-    mockVenueCategories.response.get.categories(0).categories.length must_== 0
+    mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
 
     // This one actually makes a web call!
 

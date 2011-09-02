@@ -1,12 +1,76 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{UserlessApp}
+import org.scalafoursquare.call.{UserlessApp, Request, ParseFailed, ExtractionFailed}
+import org.scalafoursquare.response._
 import org.specs.SpecsMatchers
 import org.junit.{Test, Ignore}
+import net.liftweb.json.{Printer, Extraction}
+import net.liftweb.json.JsonAST
+import net.liftweb.json.JsonAST.{JValue, JObject, JNothing}
+
+object EndpointTest {
+  implicit val formats = APICustomSerializers.formats
+
+  def pretty(v: JValue) = {
+    Printer.pretty(JsonAST.render(v))
+  }
+
+  def compare(unextracted: JValue, extracted: JValue): Boolean = {
+    val (intersection, missed, extra) = TestUtil.JsonDiff.compare(unextracted, extracted)
+    if (missed.isDefined || extra.isDefined) {
+      println("Original:\n" + pretty(unextracted))
+      println("Extracted:\n" + pretty(extracted))
+      intersection.map(j=>println("Same:\n" + pretty(j)))
+      missed.map(j=>println("Missed:\n" + pretty(j)))
+      extra.map(j=>println("Extra:\n" + pretty(j)))
+      false
+    } else true
+  }
+
+  def test[T](req: Request[T])(implicit mf: Manifest[T]) {
+    try {
+      val raw = req.getRaw
+      println(raw)
+      
+      val json = req.getJson
+
+      val ret = req.get
+      val meta = ret.meta
+      val notifications = ret.notifications
+      val response = ret.response
+
+      val metaJson = json.obj.find(_.name == "meta").map(_.value).getOrElse(JNothing)
+      val notificationsJson = json.obj.find(_.name == "notifications").map(_.value).getOrElse(JNothing)
+      val responseJson = json.obj.find(_.name == "response").map(_.value).getOrElse(JNothing)
+
+      val metaDecomposed = Extraction.decompose(meta)
+      val notificationDecomp = notifications.map(n=>Extraction.decompose(n)).getOrElse(JNothing)
+      val responseDecomp = response.map(r=>Extraction.decompose(r)).getOrElse(JNothing)
+
+      val c1 = compare(metaJson, metaDecomposed)
+      val c2 = compare(notificationsJson, notificationDecomp)
+      val c3 = compare(responseJson, responseDecomp)
+
+      if (!c1 || !c2 || !c3)
+        throw new Exception("Comparison failure")
+
+      if (meta.code != 200) {
+        println("Meta.code was not 200: \n" + pretty(json))
+        throw new Exception("Meta.code was not 200")
+      }
+
+    } catch {
+      case e: ParseFailed => {println("Parse failure: " + e.raw); throw e}
+      case e: ExtractionFailed => {println("Extraction failure: " + e.pretty); throw e}
+      case e => {println("Other Failure: " + e); throw e}
+    }
+  }
+}
 
 class UserlessEndpointTest extends SpecsMatchers {
 
   val P = TestUtil.propParams
+  val E = EndpointTest
 
   val caller = TestUtil.httpCaller
   val app = new UserlessApp(caller)
@@ -19,85 +83,74 @@ class UserlessEndpointTest extends SpecsMatchers {
 
   @Test
   def venueCategories() {
-    val cats = app.venueCategories.get
-    println(cats)
+    E.test(app.venueCategories)
   }
 
   @Test
   def venueDetail() {
-    val detail = app.venueDetail(VENUE_ID).get
-    println(detail)
+    E.test(app.venueDetail(VENUE_ID))
   }
 
   @Test
   def tipDetail() {
-    val detail = app.tipDetail(TIP_ID).get
-    println(detail)
+    E.test(app.tipDetail(TIP_ID))
   }
 
   @Test
   def specialDetail() {
-    val detail = app.specialDetail(SPECIAL_ID, VENUE_ID).get
-    println(detail)
+    E.test(app.specialDetail(SPECIAL_ID, VENUE_ID))
   }
 
   @Test
   def venueHereNow() {
-    val hereNow = app.venueHereNow(VENUE_ID).get
-    println(hereNow)
+    E.test(app.venueHereNow(VENUE_ID))
   }
 
   @Test
   def venueTips() {
-    val tips = app.venueTips(VENUE_ID).get
-    println(tips)
+    E.test(app.venueTips(VENUE_ID))
   }
 
   @Test
   def venuePhotos() {
-    val photos = app.venuePhotos(VENUE_ID, "venue").get
-    println(photos)
+    E.test(app.venuePhotos(VENUE_ID, "venue"))
   }
 
   @Test
   def venueLinks() {
-    val links = app.venueLinks(VENUE_ID).get
-    println(links)
+    E.test(app.venueLinks(VENUE_ID))
   }
 
   @Test
   def exploreVenues() {
-    val explore = app.exploreVenues(40.6748, -73.9721).get
-    println(explore)
+    E.test(app.exploreVenues(40.6748, -73.9721))
   }
 
   @Test
   def venueSearch() {
-    val search = app.venueSearch(40.6748, -73.9721).get
-    println(search)
+    E.test(app.venueSearch(40.6748, -73.9721))
   }
 
   @Test
   def venueTrending() {
-    val trending = app.venueTrending(40.6748, -73.9721).get
-    println(trending)
+    E.test(app.venueTrending(40.6748, -73.9721))
   }
 
   @Test
   def tipsSearch() {
-    val tips = app.tipsSearch(40.6748, -73.9721).get
-    println(tips)
+    E.test(app.tipsSearch(40.6748, -73.9721))
   }
 
   @Test
   def specialsSearch() {
-    val specials = app.specialsSearch(40.6748, -73.9721).get
-    println(specials)
+    E.test(app.specialsSearch(40.6748, -73.9721))
   }
+
+  // TODO: Do more detailed comparison (a la E.test) for multi responses
 
   @Test
   def multi() {
-    val mult = app.multi(app.venueCategories, app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID), app.venueTips(ANOTHER_VENUE_ID)).get
+    val mult = app.multi(app.venueCategories, app.venueDetail(VENUE_ID), app.tipsSearch(40.6748, -73.9721), app.venueTips(ANOTHER_VENUE_ID)).get
     println(mult)
   }
 

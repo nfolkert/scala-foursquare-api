@@ -138,9 +138,9 @@ class CallTest extends SpecsMatchers {
     mockSelf.notifications must_== None
     mockSelf.response.get.user.firstName must_== "Fake"
     mockSelf.response.get.user.mayorships.count must_== 20
-    mockSelf.response.get.user.checkins.items(0).venue.get.name must_== "Fake Venue"
-    mockSelf.response.get.user.checkins.items(0).venue.get.location.lat must_== Some(40.0)
-    mockSelf.response.get.user.checkins.items(0).venue.get.location.lng must_== Some(-73.5)
+    mockSelf.response.get.user.checkins.items.get(0).venue.get.name must_== "Fake Venue"
+    mockSelf.response.get.user.checkins.items.get(0).venue.get.location.lat must_== Some(40.0)
+    mockSelf.response.get.user.checkins.items.get(0).venue.get.location.lng must_== Some(-73.5)
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30
@@ -251,9 +251,9 @@ class CallTest extends SpecsMatchers {
     mockSelf.notifications must_== None
     mockSelf.response.get.user.firstName must_== "Fake"
     mockSelf.response.get.user.mayorships.count must_== 20
-    mockSelf.response.get.user.checkins.items(0).venue.get.name must_== "Fake Venue"
-    mockSelf.response.get.user.checkins.items(0).venue.get.location.lat must_== Some(40.0)
-    mockSelf.response.get.user.checkins.items(0).venue.get.location.lng must_== Some(-73.5)
+    mockSelf.response.get.user.checkins.items.get(0).venue.get.name must_== "Fake Venue"
+    mockSelf.response.get.user.checkins.items.get(0).venue.get.location.lat must_== Some(40.0)
+    mockSelf.response.get.user.checkins.items.get(0).venue.get.location.lng must_== Some(-73.5)
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30

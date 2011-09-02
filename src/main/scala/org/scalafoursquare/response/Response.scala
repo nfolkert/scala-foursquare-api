@@ -138,7 +138,7 @@ case class UserContact(phone: Option[String], email: Option[String], twitter: Op
 case class UserBadgesCount(count: Int)
 case class UserMayorshipsSummary(count: Int, items: List[VenueCompact]) // items sometimes returned as empty list here
 
-case class UserCheckinsSummary(count: Int, items: List[CheckinForFriend]) // This is only ever the most recent checkin
+case class UserCheckinsSummary(count: Int, items: Option[List[CheckinForFriend]]) // This is only ever the most recent checkin
 
 case class FriendGroupCompact(`type`: String, name: String, count: Int, items: List[UserCompact]) // mutual friends vs. other friends for self/friends/following/others
 case class FriendsOthersCompactView(count: Int, groups: List[FriendGroupCompact])

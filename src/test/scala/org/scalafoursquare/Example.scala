@@ -24,7 +24,7 @@ class Example extends SpecsMatchers {
     if (me.user.checkins.items.isEmpty)
       println("I've never been anywhere")
     else {
-      val venueId = me.user.checkins.items(0).venue.get.id
+      val venueId = me.user.checkins.items.get(0).venue.get.id
       val venue = app.venueDetail(venueId).get.response.get
       println("I'm at " + venue.venue.name)
     }

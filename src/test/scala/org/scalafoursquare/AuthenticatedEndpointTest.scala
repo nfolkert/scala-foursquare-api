@@ -8,27 +8,27 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   val P = TestUtil.propParams
 
+  val E = EndpointTest
+
   val caller = TestUtil.httpCaller
   val app = new AuthApp(caller, P.USER_TOKEN)
 
-  // MAY NEED TO MODIFY THESE IF TIPS/SPECIALS/VENUES HAVE CHANGED!
+  // MAY NEED TO MODIFY THESE IF TIPS/SPECIALS/VENUES HAVE CHANGED!  TODO: MAY WANT TO SET IN PROPERTIES TO ENSURE ACCESSIBILITY?
   def VENUE_ID = "49d22274f964a5209a5b1fe3"
   def ANOTHER_VENUE_ID = "4a468cd9f964a52015a91fe3"
   def TIP_ID = "4e5d72bbbd41bd3bc3a94bda"
   def SPECIAL_ID = "4e5d778dbd41022d87273eac"
-
   def USER_ID = "32"
+  def SELF_ID = "10002336"
 
   @Test
   def self() {
-    val u = app.self.get
-    println(u)
+    E.test(app.self)
   }
 
   @Test
   def userDetail() {
-    val u = app.userDetail(USER_ID).get
-    println(u)
+    E.test(app.userDetail(USER_ID))
   }
 
   @Test
@@ -53,191 +53,162 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def leaderboard() {
-    val board = app.leaderboard().get
-    println(board)
+    E.test(app.leaderboard())
   }
 
   @Test
   def userSearch() {
-    val us = app.userSearch(name=Some("Nate")).get
-    println(us)
+    E.test(app.userSearch(name=Some("Nate")))
   }
 
   @Test
   def userRequests() {
-    val reqs = app.userRequests.get
-    println(reqs)
+    E.test(app.userRequests)
   }
 
   @Test
   def recentCheckins() {
-    val chs = app.recentCheckins().get
-    println(chs)
+    E.test(app.recentCheckins())
   }
 
   @Test
   def notifications() {
-    val ns = app.notifications().get
-    println(ns)
+    E.test(app.notifications())
   }
 
   @Test
   def allSettings() {
-    val as = app.allSettings.get
-    println(as)
+    E.test(app.allSettings)
   }
 
   @Test
   def selfBadges() {
-    val bs = app.selfBadges.get
-    println(bs)
+    E.test(app.selfBadges)
   }
 
   @Test
   def userBadges() {
-    val bs = app.userBadges(USER_ID).get
-    println(bs)
+    E.test(app.userBadges(USER_ID))
   }
 
   @Test
   def selfCheckins() {
-    val chs = app.selfCheckins().get
-    println(chs)
+    E.test(app.selfCheckins())
   }
 
   @Test
   def selfFriends() {
-    val fs = app.selfFriends().get
-    println(fs)
+    E.test(app.selfFriends())
   }
 
   @Test
   def userFriends() {
-    val fs = app.userFriends(USER_ID).get
-    println(fs)
+    E.test(app.userFriends(USER_ID))
   }
 
   @Test
   def selfMayorships() {
-    val ms = app.selfMayorships.get
-    println(ms)
+    E.test(app.selfMayorships)
   }
 
   @Test
   def userMayorships() {
-    val ms = app.userMayorships(USER_ID).get
-    println(ms)
+    E.test(app.userMayorships(USER_ID))
   }
 
   @Test
   def selfTips() {
-    val ts = app.selfTips().get
-    println(ts)
+    E.test(app.selfTips())
   }
 
   @Test
   def userTips() {
-    val ts = app.userTips(USER_ID).get
-    println(ts)
+    E.test(app.userTips(USER_ID))
   }
 
   @Test
   def selfTodos() {
-    val ts = app.selfTodos().get
-    println(ts)
+    E.test(app.selfTodos(sort=Some("recent")))
   }
 
   @Test
   def userTodos() {
-    val ts = app.userTodos(USER_ID).get
-    println(ts)
+    E.test(app.userTodos(SELF_ID, sort=Some("recent"))) // TODO: need to check recent
   }
 
   @Test
   def selfVenueHistory() {
-    val vh = app.selfVenueHistory().get
-    println(vh)
+    E.test(app.selfVenueHistory())
   }
 
   // USERLESS ENDPOINTS WITH THE AUTHENTICATED APP
 
   @Test
   def venueCategories() {
-    val cats = app.venueCategories.get
-    println(cats)
+    E.test(app.venueCategories)
   }
 
   @Test
   def venueDetail() {
-    val detail = app.venueDetail(VENUE_ID).get
-    println(detail)
+    E.test(app.venueDetail(VENUE_ID))
   }
 
   @Test
   def tipDetail() {
-    val detail = app.tipDetail(TIP_ID).get
-    println(detail)
+    E.test(app.tipDetail(TIP_ID))
   }
 
   @Test
   def specialDetail() {
-    val detail = app.specialDetail(SPECIAL_ID, VENUE_ID).get
-    println(detail)
+    E.test(app.specialDetail(SPECIAL_ID, VENUE_ID))
   }
 
   @Test
   def venueHereNow() {
-    val hereNow = app.venueHereNow(VENUE_ID).get
-    println(hereNow)
+    E.test(app.venueHereNow(VENUE_ID))
   }
 
   @Test
   def venueTips() {
-    val tips = app.venueTips(VENUE_ID).get
-    println(tips)
+    E.test(app.venueTips(VENUE_ID))
   }
 
   @Test
   def venuePhotos() {
-    val photos = app.venuePhotos(VENUE_ID, "venue").get
-    println(photos)
+    E.test(app.venuePhotos(VENUE_ID, "venue"))
   }
 
   @Test
   def venueLinks() {
-    val links = app.venueLinks(VENUE_ID).get
-    println(links)
+    E.test(app.venueLinks(VENUE_ID))
   }
 
   @Test
   def exploreVenues() {
-    val explore = app.exploreVenues(40.6748, -73.9721).get
-    println(explore)
+    E.test(app.exploreVenues(40.6748, -73.9721))
   }
 
   @Test
   def venueSearch() {
-    val search = app.venueSearch(40.6748, -73.9721).get
-    println(search)
+    E.test(app.venueSearch(40.6748, -73.9721))
   }
 
   @Test
   def venueTrending() {
-    val trending = app.venueTrending(40.6748, -73.9721).get
-    println(trending)
+    E.test(app.venueTrending(40.6748, -73.9721))
   }
 
   @Test
   def tipsSearch() {
-    val tips = app.tipsSearch(40.6748, -73.9721).get
-    println(tips)
+    E.test(app.tipsSearch(40.6748, -73.9721))
   }
 
   @Test
   def specialsSearch() {
-    val specials = app.specialsSearch(40.6748, -73.9721).get
-    println(specials)
+    E.test(app.specialsSearch(40.6748, -73.9721))
   }
+
+  // TODO: Do more detailed comparison (a la E.test) for multi responses
 
   @Test
   def multi() {

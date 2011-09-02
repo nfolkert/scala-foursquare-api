@@ -495,6 +495,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
     )
 
   // sort = nearby, recent
+  // NOTE: either sort=recent or sort=nearby+ll is required.  Enforce this logically?
   def selfTodos(sort: Option[String]=None, ll: Option[(Double, Double)]=None) =
     userTodos("self", sort, ll)
   def userTodos(id: String, sort: Option[String]=None, ll: Option[(Double, Double)]=None) =

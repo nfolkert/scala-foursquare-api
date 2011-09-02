@@ -629,8 +629,6 @@ case class EndCampaignResponse()
 case class DeleteCampaignResponse()
 case class RetireSpecialResponse()
 
-// TODO:
-
 case class VenueTimeSeries(venueId: String,
                            totalCheckins: List[Int],
                            newCheckins: List[Int])

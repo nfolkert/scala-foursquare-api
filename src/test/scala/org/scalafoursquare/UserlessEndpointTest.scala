@@ -12,7 +12,7 @@ object EndpointTest {
   implicit val formats = APICustomSerializers.formats
 
   def pretty(v: JValue) = {
-    Printer.pretty(JsonAST.render(v))
+    if (v == JNothing) "" else Printer.pretty(JsonAST.render(v))
   }
 
   def compare(unextracted: JValue, extracted: JValue): Boolean = {
@@ -45,7 +45,7 @@ object EndpointTest {
 
       val metaDecomposed = Extraction.decompose(meta)
       val notificationDecomp = notifications.map(n=>Extraction.decompose(n)).getOrElse(JNothing)
-      val responseDecomp = response.map(r=>Extraction.decompose(r)).getOrElse(JNothing)
+      val responseDecomp = response.map(r=>Extraction.decompose(r)).getOrElse(JObject(Nil))
 
       val c1 = compare(metaJson, metaDecomposed)
       val c2 = compare(notificationsJson, notificationDecomp)

@@ -654,12 +654,14 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("endAt", endAt)
     )
 
-
   def specialConfigurationDetail(id: String) =
     new Request[SpecialConfigurationDetailResponse](this, "/specials/" + id + "/configuration")
 
   def campaignTimeSeries(id: String, startAt: Option[Long]=None, endAt: Option[Long]=None) =
-    new Request[CampaignTimeSeriesResponse](this, "/campaigns/" + id + "/timeseries")
+    new Request[CampaignTimeSeriesResponse](this, "/campaigns/" + id + "/timeseries",
+      op("startAt", startAt) ++
+      op("endAt", endAt)
+    )
 
   def startCampaign(id: String) =
     new PostRequest[StartCampaignResponse](this, "/campaigns/" + id + "/start")
@@ -673,7 +675,6 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
   def retireSpecial(id: String) =
     new PostRequest[RetireSpecialResponse](this, "/specials/" + id + "/retire")
 
-  // venueId required?  Not in spec.
   def addVenueToGroup(id: String, venueId: List[String]) =
     new PostRequest[AddVenueToGroupResponse](this, "/venuegroups/" + id + "/addvenue",
       p("venueId", venueId.join(","))

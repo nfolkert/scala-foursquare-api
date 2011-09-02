@@ -2,6 +2,7 @@ import sbt._
 
 class ScalaFoursquareProject(info: ProjectInfo) extends DefaultProject(info) {
   override def managedStyle = ManagedStyle.Maven
+  override def packageSrcJar= defaultJarPath("-sources.jar")
 
   val liftCommon = "net.liftweb" %% "lift-common" % "2.4-M1" % "compile" withSources()
   val liftUtil = "net.liftweb" %% "lift-util" % "2.4-M1" % "compile" withSources()

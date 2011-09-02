@@ -1,5 +1,6 @@
 package org.scalafoursquare
 
+import net.liftweb.util.Props
 import org.scalafoursquare.call.{AuthApp}
 import org.specs.SpecsMatchers
 import org.junit.{Test, Ignore}
@@ -13,13 +14,13 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
   val caller = TestUtil.httpCaller
   val app = new AuthApp(caller, P.USER_TOKEN)
 
-  // MAY NEED TO MODIFY THESE IF TIPS/SPECIALS/VENUES HAVE CHANGED!  TODO: MAY WANT TO SET IN PROPERTIES TO ENSURE ACCESSIBILITY?
-  def VENUE_ID = "49d22274f964a5209a5b1fe3"
-  def ANOTHER_VENUE_ID = "4a468cd9f964a52015a91fe3"
-  def TIP_ID = "4e5d72bbbd41bd3bc3a94bda"
-  def SPECIAL_ID = "4e5d778dbd41022d87273eac"
-  def USER_ID = "32"
-  def SELF_ID = "10002336"
+  def IGNORE = "IGNORE"
+  def VENUE_ID = Props.get("test.venue1.id").openOr(IGNORE)
+  def ANOTHER_VENUE_ID = Props.get("test.venue2.id").openOr(IGNORE)
+  def TIP_ID = Props.get("test.tip.id").openOr(IGNORE)
+  def SPECIAL_ID = Props.get("test.special.id").openOr(IGNORE)
+  def USER_ID = Props.get("test.user.id").openOr(IGNORE)
+  def SELF_ID = Props.get("test.self.id").openOr(IGNORE)
 
   @Test
   def self() {
@@ -28,7 +29,8 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def userDetail() {
-    E.test(app.userDetail(USER_ID))
+    if (USER_ID != IGNORE)
+      E.test(app.userDetail(USER_ID))
   }
 
   @Test
@@ -88,7 +90,8 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def userBadges() {
-    E.test(app.userBadges(USER_ID))
+    if (USER_ID != IGNORE)
+      E.test(app.userBadges(USER_ID))
   }
 
   @Test
@@ -103,7 +106,8 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def userFriends() {
-    E.test(app.userFriends(USER_ID))
+    if (USER_ID != IGNORE)
+      E.test(app.userFriends(USER_ID))
   }
 
   @Test
@@ -113,7 +117,8 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def userMayorships() {
-    E.test(app.userMayorships(USER_ID))
+    if (USER_ID != IGNORE)
+      E.test(app.userMayorships(USER_ID))
   }
 
   @Test
@@ -123,7 +128,8 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def userTips() {
-    E.test(app.userTips(USER_ID))
+    if (USER_ID != IGNORE)
+      E.test(app.userTips(USER_ID))
   }
 
   @Test
@@ -133,7 +139,8 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def userTodos() {
-    E.test(app.userTodos(SELF_ID, sort=Some("recent"))) // TODO: need to check recent
+    if (SELF_ID != IGNORE)
+      E.test(app.userTodos(SELF_ID, sort=Some("recent"))) // TODO: need to check recent
   }
 
   @Test
@@ -150,37 +157,44 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def venueDetail() {
-    E.test(app.venueDetail(VENUE_ID))
+    if (VENUE_ID != IGNORE)
+      E.test(app.venueDetail(VENUE_ID))
   }
 
   @Test
   def tipDetail() {
-    E.test(app.tipDetail(TIP_ID))
+    if (TIP_ID != IGNORE)
+      E.test(app.tipDetail(TIP_ID))
   }
 
   @Test
   def specialDetail() {
-    E.test(app.specialDetail(SPECIAL_ID, VENUE_ID))
+    if (SPECIAL_ID != IGNORE && VENUE_ID != IGNORE)
+      E.test(app.specialDetail(SPECIAL_ID, VENUE_ID))
   }
 
   @Test
   def venueHereNow() {
-    E.test(app.venueHereNow(VENUE_ID))
+    if (VENUE_ID != IGNORE)
+      E.test(app.venueHereNow(VENUE_ID))
   }
 
   @Test
   def venueTips() {
-    E.test(app.venueTips(VENUE_ID))
+    if (VENUE_ID != IGNORE)
+      E.test(app.venueTips(VENUE_ID))
   }
 
   @Test
   def venuePhotos() {
-    E.test(app.venuePhotos(VENUE_ID, "venue"))
+    if (VENUE_ID != IGNORE)
+      E.test(app.venuePhotos(VENUE_ID, "venue"))
   }
 
   @Test
   def venueLinks() {
-    E.test(app.venueLinks(VENUE_ID))
+    if (VENUE_ID != IGNORE)
+      E.test(app.venueLinks(VENUE_ID))
   }
 
   @Test
@@ -212,13 +226,17 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
 
   @Test
   def multi() {
-    val mult = app.multi(app.venueCategories, app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID), app.venueTips(ANOTHER_VENUE_ID)).get
-    println(mult)
+    if (VENUE_ID != IGNORE && ANOTHER_VENUE_ID != IGNORE) {
+      val mult = app.multi(app.venueCategories, app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID), app.venueTips(ANOTHER_VENUE_ID)).get
+      println(mult)
+    }
   }
 
   @Test
   def multiList() {
-    val mult = app.multi(List(app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID))).get
-    println(mult)
+    if (VENUE_ID != IGNORE && ANOTHER_VENUE_ID != IGNORE) {
+      val mult = app.multi(List(app.venueDetail(VENUE_ID), app.venueDetail(ANOTHER_VENUE_ID))).get
+      println(mult)
+    }
   }
 }

@@ -3,6 +3,7 @@ package org.scalafoursquare
 import org.scalafoursquare.call.{AuthApp}
 import org.specs.SpecsMatchers
 import org.junit.{Test, Ignore}
+import net.liftweb.util.Props
 
 class MerchantEndpointTest extends SpecsMatchers {
 
@@ -12,12 +13,12 @@ class MerchantEndpointTest extends SpecsMatchers {
   val caller = TestUtil.httpCaller
   val app = new AuthApp(caller, P.USER_TOKEN)
 
-  // MAY NEED TO MODIFY THESE IF TIPS/SPECIALS/VENUES HAVE CHANGED!  TODO: MAY WANT TO SET IN PROPERTIES TO ENSURE ACCESSIBILITY?
-  def VENUE_ID = "42e82000f964a52085261fe3"
-  def ANOTHER_VENUE_ID = "4a468cd9f964a52015a91fe3"
-  def VENUE_GROUP_ID = "4e6070dfbd41125ddcd331b0"
-  def CAMPAIGN_ID = "4e607126bd41125ddcd331d5"
-  def SPECIAL_ID = "4e607138bd41125ddcd331e1"
+  def IGNORE = "IGNORE"
+  def VENUE_ID = Props.get("test.merch.venue1.id").openOr(IGNORE)
+  def ANOTHER_VENUE_ID = Props.get("test.merch.venue2.id").openOr(IGNORE)
+  def VENUE_GROUP_ID = Props.get("test.merch.venueGroup.id").openOr(IGNORE)
+  def CAMPAIGN_ID = Props.get("test.merch.campaign.id").openOr(IGNORE)
+  def SPECIAL_ID = Props.get("test.merch.special.id").openOr(IGNORE)
 
   @Test
   def listCampaigns() {
@@ -26,12 +27,14 @@ class MerchantEndpointTest extends SpecsMatchers {
 
   @Test
   def campaignTimeSeries() {
-    E.test(app.campaignTimeSeries(CAMPAIGN_ID, startAt=Some(1314944938L), endAt=Some(1314945118L)))
+    if (CAMPAIGN_ID != IGNORE)
+      E.test(app.campaignTimeSeries(CAMPAIGN_ID, startAt=Some(1314944938L), endAt=Some(1314945118L)))
   }
 
   @Test
   def campaignDetails() {
-    E.test(app.campaignDetails(CAMPAIGN_ID))
+    if (CAMPAIGN_ID != IGNORE)
+      E.test(app.campaignDetails(CAMPAIGN_ID))
   }
 
   @Test
@@ -41,7 +44,8 @@ class MerchantEndpointTest extends SpecsMatchers {
 
   @Test
   def specialConfigurationDetail() {
-    E.test(app.specialConfigurationDetail(SPECIAL_ID))
+    if (SPECIAL_ID != IGNORE)
+      E.test(app.specialConfigurationDetail(SPECIAL_ID))
   }
 
   @Test
@@ -51,7 +55,8 @@ class MerchantEndpointTest extends SpecsMatchers {
 
   @Test
   def venueGroupDetails() {
-    E.test(app.venueGroupDetails(VENUE_GROUP_ID))
+    if (VENUE_GROUP_ID != IGNORE)
+      E.test(app.venueGroupDetails(VENUE_GROUP_ID))
   }
 
   @Test
@@ -61,11 +66,13 @@ class MerchantEndpointTest extends SpecsMatchers {
 
   @Test
   def venueTimeSeries() {
-    E.test(app.venuesTimeSeries(List(VENUE_ID, ANOTHER_VENUE_ID), 1309761118L))
+    if (VENUE_ID != IGNORE && ANOTHER_VENUE_ID != IGNORE)
+      E.test(app.venuesTimeSeries(List(VENUE_ID, ANOTHER_VENUE_ID), 1309761118L))
   }
 
   @Test
   def venueStats() {
-    E.test(app.venueStats(ANOTHER_VENUE_ID))
+    if (ANOTHER_VENUE_ID != IGNORE)
+      E.test(app.venueStats(ANOTHER_VENUE_ID))
   }
 }

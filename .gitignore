@@ -5,3 +5,4 @@ lib_managed
 scala_fs.iml
 src/test/resources/props/*.props
 scratch*.txt
+scala_fs.iml

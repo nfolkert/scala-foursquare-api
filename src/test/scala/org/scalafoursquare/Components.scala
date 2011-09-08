@@ -117,13 +117,15 @@ object Components {
   def genericVenueDetail1 = venueCore1 ~ ("createdAt" -> 1000) ~ ("hereNow" -> venueHereNow1) ~
     ("mayor" -> venueMayor1) ~ ("tips" -> venueTipData1) ~ ("tags" -> List("tag1", "tag2")) ~
     ("specials" -> List(venueSpecial1, venueSpecial2)) ~ ("specialsNearby" -> List(specialNearby1, specialNearby2)) ~
-    ("shortUrl" -> "venueShortUrl") ~ ("timeZone" -> "venueTimeZone") ~ ("beenHere" -> ("count" -> 5)) ~
+    ("shortUrl" -> "venueShortUrl") ~ ("canonicalUrl" -> "venueCanonicalUrl") ~
+    ("timeZone" -> "venueTimeZone") ~ ("beenHere" -> ("count" -> 5)) ~
     ("photos" -> venuePhotosData1) ~ ("description" -> "venueDescription") ~
-    ("events" -> List(compactEvent1, compactEvent2)) ~ ("lists" -> countList(2, List("List1", "List2")))
+    ("events" -> List(compactEvent1, compactEvent2)) ~ ("listed" -> countList(2, List[JValue]()))
   def genericVenueDetail2 = venueCore2 ~ ("createdAt" -> 1000) ~ ("hereNow" -> venueHereNow2) ~
     ("mayor" -> venueMayor2) ~ ("tips" -> venueTipData2) ~ ("tags" -> List("tag1", "tag2")) ~
     ("specials" -> List[JValue]()) ~ ("specialsNearby" -> List[JValue]()) ~
-    ("shortUrl" -> "venueShortUrl") ~ ("timeZone" -> "venueTimeZone")
+    ("shortUrl" -> "venueShortUrl") ~ ("canonicalUrl" -> "venueCanonicalUrl") ~
+    ("timeZone" -> "venueTimeZone")
 
   def venueDetail1 = genericVenueDetail1 ~ ("todos" -> countList(2, List(todoForVenue1, todoForVenue2)))
   def venueDetail2 = genericVenueDetail2 ~ ("todos" -> countList(0, List[JValue]()))

@@ -22,6 +22,7 @@ case class VenueTodos(count: Int, items: List[TodoForVenue])
 case class VenueHereNowCompact(count: Int)
 
 case class VenueLists(count: Int, items: List[String])
+case class VenueListed(count: Int, items: Option[List[String]])
 
 trait VenueKernel {
   def id: String
@@ -51,12 +52,13 @@ case class VenueDetailExtended(
   specials: List[Special],
   specialsNearby: List[Special],
   shortUrl: String,
+  canonicalUrl: String,
   timeZone: String,
   beenHere: Option[VenueBeenHere],
   photos: Option[VenuePhotos],
   description: Option[String],
   events: Option[List[CompactEvent]],
-  lists: Option[VenueLists],
+  listed: Option[VenueListed],
   todos: Option[VenueTodos]
 )
 
@@ -81,12 +83,13 @@ case class VenueDetail(
   def specials = extended.specials
   def specialsNearby = extended.specialsNearby
   def shortUrl = extended.shortUrl
+  def canonicalUrl = extended.canonicalUrl
   def timeZone = extended.timeZone
   def beenHere = extended.beenHere
   def photos = extended.photos
   def description = extended.description
   def events = extended.events
-  def lists = extended.lists
+  def listed = extended.listed
   def todos = extended.todos
 
 }
@@ -373,9 +376,11 @@ case class DoneDetailGroup(`type`: String, name: String, count: Option[Int], ite
 case class TodoDetail(count: Int, groups: List[TodoDetailGroup])
 case class DoneDetail(count: Int, groups: List[DoneDetailGroup])
 
+case class TipListed(count: Int, items: Option[List[String]])
 case class TipDetail(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String], venue: Option[VenueCompact],
-               user: Option[UserCompact], todo: TodoDetail, done: DoneDetail) extends TipKernel
+               user: Option[UserCompact], todo: TodoDetail, done: DoneDetail,
+               listed: Option[TipListed]) extends TipKernel
 case class TipDetailResponse(tip: TipDetail)
 
 case class AddTipResponse(tip: TipForList)

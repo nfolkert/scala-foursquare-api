@@ -58,7 +58,7 @@ case class ParseFailed(msg: String, cause: Throwable, raw: String) extends Throw
 }
 
 class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil, val method: String = "GET", val postData: Option[PostData]=None) {
-  def getRaw: String = app.caller.makeCall(this, app.token, method, postData)
+  lazy val (getRaw, duration) = app.caller.makeCall(this, app.token, method, postData)
   def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
 
@@ -76,10 +76,11 @@ class PostDataRequest[T](app: App, endpoint: String, params: List[(String, Strin
 
 class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawRequest], reqC: Option[RawRequest],
                       reqD: Option[RawRequest], reqE: Option[RawRequest], val method: String="GET") {
-  def getRaw: String = {
+  lazy val (getRaw, duration): (String, Long) = {
     val subreqs = List(reqA, reqB, reqC, reqD, reqE).flatten
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
-    new RawRequest(app, "/multi", List(("requests", param)), method, None).getRaw
+    val rawReq = new RawRequest(app, "/multi", List(("requests", param)), method, None)
+    (rawReq.getRaw, rawReq.duration)
   }
   def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
@@ -91,9 +92,10 @@ class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[R
 }
 
 class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val method: String="GET") {
-  def getRaw: String = {
+  lazy val (getRaw, duration): (String, Long) = {
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
-    new RawRequest(app, "/multi", List(("requests", param)), method, None).getRaw
+    val rawReq = new RawRequest(app, "/multi", List(("requests", param)), method, None)
+    (rawReq.getRaw, rawReq.duration)
   }
   def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
@@ -103,7 +105,7 @@ class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Mani
 }
 
 abstract class Caller {
-  def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): String
+  def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): (String, Long)
 }
 
 case class HttpCaller(clientId: String, clientSecret: String,
@@ -111,7 +113,9 @@ case class HttpCaller(clientId: String, clientSecret: String,
                       version: String = "20110823",
                       connectTimeout: Int=1000, readTimeout: Int=2000
                      ) extends Caller {
-  def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): String = {
+  import App.logger
+
+  def makeCall(req: RawRequest, token: Option[String]=None, method: String="GET", postData: Option[PostData]=None): (String, Long) = {
     val fullParams: List[(String, String)] = ("v", version) ::
       (token.map(t => List(("oauth_token", t))).getOrElse(List(("client_id", clientId), ("client_secret", clientSecret)))) ++
       req.params.toList
@@ -124,17 +128,18 @@ case class HttpCaller(clientId: String, clientSecret: String,
       case _ => throw new Exception("Don't understand " + method)
     }).options(HttpOptions.connTimeout(connectTimeout), HttpOptions.readTimeout(readTimeout)).params(fullParams)
 
-    // println(http.getUrl.toString)
-
+    val startTime = System.currentTimeMillis
     val result = try {
       http.asString
     } catch {
       case e: HttpException => {e.body}
     }
 
-    // println(result)
+    val duration = System.currentTimeMillis - startTime
+    logger.call(url + " " + method, duration)
+    logger.debug(result)
 
-    result
+    (result, duration)
   }
 }
 
@@ -387,13 +392,36 @@ object App {
         None
     })
   }
+
+  trait CallLogger {
+    def call(msg: => String, timeMillis: Long): Unit
+
+    def trace(msg: => String): Unit
+    def debug(msg: => String): Unit
+    def info(msg: => String): Unit
+    def warn(msg: => String): Unit
+    def error(msg: => String): Unit
+  }
+
+  class DefaultCallLogger extends CallLogger {
+    def call(msg: => String, timeMillis: Long) {}
+    def trace(msg: => String) {}
+    def debug(msg: => String) {}
+    def info(msg: => String) {}
+    def warn(msg: => String) {}
+    def error(msg: => String) {}
+  }
+
+  object NoopCallLogger extends DefaultCallLogger
+
+  var logger: CallLogger = NoopCallLogger
 }
 
 case class EndpointInterface(endpoint: String, requestType: String,
                              requiredQueryParams: List[(String, String)],
                              optionalQueryParams: List[(String, String)],
                              returnTree: JValue) {
-  def pretty = {
+  def pretty {
     println("Endpoint: " + endpoint + " " + requestType)
 
     if (!requiredQueryParams.isEmpty) {

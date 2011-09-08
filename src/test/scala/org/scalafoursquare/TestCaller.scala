@@ -4,18 +4,18 @@ import org.scalafoursquare.call.{Caller, RawRequest, PostData, PhotoData}
 import net.liftweb.util.Helpers._
 
 object TestCaller extends Caller {
-  def makeCall(req: RawRequest, token: Option[String], method: String="GET", postData: Option[PostData]=None): String = {
+  def makeCall(req: RawRequest, token: Option[String], method: String="GET", postData: Option[PostData]=None): (String, Long) = {
     def m(jsonObj: String) = """{"meta":{"code":200},"response":""" + jsonObj + "}"
     def unparse(reqStr: String): RawRequest = {
       new RawRequest(req.app, reqStr) // TODO: unparse parameters from endpoint
     }
 
-    req.endpoint match {
+    val ret = req.endpoint match {
       case "/multi" => {
         req.params.find(_._1 == "requests").map(reqEntry => {
           val reqs = reqEntry._2
           val reqList = reqs.split(",").toList
-          m("{\"responses\":[" + reqList.map(r => makeCall(unparse(r), req.app.token)).join(",") + "]}")
+          m("{\"responses\":[" + reqList.map(r => makeCall(unparse(r), req.app.token)._1).join(",") + "]}")
         }).getOrElse("""{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}""")
       }
       case "/venues/categories" => {
@@ -65,6 +65,7 @@ object TestCaller extends Caller {
         "specials":[],
         "specialsNearby":[],
         "shortUrl":"fakeUrl",
+        "canonicalUrl":"fakeUrl",
         "timeZone":"America/New_York",
         "beenHere":{"count":40},
         "photos":{"count":100,"groups":[
@@ -84,6 +85,8 @@ object TestCaller extends Caller {
       case "/venues/missingId" => """{"meta":{"code":400,"errorType":"param_error","errorDetail":"Value missingId is invalid for venue id"},"response":{}}"""
       case _ => """{"meta":{"code":404, "errorType":"other", "errorDetail":"Endpoint not found"},"response":{}}"""
     }
+
+    (ret, 0L)
   }
 }
 

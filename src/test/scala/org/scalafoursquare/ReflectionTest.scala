@@ -15,11 +15,13 @@ class ReflectionTest extends SpecsMatchers {
     val userless = App.deriveInterface(userlessApp)
     val auth = App.deriveInterface(authApp)
 
-
+    /*
+    // Uncomment to see structure
     println("Userless App:")
     userless.map(_.pretty)
     println("Authenticated App:")
     auth.map(_.pretty)
+    */
     
   }
 

@@ -32,6 +32,8 @@ object EndpointTest {
     try {
       val raw = req.getRaw
       println(raw)
+      val duration = req.duration
+      println("Took " + duration + " ms")
       
       val json = req.getJson
 

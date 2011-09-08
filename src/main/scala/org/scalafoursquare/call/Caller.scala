@@ -2,10 +2,13 @@ package org.scalafoursquare.call
 
 import net.liftweb.json.{Formats, JsonParser, Printer}
 import net.liftweb.json.JsonAST
-import net.liftweb.json.JsonAST.{JArray, JObject}
+import net.liftweb.json.JsonDSL._
 import net.liftweb.util.Helpers._
 import org.scalafoursquare.response._
 import scalaj.http.{HttpException, HttpOptions, Http, MultiPart}
+import com.thoughtworks.paranamer.{BytecodeReadingParanamer, CachingParanamer, Paranamer}
+import java.lang.reflect.{Type, ParameterizedType}
+import net.liftweb.json.JsonAST.{JString, JValue, JArray, JObject, JField}
 
 abstract class PostData {
   def asMultipart: List[MultiPart]
@@ -264,6 +267,148 @@ object App {
       Response[A](smeta, snotifications, sresponse)
     })
     Some(resolved)
+  }
+
+  def deriveInterface(app: App): List[EndpointInterface] = {
+    val paranamer = new CachingParanamer(new BytecodeReadingParanamer)
+
+    def generateReturnTree(t: Type, visited: List[Type]): JValue = {
+      t match {
+        case pt: ParameterizedType if classOf[Option[_]].isAssignableFrom(pt.getRawType.asInstanceOf[Class[_]]) => {
+          ("optional" -> generateReturnTree(pt.getActualTypeArguments()(0), visited))
+        }
+        case pt: ParameterizedType if classOf[List[_]].isAssignableFrom(pt.getRawType.asInstanceOf[Class[_]]) => {
+          JArray(List(generateReturnTree(pt.getActualTypeArguments()(0), visited)))
+        }
+        case x if x == classOf[String] => JString("string");
+        case x if x == classOf[Boolean] => JString("boolean"); case x if x == classOf[java.lang.Boolean] => JString("boolean");
+        case x if x == classOf[Int] => JString("integer"); case x if x == classOf[java.lang.Integer] => JString("integer");
+        case x if x == classOf[Long] => JString("integer"); case x if x == classOf[java.lang.Long] => JString("integer");
+        case x if x == classOf[Double] => JString("decimal"); case x if x == classOf[java.lang.Double] => JString("decimal");
+        case c: Class[_] => {
+          if (visited.contains(c))
+            JString("RECURSIVE")
+          else c match {
+            case c if c == classOf[Primitive] => JString("primitive (string, boolean, integer, or decimal)")
+            case c if c == classOf[UpdateTarget] => ("type" -> "update type") ~ ("object" -> "update object (polymorphic)")
+            case c if c == classOf[UserSearchUnmatched] => ("match type" -> "e.g., twitter") ~ ("unmatched values" -> List(generateReturnTree(classOf[Primitive], visited)))
+            case c if c == classOf[VenueDetail] => generateReturnTree(classOf[VenueCore], visited).asInstanceOf[JObject] ~ generateReturnTree(classOf[VenueDetailExtended], visited).asInstanceOf[JObject]
+            case c if c == classOf[SpecialConfigurationDetail] => generateReturnTree(classOf[SpecialConfigurationDetail1], visited).asInstanceOf[JObject] ~ generateReturnTree(classOf[SpecialConfigurationDetail2], visited).asInstanceOf[JObject]
+            case c if c == classOf[NotificationItem] => ("notificationType (varies)" -> "notification object (polymorphic)")
+            case c if c == classOf[Badges] => ("badgeId (multiple)" -> generateReturnTree(classOf[Badge], visited))
+            case c => {
+              val cons = c.getConstructors()(0)
+              val pTypes = cons.getGenericParameterTypes.toList
+              val pNames = paranamer.lookupParameterNames(cons).toList
+              val params: List[(String, Type)] = pNames.zip(pTypes)
+
+              JObject(params.map(p=>{JField(p._1, generateReturnTree(p._2, c :: visited))}))
+            }
+          }
+        }
+        case e => {println("WTF?: " + e); JObject(Nil)}
+      }
+    }
+
+
+    val allMethods = app.getClass.getDeclaredMethods.toList
+    val requestMethods = allMethods.filter(_.getReturnType.isAssignableFrom(classOf[RawRequest]))
+    allMethods.flatMap(m=>{
+      val returnType = m.getReturnType
+      if (classOf[RawRequest].isAssignableFrom(returnType)) {
+        val pNames: List[String] = paranamer.lookupParameterNames(m).toList
+        val pTypes: List[Type] = m.getGenericParameterTypes.toList
+
+        val params: List[(String, Type)] = pNames.zip(pTypes)
+
+        def fullArgs: List[AnyRef] = params.map(p=>{getDefault(p._2, p._1, true).asInstanceOf[AnyRef]})
+
+        def emptyArgs: List[AnyRef] = params.map(p=>{getDefault(p._2, p._1, false).asInstanceOf[AnyRef]})
+
+        def getDefault(t: java.lang.reflect.Type, pname: String, full: Boolean): Any = {
+          t match {
+            case pt: ParameterizedType if classOf[List[_]].isAssignableFrom(pt.getRawType.asInstanceOf[Class[_]]) => {
+              if (full) {
+                val ta = pt.getActualTypeArguments()(0)
+                val d = getDefault(ta, pname, full)
+                List(d, d)
+              }
+              else
+                Nil
+            }
+            case pt: ParameterizedType if classOf[Option[_]].isAssignableFrom(pt.getRawType.asInstanceOf[Class[_]]) => {
+              if (full) {
+                val ta = pt.getActualTypeArguments()(0)
+                val d = getDefault(ta, pname, full)
+                Some(d)
+              }
+              else
+                None
+            }
+            case pt: ParameterizedType if classOf[Product].isAssignableFrom(pt.getRawType.asInstanceOf[Class[_]]) => {
+              val ta = pt.getActualTypeArguments()(0)
+              val d = getDefault(ta, pname, full)
+              pt.getRawType match {
+                case c if c == classOf[Tuple2[_,_]] => (d, d)
+                case c if c == classOf[Tuple3[_,_,_]] => (d, d, d)
+                case _ => null
+              }
+            }
+            case x if x == classOf[String] => pname;
+            case x if x == classOf[Boolean] => false; case x if x == classOf[java.lang.Boolean] => false;
+            case x if x == classOf[Int] => 0; case x if x == classOf[java.lang.Integer] => 0;
+            case x if x == classOf[Long] => 0L; case x if x == classOf[java.lang.Long] => 0L;
+            case x if x == classOf[Double] => 0.0; case x if x == classOf[java.lang.Double] => 0.0;
+            case _ => null
+          }
+        }
+
+        val fullInstance = m.invoke(app, fullArgs:_*).asInstanceOf[RawRequest]
+        val emptyInstance = m.invoke(app, emptyArgs:_*).asInstanceOf[RawRequest]
+        val reqKeys = emptyInstance.params.toList.map(_._1).toSet
+
+        val reqParams = fullInstance.params.toList.filter(p => reqKeys.contains(p._1))
+        val optParams = fullInstance.params.toList.filter(p => !reqKeys.contains(p._1))
+
+        val endpoint = fullInstance.endpoint
+
+        val isGet = classOf[Request[_]].isAssignableFrom(returnType)
+        val isPost = classOf[PostRequest[_]].isAssignableFrom(returnType)
+        val isPostData = classOf[PostDataRequest[_]].isAssignableFrom(returnType)
+
+        val callType = if (isGet) "GET" else if (isPost) "POST" else "POST (with data)"
+
+        val rt = m.getGenericReturnType.asInstanceOf[ParameterizedType].getActualTypeArguments()(0)
+        val tree = generateReturnTree(rt, Nil)
+        
+        Some(EndpointInterface(endpoint, callType, reqParams, optParams, tree))
+      }
+      else
+        None
+    })
+  }
+}
+
+case class EndpointInterface(endpoint: String, requestType: String,
+                             requiredQueryParams: List[(String, String)],
+                             optionalQueryParams: List[(String, String)],
+                             returnTree: JValue) {
+  def pretty = {
+    println("Endpoint: " + endpoint + " " + requestType)
+
+    if (!requiredQueryParams.isEmpty) {
+      println("Required:")
+      requiredQueryParams.map(p=>println("\t" + p._1 + ", e.g.:\"" + p._2 + "\""))
+    }
+
+    if (!optionalQueryParams.isEmpty) {
+      println("Optional:")
+      optionalQueryParams.map(p=>println("\t" + p._1 + ", e.g.: \"" + p._2 + "\""))
+    }
+
+    println("Response Structure: ")
+    println(Printer.pretty(JsonAST.render(returnTree)))
+    println("\n")
   }
 }
 

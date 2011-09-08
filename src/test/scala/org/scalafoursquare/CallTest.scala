@@ -1,12 +1,9 @@
 package org.scalafoursquare
 
-import org.scalafoursquare.call.{AuthApp, UserlessApp, HttpCaller, Request, PhotoData}
-import org.scalafoursquare.response.{Meta, BooleanPrimitive}
-import org.junit.{Ignore, Test}
+import org.scalafoursquare.call.{AuthApp, UserlessApp, Request}
+import org.scalafoursquare.response.{Meta}
+import org.junit.{Test}
 import org.specs.SpecsMatchers
-import net.liftweb.common.Empty
-import net.liftweb.util.Props
-import net.liftweb.json.JsonParser
 
 class CallTest extends SpecsMatchers {
 
@@ -49,78 +46,6 @@ class CallTest extends SpecsMatchers {
     mockVenue.response.get.venue.location.crossStreet must_== Some("At Fake Street")
     mockVenue.response.get.venue.mayor.count must_== 15
     mockVenue.response.get.venue.tags(0) must_== "a tag"
-
-    // This one actually makes a web call!
-
-    val caller = TestUtil.httpCaller
-    val app = new UserlessApp(caller)
-
-    val venue = app.venueDetail("1234").get
-    println(venue.toString)
-  }
-
-  @Test
-  def changeSettings() {
-    // This one actually makes a web call, and modifies the database!
-
-    val caller = TestUtil.httpCaller
-    val app = new AuthApp(caller, P.USER_TOKEN)
-
-    val original = app.settingsDetail("sendMayorshipsToFacebook").get
-    val restoreOn = original.response.exists(_.value match {case BooleanPrimitive(x) => x; case _ => false})
-
-    if (restoreOn)
-      app.changeSetting("sendMayorshipsToFacebook", false).get
-
-    val turnOn = app.changeSetting("sendMayorshipsToFacebook", true).get
-    // println(turnOn.response.map(_.settings).getOrElse(turnOn.meta.toString))
-
-    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== BooleanPrimitive(true)
-
-    val turnOff = app.changeSetting("sendMayorshipsToFacebook", false).get
-    // println(turnOff.response.map(_.message).getOrElse(turnOff.meta.toString))
-
-    app.settingsDetail("sendMayorshipsToFacebook").get.response.get.value must_== BooleanPrimitive(false)
-
-    if (restoreOn)
-      app.changeSetting("sendMayorshipsToFacebook", true).get
-  }
-
-  @Test
-  def uploadPhoto() {
-    // This one actually makes a web call, and modifies the database!
-
-    val caller = TestUtil.httpCaller
-    val app = new AuthApp(caller, P.USER_TOKEN)
-
-    val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
-    val data = PhotoData.fromUrl(photoUrl)
-
-    app.updateSelf(data).get
-
-    // Verified that this works.  API page on this is fail: no params listed, plus says returns photo object when really it returns user detail
-  }
-
-  @Test
-  def checkinAndAddPhoto() {
-    // This one actually makes a web call, and modifies the database!
-
-    val caller = TestUtil.httpCaller
-    val app = new AuthApp(caller, P.USER_TOKEN)
-
-    val photoUrl = "https://playfoursquare.s3.amazonaws.com/badge/300/supermayor.png"
-    val data = PhotoData.fromUrl(photoUrl)
-
-    val checkinResponse = app.addCheckin(venueId=Some("30558"), shout=Some("Woot")).get
-
-    val checkinId = checkinResponse.response.get.checkin.id
-
-    val photoReq = app.addPhoto(data, checkinId=Some(checkinId))
-
-    println(photoReq.getRaw)
-
-    // Verified that this works.  API page on this is fail: no params listed, plus says returns photo object when really it returns user detail
-
   }
 
   @Test
@@ -144,17 +69,6 @@ class CallTest extends SpecsMatchers {
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30
-
-    // These actually make a web call!
-
-    val caller = TestUtil.httpCaller
-    val userApp = new AuthApp(caller, P.USER_TOKEN)
-
-    val self = userApp.self.get
-    println(self.toString)
-
-    val mtv = userApp.userDetail(660771.toString).get
-    println(mtv.toString)
   }
 
   @Test
@@ -171,15 +85,6 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
     mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
-
-    // This one actually makes a web call!
-    
-    val caller = TestUtil.httpCaller
-    val app = new UserlessApp(caller)
-
-    val venueCategories = app.venueCategories.get
-
-    println(venueCategories.toString)
   }
 
   @Test
@@ -212,21 +117,6 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
     mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
-
-    // This one actually makes a web call!
-
-    val caller = TestUtil.httpCaller
-    val app = new UserlessApp(caller)
-
-    val venue = app.venueDetail("1234")
-    val venueCategories = app.venueCategories
-
-    val multi = app.multi(venue, venueCategories).get
-
-    println(multi)
-
-    (multi.responses._1.get == venue.get) must_== true
-    (multi.responses._2.get == venueCategories.get) must_== true
   }
 
   @Test
@@ -257,20 +147,5 @@ class CallTest extends SpecsMatchers {
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30
-
-    // These actually make a web call!
-
-    val caller = TestUtil.httpCaller
-    val userApp = new AuthApp(caller, P.USER_TOKEN)
-
-    val self = userApp.self
-    val mtv = userApp.userDetail(660771.toString)
-
-    val multi = userApp.multi(self, mtv).get
-
-    println(multi)
-
-    (multi.responses._1.get == self.get) must_== true
-    (multi.responses._2.get == mtv.get) must_== true
   }
 }

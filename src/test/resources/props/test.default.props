@@ -43,6 +43,9 @@ test.merch.venue2.id=IGNORE
 test.merch.venueGroup.id=IGNORE
 test.merch.campaign.id=IGNORE
 test.merch.special.id=IGNORE
+# The following should be # of seconds in epoch
+test.merch.special.start=IGNORE
+test.merch.special.end=IGNORE
 
 ### Randomized Testing
 # comma separated list of user ids to start exploration

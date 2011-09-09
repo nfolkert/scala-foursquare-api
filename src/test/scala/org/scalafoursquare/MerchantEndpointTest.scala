@@ -4,6 +4,7 @@ import org.scalafoursquare.call.{AuthApp}
 import org.specs.SpecsMatchers
 import org.junit.{Test, Ignore}
 import net.liftweb.util.Props
+import net.liftweb.util.Helpers._
 
 class MerchantEndpointTest extends SpecsMatchers {
 
@@ -19,6 +20,8 @@ class MerchantEndpointTest extends SpecsMatchers {
   def VENUE_GROUP_ID = Props.get("test.merch.venueGroup.id").openOr(IGNORE)
   def CAMPAIGN_ID = Props.get("test.merch.campaign.id").openOr(IGNORE)
   def SPECIAL_ID = Props.get("test.merch.special.id").openOr(IGNORE)
+  def SPECIAL_START = Props.get("test.merch.special.start").flatMap(v=>tryo(v.toLong)).openOr(-1L)
+  def SPECIAL_END = Props.get("test.merch.special.end").flatMap(v=>tryo(v.toLong)).openOr(-1L)
 
   @Test
   def listCampaigns() {
@@ -27,8 +30,8 @@ class MerchantEndpointTest extends SpecsMatchers {
 
   @Test
   def campaignTimeSeries() {
-    if (CAMPAIGN_ID != IGNORE)
-      E.test(app.campaignTimeSeries(CAMPAIGN_ID, startAt=Some(1314944938L), endAt=Some(1314945118L)))
+    if (CAMPAIGN_ID != IGNORE && SPECIAL_START > 0L && SPECIAL_END > 0L)
+      E.test(app.campaignTimeSeries(CAMPAIGN_ID, startAt=Some(SPECIAL_START), endAt=Some(SPECIAL_END)))
   }
 
   @Test
@@ -66,8 +69,8 @@ class MerchantEndpointTest extends SpecsMatchers {
 
   @Test
   def venueTimeSeries() {
-    if (VENUE_ID != IGNORE && ANOTHER_VENUE_ID != IGNORE)
-      E.test(app.venuesTimeSeries(List(VENUE_ID, ANOTHER_VENUE_ID), 1309761118L))
+    if (VENUE_ID != IGNORE && ANOTHER_VENUE_ID != IGNORE && SPECIAL_START > 0)
+      E.test(app.venuesTimeSeries(List(VENUE_ID, ANOTHER_VENUE_ID), SPECIAL_START))
   }
 
   @Test

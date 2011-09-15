@@ -32,12 +32,16 @@ object EndpointTest {
     try {
       val raw = req.getRaw
       println(raw)
-      val duration = req.duration
-      println("Took " + duration + " ms")
+
+      val callDuration = req.callDuration
+      println("Call took " + callDuration + " ms")
       
       val json = req.getJson
 
       val ret = req.get
+      val extractDuration = req.extractDuration
+      println("Extraction took " + extractDuration + " ms")
+
       val meta = ret.meta
       val notifications = ret.notifications
       val response = ret.response

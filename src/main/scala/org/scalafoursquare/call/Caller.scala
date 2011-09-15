@@ -46,41 +46,43 @@ object PhotoData {
   }
 }
 
-case class ExtractionFailed(msg: String, cause: Throwable, json: JObject) extends Throwable {
+case class CallFailed(msg: String, cause: Throwable) extends Exception(msg, cause)
+
+case class ExtractionFailed(msg: String, cause: Throwable, json: JObject) extends Exception(msg, cause) {
   def pretty = Printer.pretty(JsonAST.render(json))
   def compact = Printer.compact(JsonAST.render(json))
 }
 
-case class ParseFailed(msg: String, cause: Throwable, raw: String) extends Throwable {
+case class ParseFailed(msg: String, cause: Throwable, raw: String) extends Exception(msg, cause) {
   def getJson: JObject = JsonParser.parse(raw).asInstanceOf[JObject]
   def pretty = Printer.pretty(JsonAST.render(getJson))
   def compact = Printer.pretty(JsonAST.render(getJson))
 }
 
 class RawRequest(val app: App, val endpoint: String, val params: List[(String, String)] = Nil, val method: String = "GET", val postData: Option[PostData]=None) {
-  lazy val (getRaw, duration) = app.caller.makeCall(this, app.token, method, postData)
+  lazy val (getRaw, callDuration) = app.caller.makeCall(this, app.token, method, postData)
   def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
 
 class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "GET", None) {
-  def get: Response[T] = app.convertSingle[T](getRaw)
+  lazy val (get, extractDuration) = app.convertSingle[T](getRaw)
 }
 
 class PostRequest[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", None) {
-  def get: Response[T] = app.convertSingle[T](getRaw)
+  lazy val (get, extractionDuration): (Response[T], Long) = app.convertSingle[T](getRaw)
 }
 
 class PostDataRequest[T](app: App, endpoint: String, params: List[(String, String)]=Nil, postData: PostData)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", Some(postData)) {
-  def get: Response[T] = app.convertSingle[T](getRaw)
+  lazy val (get, extractionDuration): (Response[T], Long) = app.convertSingle[T](getRaw)
 }
 
 class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawRequest], reqC: Option[RawRequest],
                       reqD: Option[RawRequest], reqE: Option[RawRequest], val method: String="GET") {
-  lazy val (getRaw, duration): (String, Long) = {
+  lazy val (getRaw, callDuration): (String, Long) = {
     val subreqs = List(reqA, reqB, reqC, reqD, reqE).flatten
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
     val rawReq = new RawRequest(app, "/multi", List(("requests", param)), method, None)
-    (rawReq.getRaw, rawReq.duration)
+    (rawReq.getRaw, rawReq.callDuration)
   }
   def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
@@ -88,20 +90,20 @@ class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawReques
 class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[Request[B]], reqC: Option[Request[C]],
                                    reqD: Option[Request[D]], reqE: Option[Request[E]])(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E])
   extends RawMultiRequest(app, reqA, reqB, reqC, reqD, reqE) {
-  def get: MultiResponse[A,B,C,D,E] = app.convertMulti[A,B,C,D,E](getRaw)
+  lazy val (get, extractDuration): (MultiResponse[A,B,C,D,E], Long) = app.convertMulti[A,B,C,D,E](getRaw)
 }
 
 class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val method: String="GET") {
-  lazy val (getRaw, duration): (String, Long) = {
+  lazy val (getRaw, callDuration): (String, Long) = {
     val param = subreqs.map(r=>r.endpoint + (if (r.params.isEmpty) "" else "?" + r.params.map(p=>(p._1 + "=" + urlEncode(p._2))).join("&"))).join(",")
     val rawReq = new RawRequest(app, "/multi", List(("requests", param)), method, None)
-    (rawReq.getRaw, rawReq.duration)
+    (rawReq.getRaw, rawReq.callDuration)
   }
   def getJson: JObject = JsonParser.parse(getRaw).asInstanceOf[JObject]
 }
 
 class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Manifest[A]) extends RawMultiRequestList(app, subreqs) {
-  def get: MultiResponseList[A] = app.convertMultiList[A](getRaw)
+  lazy val (get, extractionDuration): (MultiResponseList[A], Long) = app.convertMultiList[A](getRaw)
 }
 
 abstract class Caller {
@@ -145,6 +147,7 @@ case class HttpCaller(clientId: String, clientSecret: String,
 
 abstract class App(val caller: Caller) {
   implicit val formats = APICustomSerializers.formats
+  import App.logger
 
   def token: Option[String]
 
@@ -174,9 +177,10 @@ abstract class App(val caller: Caller) {
   }
 
 
-  def convertSingle[T](raw: String)(implicit mf: Manifest[T]): Response[T] = {
+  def convertSingle[T](raw: String)(implicit mf: Manifest[T]): (Response[T], Long) = {
+    val startTime = System.currentTimeMillis
     val json = parse(raw)
-    extract(json) {
+    val res = extract(json) {
       val fields = json.obj
       val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
       val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
@@ -190,11 +194,16 @@ abstract class App(val caller: Caller) {
       }
       Response[T](meta, notifications, response)
     }
+    val duration = System.currentTimeMillis - startTime
+    logger.extract("Extraction", duration)
+
+    (res, duration)
   }
 
   def convertMulti[A,B,C,D,E](raw: String)(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E]) = {
+    val startTime = System.currentTimeMillis
     val json = parse(raw)
-    extract(json) {
+    val res = extract(json) {
       val fields = json.obj
       val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
       val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
@@ -208,11 +217,15 @@ abstract class App(val caller: Caller) {
       }
       MultiResponse[A,B,C,D,E](meta, notifications, responses)
     }
+    val duration = System.currentTimeMillis - startTime
+    logger.call("Extraction", duration)
+    (res, duration)
   }
 
   def convertMultiList[A](raw: String)(implicit mf: Manifest[A]) = {
+    val startTime = System.currentTimeMillis
     val json = parse(raw)
-    extract(json) {
+    val res = extract(json) {
       val fields = json.obj
       val meta = fields.find(_.name == "meta").map(_.extract[Meta]).get
       val notifications = fields.find(_.name == "notifications").map(_.value.asInstanceOf[JArray].arr.map(_.extract[NotificationItem]))
@@ -226,6 +239,10 @@ abstract class App(val caller: Caller) {
       }
       MultiResponseList[A](meta, notifications, responses)
     }
+    val duration = System.currentTimeMillis - startTime
+    logger.call("Extraction", duration)
+
+    (res, duration)
   }
 }
 
@@ -395,6 +412,7 @@ object App {
 
   trait CallLogger {
     def call(msg: => String, timeMillis: Long): Unit
+    def extract(msg: => String, timeMillis: Long): Unit
 
     def trace(msg: => String): Unit
     def debug(msg: => String): Unit
@@ -405,6 +423,7 @@ object App {
 
   class DefaultCallLogger extends CallLogger {
     def call(msg: => String, timeMillis: Long) {}
+    def extract(msg: => String, timeMillis: Long) {}
     def trace(msg: => String) {}
     def debug(msg: => String) {}
     def info(msg: => String) {}

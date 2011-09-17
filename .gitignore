@@ -1,0 +1,8 @@
+target
+project/boot
+lib_managed
+.idea
+scala_fs.iml
+src/test/resources/props/*.props
+scratch*.txt
+scala_fs.iml

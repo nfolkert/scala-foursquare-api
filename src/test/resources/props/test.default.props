@@ -1,0 +1,54 @@
+# These properties are used for the web-based unit tests only
+
+### Authentication
+# consumer information is obtained/registered at foursquare.com/oauth
+consumer.key=CONSUMER_ID_HERE
+consumer.secret=CONSUMER_SECRET_HERE
+consumer.callbackUrl=CONSUMER_CALLBACK_URL_HERE
+# access token is obtained by going through an oauth flow
+access.token.user=USER_ACCESS_TOKEN_HERE
+
+### HTTP
+# urls are where to direct tests
+foursquare.url=https://foursquare.com
+foursquare.api.url=https://api.foursquare.com/v2
+# timeouts for http calls
+connect.timeout=1000
+read.timeout=2000
+
+### API Version
+# api version is latest version of api supported by this api wrapper
+api.version=20110823
+
+### Testing Entities
+
+### Main API Testing Entities
+# For web unit tests to run successfully, we need to direct the endpoints to entities that
+# are accessible to the authenticated user.  As these may change, or may be friendship
+# dependent, you must create your own entities and enter their ids below.  If an entity
+# is left as IGNORE, the dependent unit test will be skipped
+test.venue1.id=IGNORE
+test.venue2.id=IGNORE
+test.tip.id=IGNORE
+# The special must be running at venue1
+test.special.id=IGNORE
+test.user.id=IGNORE
+test.self.id=IGNORE
+
+### Merchant API Testing Entities
+# Merchant tests expect venues, venue groups, campaigns, and specials that the authenticated
+# user has rights to manage.
+test.merch.venue1.id=IGNORE
+test.merch.venue2.id=IGNORE
+test.merch.venueGroup.id=IGNORE
+test.merch.campaign.id=IGNORE
+test.merch.special.id=IGNORE
+# The following should be # of seconds in epoch
+test.merch.special.start=IGNORE
+test.merch.special.end=IGNORE
+
+### Randomized Testing
+# comma separated list of user ids to start exploration
+test.random.roots.ids=IGNORE
+# number of steps in exploration
+test.random.numVisits=10

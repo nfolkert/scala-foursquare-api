@@ -3,6 +3,7 @@ package org.scalafoursquare.auth
 import scalaj.http.{HttpException, HttpOptions, Http}
 import net.liftweb.json.JsonAST.JObject
 import org.scalafoursquare.call.{ParseFailed, ExtractionFailed, CallFailed, App}
+import org.scalafoursquare.call.{Caller, HttpCaller}
 import net.liftweb.json.{DefaultFormats, JsonParser}
 
 case class OAuthFlow(clientId: String, clientSecret: String, clientRedirectUri: String,
@@ -36,6 +37,10 @@ case class OAuthFlow(clientId: String, clientSecret: String, clientRedirectUri: 
     "?client_id=" + clientId +
     "&response_type=token" +
     "&redirect_uri=" + clientRedirectUri
+
+  lazy val caller: Caller = getHttpCaller
+
+  def getHttpCaller = new HttpCaller(clientId, clientSecret)
 
   case class AccessTokenCaller(code: String) {
     lazy val (getRaw, callDuration) = makeCall

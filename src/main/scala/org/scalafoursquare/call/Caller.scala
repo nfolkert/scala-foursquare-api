@@ -495,9 +495,11 @@ class UserlessApp(caller: Caller) extends App(caller) {
 
   // section = food, drinks, coffee, shops, arts, outdoors
   // intent = specials, ?
+  // novelty = new, old
   def exploreVenues(lat: Double, long: Double, llAcc: Option[Double]=None, alt: Option[Double]=None,
                     altAcc: Option[Double]=None, radius: Option[Int]=None, section: Option[String]=None,
-                    query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None) =
+                    query: Option[String]=None, limit: Option[Int]=None, intent: Option[String]=None,
+                    novelty: Option[String]=None) =
     new Request[VenueExploreResponse](this, "/venues/explore",
       p("ll", lat + "," + long) ++
       op("llAcc", llAcc) ++
@@ -507,7 +509,8 @@ class UserlessApp(caller: Caller) extends App(caller) {
       op("section", section) ++
       op("query", query) ++
       op("limit", limit) ++
-      op("intent", intent)
+      op("intent", intent) ++
+      op("novelty", novelty)
     )
 
   // intent = checkin, match, specials

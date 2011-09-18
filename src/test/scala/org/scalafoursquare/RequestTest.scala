@@ -26,7 +26,7 @@ class RequestTest extends SpecsMatchers {
     val vlnk = app.venueLinks("id")
 
     val venexp = app.exploreVenues(10.0, 30.0, Some(1000.0), Some(100.0), Some(50.0), Some(2000), Some("shops"),
-      Some("search for this venue"), Some(10), Some("specials"))
+      Some("search for this venue"), Some(10), Some("specials"), Some("new"))
     val venexp2 = app.exploreVenues(10.0, 30.0)
 
     val vsearch = app.venueSearch(10.0, 20.0, Some(100.0), Some(50.0), Some(100.0), Some("query for this venue"),

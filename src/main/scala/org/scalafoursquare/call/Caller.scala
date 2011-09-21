@@ -218,7 +218,7 @@ abstract class App(val caller: Caller) {
       MultiResponse[A,B,C,D,E](meta, notifications, responses)
     }
     val duration = System.currentTimeMillis - startTime
-    logger.call("Extraction", duration)
+    logger.extract("Extraction", duration)
     (res, duration)
   }
 
@@ -240,7 +240,7 @@ abstract class App(val caller: Caller) {
       MultiResponseList[A](meta, notifications, responses)
     }
     val duration = System.currentTimeMillis - startTime
-    logger.call("Extraction", duration)
+    logger.extract("Extraction", duration)
 
     (res, duration)
   }
@@ -413,6 +413,7 @@ object App {
   trait CallLogger {
     def call(msg: => String, timeMillis: Long): Unit
     def extract(msg: => String, timeMillis: Long): Unit
+    def debugCallResult(msg: => String): Unit
 
     def trace(msg: => String): Unit
     def debug(msg: => String): Unit
@@ -424,6 +425,7 @@ object App {
   class DefaultCallLogger extends CallLogger {
     def call(msg: => String, timeMillis: Long) {}
     def extract(msg: => String, timeMillis: Long) {}
+    def debugCallResult(msg: => String) {}
     def trace(msg: => String) {}
     def debug(msg: => String) {}
     def info(msg: => String) {}

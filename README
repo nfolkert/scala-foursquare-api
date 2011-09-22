@@ -20,4 +20,9 @@ credentials in the persisted test.default.props file).
 
 Please note that this is an unofficial library.  As of now I'm still playing around with it to see if it's useful.
 
+EXAMPLE APPLICATION:
+During the fall 2011 foursquare hackathon I built a little example project that uses the scala library.  You can
+see code for it at https://github.com/nfolkert/foursquare-hackathon-09-2012 -- a little brain fart on the 
+year, there.  :)
+
 Feel free to contact me if you have any questions.  I am nfolkert at foursquare.

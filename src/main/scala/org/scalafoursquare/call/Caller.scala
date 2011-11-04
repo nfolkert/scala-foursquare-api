@@ -66,14 +66,17 @@ class RawRequest(val app: App, val endpoint: String, val params: List[(String, S
 
 class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "GET", None) {
   lazy val (get, extractDuration) = app.convertSingle[T](getRaw)
+  def force = get.response.get // For testing
 }
 
 class PostRequest[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", None) {
   lazy val (get, extractionDuration): (Response[T], Long) = app.convertSingle[T](getRaw)
+  def force = get.response.get // For testing
 }
 
 class PostDataRequest[T](app: App, endpoint: String, params: List[(String, String)]=Nil, postData: PostData)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", Some(postData)) {
   lazy val (get, extractionDuration): (Response[T], Long) = app.convertSingle[T](getRaw)
+  def force = get.response.get // For testing
 }
 
 class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawRequest], reqC: Option[RawRequest],
@@ -91,6 +94,11 @@ class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[R
                                    reqD: Option[Request[D]], reqE: Option[Request[E]])(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E])
   extends RawMultiRequest(app, reqA, reqB, reqC, reqD, reqE) {
   lazy val (get, extractDuration): (MultiResponse[A,B,C,D,E], Long) = app.convertMulti[A,B,C,D,E](getRaw)
+  def f1 = get.responses._1.get
+  def f2 = get.responses._2.get
+  def f3 = get.responses._3.get
+  def f4 = get.responses._4.get
+  def f5 = get.responses._5.get
 }
 
 class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val method: String="GET") {
@@ -104,6 +112,7 @@ class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val metho
 
 class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Manifest[A]) extends RawMultiRequestList(app, subreqs) {
   lazy val (get, extractionDuration): (MultiResponseList[A], Long) = app.convertMultiList[A](getRaw)
+  def force = get.responses.get
 }
 
 abstract class Caller {
@@ -611,6 +620,7 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       p("name", name) ++
       op("address", address) ++
       op("crossStreet", crossStreet) ++
+      op("city", city) ++
       op("state", state) ++
       op("zip", zip) ++
       op("phone", phone) ++

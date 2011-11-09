@@ -75,8 +75,8 @@ object EndpointTest {
       }
       response.get
     } catch {
-      case e: ParseFailed => {println("Parse failure: " + e.raw); throw e}
-      case e: ExtractionFailed => {println("Extraction failure: " + e.pretty); throw e}
+      case e: ParseFailed => {println("Parse failure: " + e.raw); throw e.cause}
+      case e: ExtractionFailed => {println("Extraction failure: " + e.pretty); throw e.cause}
       case e => {println("Other Failure: " + e); throw e}
     }
   }

@@ -83,7 +83,7 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).name must_== "Fake Category"
     mockVenueCategories.response.get.categories(0).pluralName must_== "Fake Categories"
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
-    mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
+    mockVenueCategories.response.get.categories(0).icon.prefix must_== Some("noImage")
     mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
   }
 
@@ -115,7 +115,7 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).name must_== "Fake Category"
     mockVenueCategories.response.get.categories(0).pluralName must_== "Fake Categories"
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
-    mockVenueCategories.response.get.categories(0).icon must_== "noIcon"
+    mockVenueCategories.response.get.categories(0).icon.prefix must_== Some("noImage")
     mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
   }
 

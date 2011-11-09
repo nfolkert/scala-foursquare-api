@@ -180,7 +180,7 @@ abstract class App(val caller: Caller) {
     } catch {
       case e => {
         val failure = new ExtractionFailed("Failed to extract results from Json as a scala object", e, json)
-        throw e
+        throw failure
       }
     }
   }

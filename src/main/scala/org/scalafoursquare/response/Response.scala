@@ -199,14 +199,14 @@ trait VenueCategoryKernel {
   def id: Option[String]
   def name: String
   def pluralName: String
-  def icon: String
+  def icon: Image
 }
 case class VenueCategoryCore(id: Option[String], name: String, pluralName: String, shortName: String,
-                             icon: String) extends VenueCategoryKernel
+                             icon: Image) extends VenueCategoryKernel
 case class VenueCategoryCompact(id: Option[String], name: String, pluralName: String, shortName: String,
-                                icon: String, parents: List[String], primary: Option[Boolean]) extends VenueCategoryKernel
+                                icon: Image, primary: Option[Boolean]) extends VenueCategoryKernel
 case class VenueCategoryWithChildren(id: Option[String], name: String, pluralName: String, shortName: String,
-                                     icon: String, categories: Option[List[VenueCategoryWithChildren]]) extends VenueCategoryKernel
+                                     icon: Image, categories: Option[List[VenueCategoryWithChildren]]) extends VenueCategoryKernel
 
 case class VenueCategoriesResponse(categories: List[VenueCategoryWithChildren])
 
@@ -351,7 +351,7 @@ case class DoneStat(count: Int)
 trait TipKernel {
   def id: String
   def createdAt: Long
-  def text: String
+  def text: Option[String]
   def url: Option[String]
   def status: Option[String]
   def photo: Option[PhotoCore]
@@ -363,9 +363,9 @@ trait TipStats {
   def done: DoneStat
 }
 
-case class TipCore(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
+case class TipCore(id: String, createdAt: Long, text: Option[String], url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String]) extends TipKernel
-case class TipForList(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
+case class TipForList(id: String, createdAt: Long, text: Option[String], url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String], todo: TodoStat, done: DoneStat,
                venue: Option[VenueCompact], user: Option[UserCompact]) extends TipKernel with TipStats
 case class TipSearchResponse(tips: List[TipForList])
@@ -377,7 +377,7 @@ case class TodoDetail(count: Int, groups: List[TodoDetailGroup])
 case class DoneDetail(count: Int, groups: List[DoneDetailGroup])
 
 case class TipListed(count: Int, items: Option[List[String]])
-case class TipDetail(id: String, createdAt: Long, text: String, url: Option[String], status: Option[String],
+case class TipDetail(id: String, createdAt: Long, text: Option[String], url: Option[String], status: Option[String],
                photo: Option[PhotoCore], photourl: Option[String], venue: Option[VenueCompact],
                user: Option[UserCompact], todo: TodoDetail, done: DoneDetail,
                listed: Option[TipListed]) extends TipKernel

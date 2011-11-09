@@ -50,7 +50,7 @@ case class VenueDetailExtended(
   tips: VenueTips,
   tags: List[String],
   specials: List[Special],
-  specialsNearby: List[Special],
+  specialsNearby: Option[List[Special]], // Optional? Or deprecated?
   shortUrl: String,
   canonicalUrl: String,
   timeZone: String,
@@ -396,8 +396,12 @@ case class TodoForVenue(id: String, createdAt: Long, list: Option[TodoListName],
 case class UserTodosList(count: Int, items: List[TodoForList])
 case class UserTodosResponse(todos: UserTodosList)
 
+// case class AddListResponse(list: ListDetail)
+// case class AddListItemResponse(listItem: ListItemDetail)
+
 // Lists
 
+// todo: unify these
 case class ListFollowerList(count: Int, items: Option[List[String]])
 case class ListItemsList(count: Int, items: Option[List[String]])
 
@@ -410,6 +414,56 @@ case class ListForList(id: String, name: String, description: String, user: Opti
                        url: String, createdAt: Option[Long], updatedAt: Option[Long],
                        photo: Option[PhotoForList], followers: ListFollowerList,
                        listItems: ListItemsList)
+
+// todo: just getting started on these
+/*
+case class TipListFollowers(count: Int, items: Option[List[String]])
+
+case class TipListItem(id: String, user: Option[UserCompact], venue: Option[VenueCompact],
+                       createdAt: Option[Long], todo: Option[Boolean], done: Option[Boolean],
+                       visited: Option[Int], visitedCount: Option[Int], tip: Option[TipForList],
+                       note: Option[String], photo: Option[PhotoForList], listed: Option[ListedList],
+                       source: Option[TipListForList])
+case class TipListItemList(count: Int, items: Option[List[TipListItem]])
+
+case class TipListForList(id: String, name: String, description: String, user: Option[UserCompact],
+                          editable: Boolean, `public`: Boolean, collaborative: Boolean,
+                          url: Option[String], canonicalUrl: String, createdAt: Option[Long],
+                          updatedAt: Option[Long], photo: Option[PhotoForList],
+                          followers: Option[TipListFollowers], listItems: Option[TipListItemList])
+
+case class ListItemDetail(id: String, user: Option[UserCompact], createdAt: Option[Long],
+                          todo: Option[Boolean], done: Option[Boolean], visited: Option[Int],
+                          visitedCount: Option[Int], tip: Option[TipForList], note: Option[String],
+                          photo: Option[PhotoForList], venue: Option[VenueCompact],
+                          listed: Option[List[ListedList]])
+
+case class ListedGroup(`type`: String, name: Option[String], count: Option[Int], items: List[TipListForList])
+case class ListedList(count: Int, items: List[TipListForList])
+case class ListedGroups(groups: List[ListedGroup], summary: Option[String])
+
+case class VenueListedResponse(lists: ListedGroups)
+case class TipListedResponse(lists: ListedGroups)
+case class UserListsResponse(lists: ListedGroups)
+
+case class VenueListedGroupResponse(lists: ListedList)
+case class TipListedGroupResponse(lists: ListedList)
+case class UserListGroupResponse(lists: ListedList)
+
+case class ListCategoriesListElement(category: VenueCategoryCore, count: Int)
+case class ListCategoriesList(count: Int, items: List[ListCategoriesListElement])
+case class ListDetail(id: String, name: String, description: String, user: Option[UserCompact],
+                      editable: Boolean, public: Boolean, collaborative: Boolean,
+                      url: Option[String], canonicalUrl: String, createdAt: Option[Long],
+                      updatedAt: Option[Long], photo: Option[PhotoForList],
+                      doneCount: Long, visitedCount: Long, venueCount: Long,
+                      categories: Option[ListCategoriesList], following: Boolean,
+                      sharing: Option[String /*TODO*/], followers: Option[String /*TODO*/],
+                      collaborators: Option[String /*TODO*/],
+                      listItems: TipListItemList)
+
+case class ListDetailResponse(list: ListDetail)
+*/
 
 // Photos
 

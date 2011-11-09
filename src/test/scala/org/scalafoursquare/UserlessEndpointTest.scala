@@ -12,6 +12,10 @@ import net.liftweb.util.Props
 object EndpointTest {
   implicit val formats = APICustomSerializers.formats
 
+  var showFullDiff = false
+  var failOnMissed = false
+  var printDebug = false
+
   def pretty(v: JValue) = {
     if (v == JNothing) "" else Printer.pretty(JsonAST.render(v))
   }
@@ -19,19 +23,23 @@ object EndpointTest {
   def compare(unextracted: JValue, extracted: JValue): Boolean = {
     val (intersection, missed, extra) = TestUtil.JsonDiff.compare(unextracted, extracted)
     if (missed.isDefined || extra.isDefined) {
-      println("Original:\n" + pretty(unextracted))
-      println("Extracted:\n" + pretty(extracted))
-      intersection.map(j=>println("Same:\n" + pretty(j)))
+      if (showFullDiff) println("Original:\n" + pretty(unextracted))
+      if (showFullDiff) println("Extracted:\n" + pretty(extracted))
+      if (showFullDiff) intersection.map(j=>println("Same:\n" + pretty(j)))
       missed.map(j=>println("Missed:\n" + pretty(j)))
       extra.map(j=>println("Extra:\n" + pretty(j)))
-      false
+
+      if (!failOnMissed && !extra.isDefined)
+        true
+      else
+        false
     } else true
   }
 
   def test[T](req: Request[T])(implicit mf: Manifest[T]): T = {
     try {
       val raw = req.getRaw
-      println(raw)
+      if (printDebug) println(raw)
 
       val callDuration = req.callDuration
       println("Call took " + callDuration + " ms")

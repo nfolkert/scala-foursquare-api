@@ -148,6 +148,26 @@ class RequestTest extends SpecsMatchers {
       Some("58701"), Some("867-5309"), Some((10.0, 20.0)), Some("primaryCategoryId"))
     val vpedit2 = app.proposeEditVenue("id")
 
+    /*
+    val vlstd = app.venueListed("id")
+    val vlstdg = app.venueListedGroup("id", "group")
+
+    val tlstd = app.tipListed("id")
+    val tlstdg = app.tipListedGroup("id", "group")
+
+    val slflstd = app.selfLists(10.0, 20.0)
+    val ulstd = app.userLists("id", 10.0, 20.0)
+
+    val slflstdg = app.selfListGroup("other", 10.0, 20.0)
+    val ulstdg = app.userListGroup("id", "other", 10.0, 20.0)
+
+    val addlst = app.addList("name", Some("desc"), Some(true), Some("photo"))
+    val addlst2 = app.addList("name")
+
+    val addlsti = app.addListItem("id", Some("venueId"), Some("text"), Some("url"), Some("tip"), Some("list"), Some("item"))
+    val addlsti2 = app.addListItem("id")
+    */
+
     val chcomment = app.addCheckinComment("id", "check it out")
     val chdelcomm = app.deleteCheckinComment("id", "commId")
 

@@ -222,6 +222,25 @@ class AuthenticatedEndpointTest extends SpecsMatchers {
     E.test(app.specialsSearch(40.6748, -73.9721))
   }
 
+  /*
+  TODO: LISTS
+  @Test
+  def selfLists() {
+    EndpointTest.printDebug = true
+    println("LISTS!!!!!!!!!")
+    E.test(app.selfLists(40.6748, -73.9721))
+    EndpointTest.printDebug = false
+  }
+
+  @Test
+  def userLists() {
+    EndpointTest.printDebug = true
+    println("LISTS!!!!!!!!!")
+    E.test(app.userLists(USER_ID, 40.6748, -73.9721))
+    EndpointTest.printDebug = false
+  }
+  */
+
   // TODO: Do more detailed comparison (a la E.test) for multi responses
 
   @Test

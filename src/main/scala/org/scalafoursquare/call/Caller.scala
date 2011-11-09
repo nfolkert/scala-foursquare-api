@@ -479,6 +479,9 @@ class UserlessApp(caller: Caller) extends App(caller) {
   def tipDetail(id: String) = new Request[TipDetailResponse](this, "/tips/" + id)
   def specialDetail(id: String, venue: String) = new Request[SpecialDetailResponse](this, "/specials/" + id, p("venueId", venue))
 
+  // Can pass in USER_ID/tips, USER_ID/todos, or USER_ID/dones
+  // def listDetail(id: String) = new Request[ListDetailResponse](this, "/lists/" + id)
+
   def venueHereNow(id: String, limit: Option[Int]=None, offset: Option[Int]=None, afterTimestamp: Option[Long]=None) =
     new Request[VenueHereNowResponse](this, "/venues/" + id + "/herenow",
       op("limit", limit) ++
@@ -684,6 +687,25 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("altAcc", altAcc), data
     )
 
+  /*
+  def addList(name: String, description: Option[String]=None, collaborative: Option[Boolean]=None, photoId: Option[String]=None) =
+    new Request[AddListResponse](this, "/lists/add",
+      p("name", name) ++
+      op("description", description) ++
+      op("collaborative", collaborative) ++
+      op("photoId", photoId))
+
+  def addListItem(id: String, venueId: Option[String]=None, text: Option[String]=None, url: Option[String]=None,
+                  tipId: Option[String]=None, listId: Option[String]=None, itemId: Option[String]=None) =
+    new Request[AddListItemResponse](this, "/lists/" + id + "/additem",
+      op("venueId", venueId) ++
+      op("text", text) ++
+      op("url", url) ++
+      op("tipId", tipId) ++
+      op("listId", listId) ++
+      op("itemId", itemId))
+   */
+
   def allSettings = new Request[AllSettingsResponse](this, "/settings/all")
 
   def selfBadges = userBadges("self")
@@ -710,6 +732,18 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
 
   def selfMayorships = userMayorships("self")
   def userMayorships(id: String) = new Request[UserMayorshipsResponse](this, "/users/" + id + "/mayorships")
+
+  /*
+  def selfLists(lat: Double, lng: Double) = userLists("self", lat, lng)
+  def userLists(id: String, lat: Double, lng: Double) = new Request[UserListsResponse](this, "/users/" + id + "/lists",
+    p("ll", lat + "," + lng))
+
+  // Because their response structure is different, decided to split these out into separate calls, even though they hit the same endpoint
+  def selfListGroup(group: String, lat: Double, lng: Double) = userListGroup("self", group, lat, lng)
+  def userListGroup(id: String, group: String, lat: Double, lng: Double) = new Request[UserListGroupResponse](this, "/users/" + id + "/lists",
+    p("group", group) ++
+    p("ll", lat + "," + lng))
+  */
 
   // sort = recent, nearby, popular
   def selfTips(sort: Option[String]=None, ll: Option[(Double, Double)]=None, limit: Option[Int]=None, offset: Option[Int]=None) =
@@ -794,6 +828,19 @@ class AuthApp(caller: Caller, authToken: String) extends UserlessApp(caller) {
       op("ll", ll.map(p=>p._1 + "," + p._2)) ++
       op("primaryCategoryId", primaryCategoryId)
     )
+
+  /*
+  def venueListed(id: String) =
+    new Request[VenueListedResponse](this, "/venues/" + id + "/listed")
+  // group = created, edited, followed, friends, other
+  def venueListedGroup(id: String, group: String) =
+    new Request[VenueListedGroupResponse](this, "/venues/" + id + "/listed", p("group", group))
+
+  def tipListed(id: String) =
+    new Request[TipListedResponse](this, "/tips/" + id + "/listed")
+  def tipListedGroup(id: String, group: String) =
+    new Request[TipListedGroupResponse](this, "/tips/" + id + "/listed", p("group", group))
+  */
 
   def addCheckinComment(id: String, text: String) = new PostRequest[CheckinAddCommentResponse](this, "/checkins/" + id + "/addcomment", p("text", text))
 

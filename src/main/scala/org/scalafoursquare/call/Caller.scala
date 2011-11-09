@@ -574,13 +574,15 @@ class UserlessApp(caller: Caller) extends App(caller) {
 
   // Not sure if these can be userless; will move to AuthApp if not
 
+  val dummy: Option[Request[Any]] = None // Type system does not like None by itself
+
   def multi[A](req: Request[A])(implicit mfa: Manifest[A]) = new MultiRequest(this, Some(req), None, None, None, None)
   def multi[A,B](reqA: Request[A], reqB: Request[B])(implicit mfa: Manifest[A], mfb: Manifest[B]) =
-    new MultiRequest(this, Some(reqA), Some(reqB), None, None, None)
+    new MultiRequest(this, Some(reqA), Some(reqB), dummy, dummy, dummy)
   def multi[A,B,C](reqA: Request[A], reqB: Request[B], reqC: Request[C])(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C]) =
-    new MultiRequest(this, Some(reqA), Some(reqB), Some(reqC), None, None)
+    new MultiRequest(this, Some(reqA), Some(reqB), Some(reqC), dummy, dummy)
   def multi[A,B,C,D](reqA: Request[A], reqB: Request[B], reqC: Request[C], reqD: Request[D])(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D]) =
-    new MultiRequest(this, Some(reqA), Some(reqB), Some(reqC), Some(reqD), None)
+    new MultiRequest(this, Some(reqA), Some(reqB), Some(reqC), Some(reqD), dummy)
   def multi[A,B,C,D,E](reqA: Request[A], reqB: Request[B], reqC: Request[C], reqD: Request[D], reqE: Request[E])(implicit mfa: Manifest[A], mfb: Manifest[B], mfc: Manifest[C], mfd: Manifest[D], mfe: Manifest[E]) =
     new MultiRequest(this, Some(reqA), Some(reqB), Some(reqC), Some(reqD), Some(reqE))
   def multi[A](reqs: List[Request[A]])(implicit mfa: Manifest[A]) = new MultiRequestList(this, reqs)

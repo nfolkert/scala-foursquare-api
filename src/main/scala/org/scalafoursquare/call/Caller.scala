@@ -67,16 +67,59 @@ class RawRequest(val app: App, val endpoint: String, val params: List[(String, S
 class Request[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "GET", None) {
   lazy val (get, extractDuration) = app.convertSingle[T](getRaw)
   def force = get.response.get // For testing
+
+  def fail = {
+    val result = this.get
+    if (result.meta.code == 200 || result.response.isDefined)
+      throw new Exception("Expected failure, but received: " + getRaw)
+    result.meta
+  }
+
+  def expect = {
+    val result = this.get
+    if (result.meta.code != 200 || result.response.isEmpty)
+      throw new Exception("Expected success, but received: " + getRaw)
+    result.response.get
+  }
 }
 
 class PostRequest[T](app: App, endpoint: String, params: List[(String, String)] = Nil)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", None) {
   lazy val (get, extractionDuration): (Response[T], Long) = app.convertSingle[T](getRaw)
   def force = get.response.get // For testing
+
+  def fail = {
+    val result = this.get
+    if (result.meta.code == 200 || result.response.isDefined)
+      throw new Exception("Expected failure, but received: " + getRaw)
+    result.meta
+  }
+
+  def expect = {
+    val result = this.get
+    if (result.meta.code != 200 || result.response.isEmpty)
+      throw new Exception("Expected success, but received: " + getRaw)
+    result.response.get
+  }
 }
 
 class PostDataRequest[T](app: App, endpoint: String, params: List[(String, String)]=Nil, postData: PostData)(implicit mf: Manifest[T]) extends RawRequest(app, endpoint, params, "POST", Some(postData)) {
   lazy val (get, extractionDuration): (Response[T], Long) = app.convertSingle[T](getRaw)
   def force = get.response.get // For testing
+
+
+  def fail = {
+    val result = this.get
+    if (result.meta.code == 200 || result.response.isDefined)
+      throw new Exception("Expected failure, but received: " + getRaw)
+    result.meta
+  }
+
+  def expect = {
+    val result = this.get
+    if (result.meta.code != 200 || result.response.isEmpty)
+      throw new Exception("Expected success, but received: " + getRaw)
+    result.response.get
+  }
 }
 
 class RawMultiRequest(app: App, reqA: Option[RawRequest], reqB: Option[RawRequest], reqC: Option[RawRequest],
@@ -99,6 +142,21 @@ class MultiRequest[A,B,C,D,E](app: App, reqA: Option[Request[A]], reqB: Option[R
   def f3 = get.responses._3.get
   def f4 = get.responses._4.get
   def f5 = get.responses._5.get
+
+
+  def fail = {
+    val result = this.get
+    if (result.meta.code == 200 || result.responses.productIterator.exists(_.asInstanceOf[Option[_]].isDefined))
+      throw new Exception("Expected failure, but received: " + getRaw)
+    result.meta
+  }
+
+  def expect = {
+    val result = this.get
+    if (result.meta.code != 200 || result.responses.productIterator.forall(_.asInstanceOf[Option[_]].isEmpty))
+      throw new Exception("Expected success, but received: " + getRaw)
+    result.responses
+  }
 }
 
 class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val method: String="GET") {
@@ -113,6 +171,20 @@ class RawMultiRequestList(val app: App, val subreqs: List[RawRequest], val metho
 class MultiRequestList[A](app: App, subreqs: List[Request[A]])(implicit mf: Manifest[A]) extends RawMultiRequestList(app, subreqs) {
   lazy val (get, extractionDuration): (MultiResponseList[A], Long) = app.convertMultiList[A](getRaw)
   def force = get.responses.get
+
+  def fail = {
+    val result = this.get
+    if (result.meta.code == 200 || result.responses.isDefined)
+      throw new Exception("Expected failure, but received: " + getRaw)
+    result.meta
+  }
+
+  def expect = {
+    val result = this.get
+    if (result.meta.code != 200 || result.responses.isEmpty)
+      throw new Exception("Expected success, but received: " + getRaw)
+    result.responses.get
+  }
 }
 
 abstract class Caller {

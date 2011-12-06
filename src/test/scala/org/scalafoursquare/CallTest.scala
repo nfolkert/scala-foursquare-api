@@ -27,10 +27,14 @@ class CallTest extends SpecsMatchers {
     failVenue.meta.errorType must_== Some("param_error")
     failVenue.response.isDefined must_== false
 
+    mockApp.venueDetail("missingId").fail must_== failVenue.meta
+
     case class ErrorTest()
 
     val failEndpoint = new Request[ErrorTest](mockApp, "/bad/endpoint/blargh").get
     failEndpoint.meta must_== Meta(404, Some("other"), Some("Endpoint not found"))
+
+    new Request[ErrorTest](mockApp, "/bad/endpoint/blargh").fail must_== failEndpoint.meta
   }
 
   @Test
@@ -46,6 +50,8 @@ class CallTest extends SpecsMatchers {
     mockVenue.response.get.venue.location.crossStreet must_== Some("At Fake Street")
     mockVenue.response.get.venue.mayor.count must_== 15
     mockVenue.response.get.venue.tags(0) must_== "a tag"
+
+    mockApp.venueDetail("someVenueId").expect must_== mockVenue.response.get
   }
 
   @Test
@@ -69,6 +75,8 @@ class CallTest extends SpecsMatchers {
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30
+
+    mockUserApp.self.expect must_== mockSelf.response.get
   }
 
   @Test
@@ -85,6 +93,8 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon.prefix must_== Some("noImage")
     mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
+
+    mockApp.venueCategories.expect must_== mockVenueCategories.response.get
   }
 
   @Test
@@ -117,6 +127,8 @@ class CallTest extends SpecsMatchers {
     mockVenueCategories.response.get.categories(0).id must_== Some("fakeId")
     mockVenueCategories.response.get.categories(0).icon.prefix must_== Some("noImage")
     mockVenueCategories.response.get.categories(0).categories.isDefined must_== false
+
+    mockApp.multi(mockVenueReq, mockCategoryReq).expect must_== mockMulti.responses
   }
 
   @Test
@@ -147,5 +159,7 @@ class CallTest extends SpecsMatchers {
     mockSelf.response.get.user.following.get.count must_== 70
     mockSelf.response.get.user.followers.isDefined must_== false
     mockSelf.response.get.user.scores.checkinsCount must_== 30
+
+    mockUserApp.multi(mockSelfReq, mockByIdReq).expect must_== mockMulti.responses
   }
 }

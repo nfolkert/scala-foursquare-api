@@ -1,0 +1,38 @@
+# Scala client for the foursquare API
+
+To use, you need to create an `HttpCaller` object and supply it
+with your client information (you can get client credentials
+[here](https://foursquare.com/oauth)).  This caller object gets passed into
+either a `UserlessApp` (which makes all requests using only your client
+secret rather than an access token, so only a limited set of endpoints
+are available) or an `AuthApp` (which requires a user's access token,
+thus binding any requests made to that user).  To get a user's access
+token, you need to go through one of the oauth flows described in the
+[documentation](https://developer.foursquare.com/docs/oauth.html).  There is some support
+for building the various oauth urls and making some calls in `OAuthFlow`.
+
+These apps support multiple request types to interact with the
+Foursquare server.  All requests may be made either raw (returning the
+JSON formatted string result of the call) or extracted into Scala case
+classes.  Basic call and extraction has been tested for all read-only
+endpoints and a few mutating ones.  Photo endpoints support uploading
+a photo file via POST.  See the test src for examples on how to make
+various calls.  Multi endpoint is also supported.
+
+To run the tests, you will need to fill out the information missing in
+`test.default.props` file (you should make a `test.<username>.props` file
+that will get ignored by git.  Please do not submit any credentials in
+the persisted `test.default.props` file).
+
+Please note that this is an unofficial library.  As of now I'm still
+playing around with it to see if it's useful.
+
+## Example application
+
+During [the Fall 2011 Foursquare hackathon](http://blog.foursquare.com/2011/09/28/announcing-the-global-hackathon-winners/)
+I built a little example project that uses the scala library.
+You can see code for it [on my github](https://github.com/nfolkert/foursquare-hackathon-09-2012)
+- a little brain fart on the year, there.  :)
+
+Feel free to contact me if you have any questions.  I am `nfolkert` at
+`foursquare` dot `com`.

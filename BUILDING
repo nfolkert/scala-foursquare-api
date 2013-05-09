@@ -1,0 +1,94 @@
+For the moment, sbt 0.7.7 is required. A session culminating in
+publish-local (so that dependent projects can pull in this project)
+is shown below.
+
+
+$ sbt-0.7.7 
+[info] Recompiling project definition...
+[info]    Source analysis: 0 new/modified, 1 indirectly invalidated, 0 removed.
+[info] Building project ScalaFoursquare 0.0.4 against Scala 2.9.2
+[info]    using ScalaFoursquareProject with sbt 0.7.7 and Scala 2.9.2
+> update
+[info] 
+[info] == update ==
+[info] downloading http://repo1.maven.org/maven2/org/scalaj/scalaj-collection_2.9.1/1.2/scalaj-collection_2.9.1-1.2.jar ...
+[info]  [SUCCESSFUL ] org.scalaj#scalaj-collection_2.9.1;1.2!scalaj-collection_2.9.1.jar (389ms)
+[info] downloading http://repo1.maven.org/maven2/net/liftweb/lift-util_2.9.1/2.4/lift-util_2.9.1-2.4-sources.jar ...
+[info]  [SUCCESSFUL ] net.liftweb#lift-util_2.9.1;2.4!lift-util_2.9.1.jar(src) (943ms)
+[info] downloading http://repo1.maven.org/maven2/net/liftweb/lift-common_2.9.1/2.4/lift-common_2.9.1-2.4-sources.jar ...
+[info]  [SUCCESSFUL ] net.liftweb#lift-common_2.9.1;2.4!lift-common_2.9.1.jar(src) (223ms)
+[info] downloading http://repo1.maven.org/maven2/org/scalaj/scalaj-http_2.9.1/0.3.1/scalaj-http_2.9.1-0.3.1-sources.jar ...
+[info]  [SUCCESSFUL ] org.scalaj#scalaj-http_2.9.1;0.3.1!scalaj-http_2.9.1.jar(src) (68ms)
+[info] downloading http://repo1.maven.org/maven2/org/scalaj/scalaj-http_2.9.1/0.3.1/scalaj-http_2.9.1-0.3.1.jar ...
+[info]  [SUCCESSFUL ] org.scalaj#scalaj-http_2.9.1;0.3.1!scalaj-http_2.9.1.jar (355ms)
+[info] downloading http://repo1.maven.org/maven2/net/liftweb/lift-json_2.9.1/2.4/lift-json_2.9.1-2.4-sources.jar ...
+[info]  [SUCCESSFUL ] net.liftweb#lift-json_2.9.1;2.4!lift-json_2.9.1.jar(src) (224ms)
+[info] downloading http://repo1.maven.org/maven2/commons-codec/commons-codec/1.5/commons-codec-1.5.jar ...
+[info]  [SUCCESSFUL ] commons-codec#commons-codec;1.5!commons-codec.jar (189ms)
+[info] downloading http://repo1.maven.org/maven2/com/novocode/junit-interface/0.6/junit-interface-0.6.jar ...
+[info]  [SUCCESSFUL ] com.novocode#junit-interface;0.6!junit-interface.jar (82ms)
+[info] downloading http://repo1.maven.org/maven2/junit/junit/4.8.2/junit-4.8.2-sources.jar ...
+[info]  [SUCCESSFUL ] junit#junit;4.8.2!junit.jar(src) (347ms)
+[info] downloading http://repo1.maven.org/maven2/junit/junit/4.8.2/junit-4.8.2.jar ...
+[info]  [SUCCESSFUL ] junit#junit;4.8.2!junit.jar (528ms)
+[info] downloading http://repo1.maven.org/maven2/org/scala-tools/testing/specs_2.9.1/1.6.9/specs_2.9.1-1.6.9.jar ...
+[info]  [SUCCESSFUL ] org.scala-tools.testing#specs_2.9.1;1.6.9!specs_2.9.1.jar (6022ms)
+[info] downloading http://repo1.maven.org/maven2/org/scala-tools/testing/specs_2.9.1/1.6.9/specs_2.9.1-1.6.9-sources.jar ...
+[info]  [SUCCESSFUL ] org.scala-tools.testing#specs_2.9.1;1.6.9!specs_2.9.1.jar(src) (781ms)
+[info] :: retrieving :: org.scalafoursquare#scalafoursquare_2.9.2 [sync]
+[info]  confs: [compile, runtime, test, provided, system, optional, sources, javadoc]
+[info]  24 artifacts copied, 0 already retrieved (8573kB/478ms)
+[info] == update ==
+[success] Successful.
+[info] 
+[info] Total time: 25 s, completed May 9, 2013 1:07:36 AM
+> compile
+[info] 
+[info] == compile ==
+[info]   Source analysis: 4 new/modified, 0 indirectly invalidated, 0 removed.
+[info] Compiling main sources...
+[warn] there were 8 unchecked warnings; re-run with -unchecked for details
+[warn] one warning found
+[info] Compilation successful.
+[info]   Post-analysis: 676 classes.
+[info] == compile ==
+[success] Successful.
+[info] 
+[info] Total time: 52 s, completed May 9, 2013 1:08:47 AM
+> publish-local
+[info] 
+[info] == compile ==
+[info]   Source analysis: 0 new/modified, 0 indirectly invalidated, 0 removed.
+[info] Compiling main sources...
+[info] Nothing to compile.
+[info]   Post-analysis: 676 classes.
+[info] == compile ==
+[info] 
+[info] == package ==
+[info] Packaging ./target/scala_2.9.2/scalafoursquare_2.9.2-0.0.4.jar ...
+[info] Packaging complete.
+[info] == package ==
+[info] 
+[info] == deliver-local ==
+[info] downloading http://repo1.maven.org/maven2/org/scala-lang/scala-library/2.9.1/scala-library-2.9.1.jar ...
+[info]  [SUCCESSFUL ] org.scala-lang#scala-library;2.9.1!scala-library.jar (18218ms)
+[info] downloading http://repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.9.1/scala-compiler-2.9.1.jar ...
+[info]  [SUCCESSFUL ] org.scala-lang#scala-compiler;2.9.1!scala-compiler.jar (23294ms)
+[info] :: delivering :: org.scalafoursquare#scalafoursquare_2.9.2;0.0.4 :: 0.0.4 :: release :: Thu May 09 01:10:09 EDT 2013
+[info]  delivering ivy file to /home/toby/git/scala-foursquare-api/target/scala_2.9.2/ivy-0.0.4.xml
+[info] == deliver-local ==
+[info] 
+[info] == make-pom ==
+[info] Wrote /home/toby/git/scala-foursquare-api/target/scala_2.9.2/scalafoursquare_2.9.2-0.0.4.pom
+[info] == make-pom ==
+[info] 
+[info] == publish-local ==
+[info] :: publishing :: org.scalafoursquare#scalafoursquare_2.9.2
+[info]  published scalafoursquare_2.9.2 to /home/toby/.ivy2/local/org.scalafoursquare/scalafoursquare_2.9.2/0.0.4/jars/scalafoursquare_2.9.2.jar
+[info]  published scalafoursquare_2.9.2 to /home/toby/.ivy2/local/org.scalafoursquare/scalafoursquare_2.9.2/0.0.4/poms/scalafoursquare_2.9.2.pom
+[info]  published ivy to /home/toby/.ivy2/local/org.scalafoursquare/scalafoursquare_2.9.2/0.0.4/ivys/ivy.xml
+[info] == publish-local ==
+[success] Successful.
+[info] 
+[info] Total time: 51 s, completed May 9, 2013 1:10:09 AM
+> 
